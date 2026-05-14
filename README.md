@@ -17,11 +17,11 @@
 
 | No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
 |---:|---|---|---|---|---|
-| 1 | DE180519 | Nguyen Phan Huy | TBD | Leader | Backend project setup, architecture, API coordination |
+| 1 | DE180519 | Nguyen Phan Huy | Wykowjbu | Leader | Backend project setup, architecture, API coordination |
 | 2 | DE180405 | Phan Thanh Vuong | ptvuong2505 | Member | Backend feature development |
 | 3 | DE180313 | Nguyen Van Hai | vohai04 | Member | Backend feature development |
 | 4 | DE180310 | Phan Quoc Khanh | PQKhanh294 | Member | Testing and documentation |
-| 5 | TBD | Trinh Viet Hoang | TBD | Member | Testing and documentation |
+| 5 | DE190946 | Trinh Viet Hoang | HoangTrinhyeuoi | Member | Testing and documentation |
 
 ---
 
@@ -78,9 +78,9 @@ test/studentid-test-case-name
 Example:
 
 ```text
-feature/se123456-login-page
-bugfix/se123456-login-validation
-docs/se123456-update-ai-audit-log
+feature/de180519-login-page
+bugfix/de180519-login-validation
+docs/de180519-update-ai-audit-log
 ```
 
 ---
