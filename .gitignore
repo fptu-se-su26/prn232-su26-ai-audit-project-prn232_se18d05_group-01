@@ -1,0 +1,47 @@
+# Build results
+bin/
+obj/
+out/
+publish/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET local tooling
+.config/dotnet-tools.json
+
+# Logs
+*.log
+logs/
+
+# Test results and coverage
+TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+# Local environment and secrets
+.env
+.env.*
+*.env
+secrets.json
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Local development configuration
+# Keep appsettings.json committed for shared safe defaults.
+# Keep appsettings.Development.json local if it contains local DB strings or secrets.
+appsettings.Development.json
+**/appsettings.Development.json
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini

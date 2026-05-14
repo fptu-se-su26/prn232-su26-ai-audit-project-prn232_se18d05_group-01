@@ -4,12 +4,12 @@
 
 | Item | Description |
 |---|---|
-| Course |  |
-| Class |  |
+| Course | PRN232 |
+| Class | SE18D05 |
 | Semester | SU26 |
-| Group |  |
-| Topic |  |
-| Repository |  |
+| Group | Group 01 |
+| Topic | PlayCount API - Sport Court Booking System |
+| Repository | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
 
 ---
 
@@ -17,20 +17,25 @@
 
 | No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
 |---:|---|---|---|---|---|
-| 1 |  |  |  | Leader |  |
-| 2 |  |  |  | Member |  |
-| 3 |  |  |  | Member |  |
-| 4 |  |  |  | Member |  |
-| 5 |  |  |  | Member |  |
+| 1 | DE180519 | Nguyen Phan Huy | TBD | Leader | Backend project setup, architecture, API coordination |
+| 2 | DE180405 | Phan Thanh Vuong | ptvuong2505 | Member | Backend feature development |
+| 3 | DE180313 | Nguyen Van Hai | vohai04 | Member | Backend feature development |
+| 4 | DE180310 | Phan Quoc Khanh | PQKhanh294 | Member | Testing and documentation |
+| 5 | TBD | Trinh Viet Hoang | TBD | Member | Testing and documentation |
 
 ---
 
 ## 3. Project Structure
 
 ```text
-src/
+PlayCount.API/
+PlayCount.Application/
+PlayCount.Domain/
+PlayCount.Infrastructure/
+PlayCount.ApiTests/
 docs/
 .github/
+PlayCount.sln
 README.md
 ```
 
@@ -89,24 +94,74 @@ docs/se123456-update-ai-audit-log
 Examples:
 
 ```text
-[SE123456] feat: add login page
-[SE123456] fix: fix login validation
-[SE123456] docs: update AI audit log
-[SE123456] test: add login test cases
+[DE180519] feat: add login page
+[DE180519] fix: fix login validation
+[DE180519] docs: update AI audit log
+[DE180519] test: add login test cases
 ```
 
 Common types:
 
 ```text
-feat, fix, docs, test, refactor, style, chore
+feat     - Add a new feature
+fix      - Fix a bug
+docs     - Update documentation
+test     - Add or update tests
+refactor - Improve code without changing behavior
+style    - Format code without changing logic
+chore    - Update config, packages, tools, or build files
 ```
 
 ---
 
 ## 8. How to Run
 
-```text
-Students write project running instructions here.
+Prerequisites:
+
+- .NET SDK 8.0 or newer
+- Visual Studio 2022, Visual Studio Code, JetBrains Rider, or another C# IDE
+
+Restore packages:
+
+```bash
+dotnet restore PlayCount.sln
+```
+
+Build solution:
+
+```bash
+dotnet build PlayCount.sln
+```
+
+Run API:
+
+```bash
+dotnet run --project PlayCount.API/PlayCount.API.csproj --launch-profile http
+```
+
+Run tests:
+
+```bash
+dotnet test PlayCount.sln
+```
+
+Local API URLs:
+
+| Service | URL |
+|---|---|
+| HTTP API | [http://localhost:5187](http://localhost:5187) |
+| HTTPS API | [https://localhost:7174](https://localhost:7174) |
+| Swagger HTTP | [http://localhost:5187/swagger](http://localhost:5187/swagger) |
+| Swagger HTTPS | [https://localhost:7174/swagger](https://localhost:7174/swagger) |
+
+These URLs only work after the API is running.
+
+Copy all setup commands:
+
+```bash
+dotnet restore PlayCount.sln
+dotnet build PlayCount.sln
+dotnet run --project PlayCount.API/PlayCount.API.csproj --launch-profile http
 ```
 
 ---
