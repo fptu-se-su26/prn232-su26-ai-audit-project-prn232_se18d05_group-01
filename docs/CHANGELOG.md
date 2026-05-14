@@ -19,17 +19,17 @@ Nguyên tắc ghi changelog:
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Repository URL |  |
-| Ngày bắt đầu |  |
-| Ngày hoàn thành |  |
+| Môn học | PRN232 |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | SU26 |
+| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
+| Tên sinh viên / Nhóm | Group 01 |
+| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
+| Giảng viên hướng dẫn | TBD |
+| Repository URL | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
+| Ngày bắt đầu | 11/05/2026 |
+| Ngày hoàn thành | 05/07/2026 |
 
 ---
 
@@ -37,12 +37,12 @@ Nguyên tắc ghi changelog:
 
 | Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
-| Phase 01 |  | Khởi tạo project | Not Started / In Progress / Completed |
-| Phase 02 |  | Phân tích yêu cầu | Not Started / In Progress / Completed |
-| Phase 03 |  | Thiết kế hệ thống | Not Started / In Progress / Completed |
-| Phase 04 |  | Implementation | Not Started / In Progress / Completed |
-| Phase 05 |  | Testing & Debug | Not Started / In Progress / Completed |
-| Phase 06 |  | Hoàn thiện báo cáo và demo | Not Started / In Progress / Completed |
+| Phase 01 | 11/05/2026 - 17/05/2026 | Khởi tạo project | In Progress |
+| Phase 02 | 18/05/2026 - 24/05/2026 | Phân tích yêu cầu | Not Started |
+| Phase 03 | 25/05/2026 - 31/05/2026 | Thiết kế hệ thống | Not Started |
+| Phase 04 | 01/06/2026 - 21/06/2026 | Implementation | Not Started |
+| Phase 05 | 22/06/2026 - 28/06/2026 | Testing & Debug | Not Started |
+| Phase 06 | 29/06/2026 - 05/07/2026 | Hoàn thiện báo cáo và demo | Not Started |
 
 ---
 
@@ -51,20 +51,20 @@ Nguyên tắc ghi changelog:
 ## Ngày thực hiện
 
 ```text
-DD/MM/YYYY
+11/05/2026
 ```
 
 ## Đã hoàn thành
 
-- [ ] Tạo repository
-- [ ] Tạo cấu trúc thư mục project
-- [ ] Tạo file README.md
-- [ ] Tạo thư mục `docs/`
-- [ ] Tạo file `AI_AUDIT_LOG.md`
-- [ ] Tạo file `PROMPTS.md`
-- [ ] Tạo file `REFLECTION.md`
-- [ ] Tạo file `CHANGELOG.md`
-- [ ] Khởi tạo source code ban đầu
+- [x] Tạo repository
+- [x] Tạo cấu trúc thư mục project
+- [x] Tạo file README.md
+- [x] Tạo thư mục `docs/`
+- [x] Tạo file `AI_AUDIT_LOG.md`
+- [x] Tạo file `PROMPTS.md`
+- [x] Tạo file `REFLECTION.md`
+- [x] Tạo file `CHANGELOG.md`
+- [x] Khởi tạo source code ban đầu
 - [ ] Cài đặt thư viện/công cụ cần thiết
 - [ ] Cấu hình môi trường chạy project
 
@@ -72,19 +72,19 @@ DD/MM/YYYY
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
+| 1 | Khởi tạo README và thông tin project ban đầu | Group 01 | `README.md` | Commit/PR sẽ cập nhật |
+| 2 | Khởi tạo bộ tài liệu AI audit | Group 01 | `docs/` | Commit/PR sẽ cập nhật |
+| 3 | Khởi tạo cấu trúc solution và source code ban đầu | Group 01 | `PlayCount.*`, `PlayCount.sln` | Commit/PR sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+AI hỗ trợ chuẩn hóa nội dung README, điền thông tin nền ban đầu cho tài liệu audit và gợi ý cấu trúc ghi chú dự án.
 ```
 
 ## Commit/Screenshot minh chứng
@@ -96,7 +96,7 @@ Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Thông tin ban đầu được cập nhật trước khi project đi vào các phase tiếp theo.
 ```
 
 ---
@@ -428,7 +428,7 @@ Viết tại đây...
 ## 4.4. Bài học rút ra
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ---
@@ -436,7 +436,7 @@ Viết tại đây...
 ## 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ---
@@ -447,4 +447,4 @@ Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các t
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |

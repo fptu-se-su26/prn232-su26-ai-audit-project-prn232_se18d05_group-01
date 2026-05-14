@@ -4,15 +4,15 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Ngày hoàn thành reflection |  |
+| Môn học | PRN232 |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | SU26 |
+| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
+| Tên sinh viên / Nhóm | Group 01 |
+| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
+| Giảng viên hướng dẫn | TBD |
+| Ngày hoàn thành reflection | Sẽ cập nhật khi project kết thúc (dự kiến 05/07/2026) |
 
 ---
 
@@ -35,7 +35,7 @@ Reflection cần thể hiện:
 Mô tả ngắn gọn quá trình sử dụng AI trong bài tập/project này.
 
 ```text
-Viết tại đây...
+Nội dung reflection chi tiết sẽ được cập nhật khi project kết thúc.
 ```
 
 Gợi ý:
@@ -52,26 +52,26 @@ Gợi ý:
 
 Đánh dấu các công cụ AI đã sử dụng.
 
-- [ ] ChatGPT
-- [ ] Gemini
-- [ ] Claude
-- [ ] GitHub Copilot
-- [ ] Cursor
-- [ ] Antigravity
+- [x] ChatGPT
+- [x] Gemini
+- [x] Claude
+- [x] GitHub Copilot
+- [x] Cursor
+- [x] Antigravity
 - [ ] Microsoft Copilot
 - [ ] Perplexity
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Codex
 
 ### Công cụ được sử dụng nhiều nhất
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### Lý do sử dụng công cụ đó
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ---
@@ -386,4 +386,4 @@ Sinh viên/nhóm hiểu rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |

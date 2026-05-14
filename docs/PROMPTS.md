@@ -4,16 +4,16 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Ngày bắt đầu |  |
-| Ngày cập nhật gần nhất |  |
+| Môn học | PRN232 |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | SU26 |
+| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
+| Tên sinh viên / Nhóm | Group 01 |
+| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
+| Giảng viên hướng dẫn | TBD |
+| Ngày bắt đầu | 11/05/2026 |
+| Ngày cập nhật gần nhất | 14/05/2026 |
 
 ---
 
@@ -36,15 +36,15 @@ Sinh viên/nhóm cần ghi lại:
 
 Đánh dấu các công cụ AI đã sử dụng.
 
-- [ ] ChatGPT
-- [ ] Gemini
-- [ ] Claude
-- [ ] GitHub Copilot
-- [ ] Cursor
-- [ ] Antigravity
+- [x] ChatGPT
+- [x] Gemini
+- [x] Claude
+- [x] GitHub Copilot
+- [x] Cursor
+- [x] Antigravity
 - [ ] Microsoft Copilot
 - [ ] Perplexity
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Codex
 
 ---
 
@@ -52,7 +52,7 @@ Sinh viên/nhóm cần ghi lại:
 
 | STT | Ngày | Công cụ AI | Mục đích | Prompt tóm tắt | Kết quả chính | Có sử dụng vào bài không? | Minh chứng |
 |---:|---|---|---|---|---|---|---|
-| 1 |  |  |  |  |  | Có / Không |  |
+| 1 | 14/05/2026 | Codex | Cập nhật tài liệu ban đầu | Điền thông tin project, ngày bắt đầu/kết thúc và danh sách công cụ AI | README và tài liệu trong `docs/` được cập nhật thông tin nền ban đầu | Có | `README.md`, `docs/` |
 | 2 |  |  |  |  |  | Có / Không |  |
 | 3 |  |  |  |  |  | Có / Không |  |
 | 4 |  |  |  |  |  | Có / Không |  |
@@ -75,16 +75,16 @@ Sinh viên/nhóm cần ghi lại:
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích |  |
-| Phần việc liên quan | Requirement / Design / Database / Coding / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỏi ý tưởng / Hỏi giải thích / Hỏi review / Hỏi debug / Hỏi sinh code / Hỏi tối ưu |
+| Ngày sử dụng | 14/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Cập nhật tài liệu ban đầu cho project |
+| Phần việc liên quan | Report / Documentation / Other |
+| Mức độ sử dụng | Hỏi chỉnh sửa tài liệu |
 
 #### 5.1. Prompt nguyên văn
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Điền thông tin cơ sở ban đầu cho các file trong docs, ngày bắt đầu 11/05/2026, project kéo dài 8 tuần, công cụ AI chắc chắn dùng gồm ChatGPT, Gemini, Antigravity, Codex, GitHub Copilot, Cursor, Claude. Các mục reflection sẽ viết sau khi kết thúc project.
 ```
 
 #### 5.2. Bối cảnh khi viết prompt
@@ -92,7 +92,7 @@ Dán nguyên văn prompt đã hỏi AI tại đây.
 Mô tả ngắn gọn vì sao sinh viên/nhóm cần dùng prompt này.
 
 ```text
-Viết tại đây...
+Nhóm cần chuẩn hóa tài liệu audit ban đầu trước khi bắt đầu ghi log chi tiết trong quá trình thực hiện project.
 ```
 
 #### 5.3. Kết quả AI trả về
@@ -100,7 +100,7 @@ Viết tại đây...
 Tóm tắt nội dung AI đã trả lời hoặc gợi ý.
 
 ```text
-Viết tại đây...
+AI gợi ý điền thông tin project, tính ngày kết thúc sau 8 tuần, đánh dấu các công cụ AI dự kiến sử dụng và để các mục reflection ở trạng thái cập nhật sau.
 ```
 
 #### 5.4. Kết quả đã áp dụng vào bài
@@ -108,7 +108,7 @@ Viết tại đây...
 Mô tả phần nào từ kết quả AI đã được sử dụng vào bài tập/project.
 
 ```text
-Viết tại đây...
+Thông tin project, timeline, danh sách công cụ AI và ghi chú cập nhật sau được áp dụng vào các file tài liệu.
 ```
 
 #### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
@@ -116,37 +116,37 @@ Viết tại đây...
 Mô tả sinh viên/nhóm đã thay đổi, kiểm tra, sửa lỗi hoặc cải tiến gì so với kết quả AI trả về.
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra lại ngày tháng, tên project, danh sách công cụ và giữ các phần đánh giá cuối kỳ để cập nhật sau khi project kết thúc.
 ```
 
 #### 5.6. Đánh giá chất lượng prompt
 
 Đánh dấu các nhận xét phù hợp.
 
-- [ ] Prompt rõ ràng
-- [ ] Prompt có đủ bối cảnh
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
 - [ ] Prompt còn thiếu thông tin
-- [ ] Prompt tạo ra kết quả tốt
+- [x] Prompt tạo ra kết quả tốt
 - [ ] Prompt tạo ra kết quả chưa phù hợp
 - [ ] Cần hỏi lại AI nhiều lần
-- [ ] Cần tự kiểm tra và chỉnh sửa nhiều
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
 - [ ] Kết quả AI có lỗi hoặc chưa chính xác
 
 #### 5.7. Minh chứng liên quan
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `README.md`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/REFLECTION.md`, `docs/CHANGELOG.md` |
 | Screenshot |  |
 | Kết quả chạy/test |  |
-| Link tài liệu/báo cáo |  |
-| Ghi chú khác |  |
+| Link tài liệu/báo cáo | `docs/` |
+| Ghi chú khác | Chỉ cập nhật thông tin nền ban đầu |
 
 #### 5.8. Ghi chú thêm
 
 ```text
-Viết tại đây...
+Các prompt tiếp theo sẽ được bổ sung trong quá trình làm project.
 ```
 
 ---
@@ -459,4 +459,4 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |

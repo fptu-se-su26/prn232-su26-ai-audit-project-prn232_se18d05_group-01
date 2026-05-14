@@ -4,16 +4,16 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Ngày bắt đầu |  |
-| Ngày hoàn thành |  |
+| Môn học | PRN232 |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | SU26 |
+| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
+| Tên sinh viên / Nhóm | Group 01 |
+| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
+| Giảng viên hướng dẫn | TBD |
+| Ngày bắt đầu | 11/05/2026 |
+| Ngày hoàn thành | 05/07/2026 |
 
 ---
 
@@ -21,15 +21,15 @@
 
 Đánh dấu các công cụ AI đã sử dụng trong quá trình thực hiện bài tập/project.
 
-- [ ] ChatGPT
-- [ ] Gemini
-- [ ] Claude
-- [ ] GitHub Copilot
-- [ ] Cursor
-- [ ] Antigravity
+- [x] ChatGPT
+- [x] Gemini
+- [x] Claude
+- [x] GitHub Copilot
+- [x] Cursor
+- [x] Antigravity
 - [ ] Perplexity
 - [ ] Microsoft Copilot
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Codex
 
 ---
 
@@ -55,7 +55,10 @@ Ví dụ:
 ### Mô tả mục tiêu sử dụng AI
 
 ```text
-Viết tại đây...
+Nhóm dự kiến sử dụng AI để hỗ trợ phân tích yêu cầu, gợi ý thiết kế hệ thống, hỗ trợ viết code, debug lỗi, viết test case, review code và cập nhật tài liệu.
+
+Các prompt, kết quả AI, phần đã áp dụng và phần nhóm tự chỉnh sửa sẽ được ghi chi tiết trong quá trình thực hiện project.
+```
 
 ## 4. Nhật ký sử dụng AI chi tiết
 
@@ -68,16 +71,16 @@ Viết tại đây...
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 14/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Cập nhật thông tin nền ban đầu cho README và tài liệu audit |
+| Phần việc liên quan | Report / Documentation / Other |
+| Mức độ sử dụng | Hỗ trợ một phần |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Điền thông tin cơ sở ban đầu cho các file trong docs, ngày bắt đầu 11/05/2026, project kéo dài 8 tuần, công cụ AI chắc chắn dùng gồm ChatGPT, Gemini, Antigravity, Codex, GitHub Copilot, Cursor, Claude. Các mục reflection sẽ viết sau khi kết thúc project.
 ```
 
 #### 4.2. Kết quả AI gợi ý
@@ -85,7 +88,7 @@ Dán nguyên văn prompt đã hỏi AI tại đây.
 Tóm tắt nội dung AI đã trả lời hoặc gợi ý.
 
 ```text
-Viết tại đây...
+AI hỗ trợ tính ngày kết thúc project, chuẩn hóa thông tin project và cập nhật các file tài liệu audit ban đầu.
 ```
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
@@ -93,7 +96,7 @@ Viết tại đây...
 Mô tả rõ phần nào được sử dụng lại từ gợi ý của AI.
 
 ```text
-Viết tại đây...
+Nhóm sử dụng phần thông tin ngày tháng, danh sách công cụ AI, thông tin project và ghi chú các mục sẽ cập nhật sau.
 ```
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
@@ -101,26 +104,26 @@ Viết tại đây...
 Mô tả sinh viên/nhóm đã thay đổi, kiểm tra, sửa lỗi hoặc cải tiến gì so với gợi ý ban đầu của AI.
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra lại nội dung README, thông tin thành viên, timeline và giữ các phần reflection để cập nhật khi project kết thúc.
 ```
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `README.md`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/REFLECTION.md`, `docs/CHANGELOG.md` |
 | Screenshot |  |
 | Kết quả chạy/test |  |
 | Link video demo |  |
-| Ghi chú khác |  |
+| Ghi chú khác | Cập nhật thông tin nền ban đầu |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
 Sinh viên/nhóm học được gì sau lần sử dụng AI này?
 
 ```text
-Viết tại đây...
+Nhóm cần ghi log AI thường xuyên ngay khi sử dụng AI cho các phần quan trọng của project.
 ```
 
 ---
@@ -304,10 +307,11 @@ Viết tại đây...
 
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
-|  |  |  | Có / Không |  |
-|  |  |  | Có / Không |  |
-|  |  |  | Có / Không |  |
-|  |  |  | Có / Không |  |
+| Nguyen Phan Huy | DE180519 | Backend project setup, architecture, API coordination | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Phan Thanh Vuong | DE180405 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Nguyen Van Hai | DE180313 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Phan Quoc Khanh | DE180310 | Testing and documentation | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Trinh Viet Hoang | TBD | Testing and documentation | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
 
 ---
 
@@ -316,37 +320,37 @@ Viết tại đây...
 ### 9.1. AI đã hỗ trợ em/nhóm ở điểm nào?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### 9.2. Phần nào em/nhóm không sử dụng theo gợi ý của AI? Vì sao?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### 9.3. Em/nhóm đã kiểm tra tính đúng đắn của kết quả AI như thế nào?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### 9.4. Nếu không có AI, phần nào sẽ khó khăn nhất?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### 9.5. Sau bài tập/project này, em/nhóm học được gì về môn học?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ### 9.6. Sau bài tập/project này, em/nhóm học được gì về cách sử dụng AI có trách nhiệm?
 
 ```text
-Viết tại đây...
+Sẽ cập nhật khi project kết thúc.
 ```
 
 ---
@@ -363,4 +367,4 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |
