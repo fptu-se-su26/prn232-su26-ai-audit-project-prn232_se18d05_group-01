@@ -19,14 +19,14 @@ Nguyên tắc ghi changelog:
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học | PRN232 |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
-| Tên sinh viên / Nhóm | Group 01 |
-| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
-| Giảng viên hướng dẫn | TBD |
+| Project | PlayCount API - Sport Court Booking System |
+| Nhóm | Group 01 |
+| Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
+| Giảng viên hướng dẫn | QuangLTN3 |
 | Repository URL | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
 | Ngày bắt đầu | 11/05/2026 |
 | Ngày hoàn thành | 05/07/2026 |
@@ -37,8 +37,8 @@ Nguyên tắc ghi changelog:
 
 | Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
-| Phase 01 | 11/05/2026 - 17/05/2026 | Khởi tạo project | In Progress |
-| Phase 02 | 18/05/2026 - 24/05/2026 | Phân tích yêu cầu | Not Started |
+| Phase 01 | 11/05/2026 - 17/05/2026 | Khởi tạo project | Done |
+| Phase 02 | 18/05/2026 - 24/05/2026 | Phân tích yêu cầu | In Progress |
 | Phase 03 | 25/05/2026 - 31/05/2026 | Thiết kế hệ thống | Not Started |
 | Phase 04 | 01/06/2026 - 21/06/2026 | Implementation | Not Started |
 | Phase 05 | 22/06/2026 - 28/06/2026 | Testing & Debug | Not Started |
@@ -51,7 +51,7 @@ Nguyên tắc ghi changelog:
 ## Ngày thực hiện
 
 ```text
-11/05/2026
+14/05/2026
 ```
 
 ## Đã hoàn thành
@@ -65,16 +65,16 @@ Nguyên tắc ghi changelog:
 - [x] Tạo file `REFLECTION.md`
 - [x] Tạo file `CHANGELOG.md`
 - [x] Khởi tạo source code ban đầu
-- [ ] Cài đặt thư viện/công cụ cần thiết
-- [ ] Cấu hình môi trường chạy project
+- [x] Cài đặt thư viện/công cụ cần thiết
+- [x] Cấu hình môi trường chạy project
 
 ## Thay đổi chi tiết
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 | Khởi tạo README và thông tin project ban đầu | Group 01 | `README.md` | Commit/PR sẽ cập nhật |
-| 2 | Khởi tạo bộ tài liệu AI audit | Group 01 | `docs/` | Commit/PR sẽ cập nhật |
-| 3 | Khởi tạo cấu trúc solution và source code ban đầu | Group 01 | `PlayCount.*`, `PlayCount.sln` | Commit/PR sẽ cập nhật |
+| 1 | Khởi tạo README và thông tin project ban đầu | Nguyen Phan Huy | `README.md` | Commit/PR sẽ cập nhật |
+| 2 | Khởi tạo bộ tài liệu AI audit | Nguyen Phan Huy | `docs/` | Commit/PR sẽ cập nhật |
+| 3 | Khởi tạo cấu trúc solution và source code ban đầu | Nguyen Phan Huy | `PlayCount.*`, `PlayCount.sln` | Commit/PR sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
@@ -106,7 +106,7 @@ Thông tin ban đầu được cập nhật trước khi project đi vào các p
 ## Ngày thực hiện
 
 ```text
-DD/MM/YYYY
+18/05/2004
 ```
 
 ## Đã hoàn thành

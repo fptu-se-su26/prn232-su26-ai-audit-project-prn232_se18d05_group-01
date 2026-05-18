@@ -4,14 +4,14 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học | PRN232 |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
-| Tên sinh viên / Nhóm | Group 01 |
-| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
-| Giảng viên hướng dẫn | TBD |
+| Project | PlayCount API - Sport Court Booking System |
+| Nhóm | Group 01 |
+| Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
+| Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
 | Ngày hoàn thành | 05/07/2026 |
 
@@ -27,9 +27,11 @@
 - [x] GitHub Copilot
 - [x] Cursor
 - [x] Antigravity
+- [x] Codex
+- [x] Stitch
 - [ ] Perplexity
 - [ ] Microsoft Copilot
-- [x] Công cụ khác: Codex
+- [ ] Công cụ khác:............................
 
 ---
 
@@ -71,16 +73,16 @@ Các prompt, kết quả AI, phần đã áp dụng và phần nhóm tự chỉn
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng | 14/05/2026 |
-| Công cụ AI | Codex |
-| Mục đích sử dụng | Cập nhật thông tin nền ban đầu cho README và tài liệu audit |
-| Phần việc liên quan | Report / Documentation / Other |
-| Mức độ sử dụng | Hỗ trợ một phần |
+| Ngày sử dụng |  |
+| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
+| Mục đích sử dụng |  |
+| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
+| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Điền thông tin cơ sở ban đầu cho các file trong docs, ngày bắt đầu 11/05/2026, project kéo dài 8 tuần, công cụ AI chắc chắn dùng gồm ChatGPT, Gemini, Antigravity, Codex, GitHub Copilot, Cursor, Claude. Các mục reflection sẽ viết sau khi kết thúc project.
+Dán nguyên văn prompt đã hỏi AI tại đây.
 ```
 
 #### 4.2. Kết quả AI gợi ý
@@ -88,7 +90,7 @@ Các prompt, kết quả AI, phần đã áp dụng và phần nhóm tự chỉn
 Tóm tắt nội dung AI đã trả lời hoặc gợi ý.
 
 ```text
-AI hỗ trợ tính ngày kết thúc project, chuẩn hóa thông tin project và cập nhật các file tài liệu audit ban đầu.
+Viết tại đây...
 ```
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
@@ -96,7 +98,7 @@ AI hỗ trợ tính ngày kết thúc project, chuẩn hóa thông tin project v
 Mô tả rõ phần nào được sử dụng lại từ gợi ý của AI.
 
 ```text
-Nhóm sử dụng phần thông tin ngày tháng, danh sách công cụ AI, thông tin project và ghi chú các mục sẽ cập nhật sau.
+Viết tại đây...
 ```
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
@@ -104,26 +106,26 @@ Nhóm sử dụng phần thông tin ngày tháng, danh sách công cụ AI, thô
 Mô tả sinh viên/nhóm đã thay đổi, kiểm tra, sửa lỗi hoặc cải tiến gì so với gợi ý ban đầu của AI.
 
 ```text
-Nhóm kiểm tra lại nội dung README, thông tin thành viên, timeline và giữ các phần reflection để cập nhật khi project kết thúc.
+Viết tại đây...
 ```
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit | Sẽ cập nhật sau khi commit |
-| File liên quan | `README.md`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/REFLECTION.md`, `docs/CHANGELOG.md` |
+| Link commit |  |
+| File liên quan |  |
 | Screenshot |  |
 | Kết quả chạy/test |  |
 | Link video demo |  |
-| Ghi chú khác | Cập nhật thông tin nền ban đầu |
+| Ghi chú khác |  |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
 Sinh viên/nhóm học được gì sau lần sử dụng AI này?
 
 ```text
-Nhóm cần ghi log AI thường xuyên ngay khi sử dụng AI cho các phần quan trọng của project.
+Viết tại đây...
 ```
 
 ---
@@ -307,11 +309,11 @@ Viết tại đây...
 
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
-| Nguyen Phan Huy | DE180519 | Backend project setup, architecture, API coordination | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Nguyen Phan Huy | DE180519 | Frontend, backend project setup, architecture, API coordination, testing and documentation | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
 | Phan Thanh Vuong | DE180405 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
 | Nguyen Van Hai | DE180313 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
-| Phan Quoc Khanh | DE180310 | Testing and documentation | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
-| Trinh Viet Hoang | TBD | Testing and documentation | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Phan Quoc Khanh | DE180310 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
+| Trinh Viet Hoang | DE190946 | Backend feature development | Có | Commit/PR sẽ cập nhật trong quá trình làm project |
 
 ---
 
@@ -367,4 +369,4 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |
+| Nguyen Phan Huy | Sẽ cập nhật sau khi xác nhận |

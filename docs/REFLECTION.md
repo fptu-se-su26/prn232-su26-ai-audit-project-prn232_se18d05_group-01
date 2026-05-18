@@ -4,14 +4,14 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học | PRN232 |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| Tên bài tập / Project | PlayCount API - Sport Court Booking System |
-| Tên sinh viên / Nhóm | Group 01 |
-| MSSV / Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, TBD |
-| Giảng viên hướng dẫn | TBD |
+| Project | PlayCount API - Sport Court Booking System |
+| Nhóm | Group 01 |
+| Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
+| Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày hoàn thành reflection | Sẽ cập nhật khi project kết thúc (dự kiến 05/07/2026) |
 
 ---
