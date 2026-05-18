@@ -1,8 +1,11 @@
 name: Autograding Tests
 on:
-  - push
-  - workflow_dispatch
-  - repository_dispatch
+  push:
+    branches-ignore:
+      - main
+      - dev
+  workflow_dispatch:
+  repository_dispatch:
 permissions:
   checks: write
   actions: read
