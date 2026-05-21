@@ -8,7 +8,7 @@
 | Class | SE18D05 |
 | Semester | SU26 |
 | Group | Group 01 |
-| Topic | PlayCount API - Sport Court Booking System |
+| Topic | PlayCourt API - Sport Court Booking System |
 | Repository | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
 | Frontend | https://wykowjbu.github.io/play-count-fe/ |
 
@@ -29,14 +29,14 @@
 ## 3. Project Structure
 
 ```text
-PlayCount.API/
-PlayCount.Application/
-PlayCount.Domain/
-PlayCount.Infrastructure/
-PlayCount.ApiTests/
+PlayCourt.API/
+PlayCourt.Application/
+PlayCourt.Domain/
+PlayCourt.Infrastructure/
+PlayCourt.ApiTests/
 docs/
 .github/
-PlayCount.sln
+PlayCourt.sln
 README.md
 ```
 
@@ -125,25 +125,25 @@ Prerequisites:
 Restore packages:
 
 ```bash
-dotnet restore PlayCount.sln
+dotnet restore PlayCourt.sln
 ```
 
 Build solution:
 
 ```bash
-dotnet build PlayCount.sln
+dotnet build PlayCourt.sln
 ```
 
 Run API:
 
 ```bash
-dotnet run --project PlayCount.API/PlayCount.API.csproj --launch-profile http
+dotnet run --project PlayCourt.API/PlayCourt.API.csproj --launch-profile http
 ```
 
 Run tests:
 
 ```bash
-dotnet test PlayCount.sln
+dotnet test PlayCourt.sln
 ```
 
 Local API URLs:
@@ -160,9 +160,9 @@ These URLs only work after the API is running.
 Copy all setup commands:
 
 ```bash
-dotnet restore PlayCount.sln
-dotnet build PlayCount.sln
-dotnet run --project PlayCount.API/PlayCount.API.csproj --launch-profile http
+dotnet restore PlayCourt.sln
+dotnet build PlayCourt.sln
+dotnet run --project PlayCourt.API/PlayCourt.API.csproj --launch-profile http
 ```
 
 ---

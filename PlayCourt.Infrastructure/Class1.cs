@@ -1,4 +1,4 @@
-namespace PlayCount.Infrastructure
+namespace PlayCourt.Infrastructure
 {
     public class Class1
     {
