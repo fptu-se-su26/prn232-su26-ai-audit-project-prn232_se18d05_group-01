@@ -10,6 +10,7 @@
 | Group | Group 01 |
 | Topic | PlayCount API - Sport Court Booking System |
 | Repository | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
+| Frontend | https://wykowjbu.github.io/play-count-fe/ |
 
 ---
 
