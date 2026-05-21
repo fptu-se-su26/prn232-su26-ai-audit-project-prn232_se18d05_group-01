@@ -40,7 +40,7 @@ Nguyên tắc ghi changelog:
 | Phase 01 | 11/05/2026 - 17/05/2026 | Khởi tạo project | Done |
 | Phase 02 | 18/05/2026 - 24/05/2026 | Phân tích yêu cầu | In Progress |
 | Phase 03 | 25/05/2026 - 31/05/2026 | Thiết kế hệ thống | Not Started |
-| Phase 04 | 01/06/2026 - 21/06/2026 | Implementation | Not Started |
+| Phase 04 | 01/06/2026 - 21/06/2026 | Implementation | In Progress |
 | Phase 05 | 22/06/2026 - 28/06/2026 | Testing & Debug | Not Started |
 | Phase 06 | 29/06/2026 - 05/07/2026 | Hoàn thiện báo cáo và demo | Not Started |
 
@@ -160,7 +160,7 @@ Nhóm đã kiểm tra lại bằng format, build, EF migration check và test tr
 ## Ngày thực hiện
 
 ```text
-DD/MM/YYYY
+21/05/2026
 ```
 
 ## Đã hoàn thành
@@ -219,16 +219,16 @@ DD/MM/YYYY
 
 ## Đã hoàn thành
 
-- [ ] Tạo project structure
-- [ ] Cài đặt database connection
-- [ ] Xây dựng backend
+- [x] Tạo project structure
+- [x] Cài đặt database connection
+- [x] Xây dựng backend
 - [ ] Xây dựng frontend
 - [ ] Xây dựng authentication/authorization
 - [ ] Xử lý CRUD
 - [ ] Xử lý validation
 - [ ] Tích hợp API
 - [ ] Xử lý upload/download file
-- [ ] Xử lý lỗi
+- [x] Xử lý lỗi
 - [ ] Tối ưu giao diện
 - [ ] Cập nhật README hướng dẫn chạy
 
@@ -236,33 +236,33 @@ DD/MM/YYYY
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Tách cấu hình service và request pipeline khỏi `Program.cs` | Nguyen Phan Huy | `PlayCourt.API/Program.cs`, `PlayCourt.API/DependencyInjection.cs` | Commit sẽ cập nhật |
+| 2 | Thêm middleware xử lý exception thống nhất cho API | Nguyen Phan Huy | `PlayCourt.API/Middlewares/ExceptionHandlingMiddleware.cs` | Commit sẽ cập nhật |
+| 3 | Thêm common response model cho Application layer | Nguyen Phan Huy | `PlayCourt.Application/Common/Responses/ApiResponse.cs` | Commit sẽ cập nhật |
+| 4 | Thêm Application interface/DTO placeholder và service implementation placeholder ở Infrastructure | Nguyen Phan Huy | `PlayCourt.Application/Interfaces/`, `PlayCourt.Application/DTOs/`, `PlayCourt.Infrastructure/Services/` | Commit sẽ cập nhật |
+| 5 | Đăng ký dependency injection theo từng layer và cập nhật package reference cần thiết | Nguyen Phan Huy | `PlayCourt.Application/DependencyInjection.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs`, `*.csproj` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+AI hỗ trợ đề xuất cách setup layer, gom DependencyInjection theo API/Application/Infrastructure, thêm middleware exception và common ApiResponse. Nhóm tự review dependency direction, scope thay đổi và chạy kiểm chứng trước khi commit.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Commit sẽ cập nhật sau khi hoàn tất.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Thay đổi này là phần foundation cho các feature backend sau, chưa triển khai nghiệp vụ cụ thể. Kết quả kiểm chứng: dotnet format passed, dotnet build passed và dotnet test passed 3/3 tests.
 ```
 
 ---
