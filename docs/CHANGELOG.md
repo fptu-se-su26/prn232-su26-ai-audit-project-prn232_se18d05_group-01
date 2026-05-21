@@ -23,7 +23,7 @@ Nguyên tắc ghi changelog:
 | Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| Project | PlayCount API - Sport Court Booking System |
+| Project | PlayCourt API - Sport Court Booking System |
 | Nhóm | Group 01 |
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
@@ -74,7 +74,7 @@ Nguyên tắc ghi changelog:
 |---:|---|---|---|---|
 | 1 | Khởi tạo README và thông tin project ban đầu | Nguyen Phan Huy | `README.md` | Commit/PR sẽ cập nhật |
 | 2 | Khởi tạo bộ tài liệu AI audit | Nguyen Phan Huy | `docs/` | Commit/PR sẽ cập nhật |
-| 3 | Khởi tạo cấu trúc solution và source code ban đầu | Nguyen Phan Huy | `PlayCount.*`, `PlayCount.sln` | Commit/PR sẽ cập nhật |
+| 3 | Khởi tạo cấu trúc solution và source code ban đầu | Nguyen Phan Huy | `PlayCourt.*`, `PlayCourt.sln` | Commit/PR sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 

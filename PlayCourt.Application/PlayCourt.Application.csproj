@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\PlayCount.Domain\PlayCount.Domain.csproj" />
+    <ProjectReference Include="..\PlayCourt.Domain\PlayCourt.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

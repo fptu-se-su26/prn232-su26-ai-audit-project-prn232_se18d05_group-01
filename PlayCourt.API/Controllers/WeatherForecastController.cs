@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace PlayCount.API.Controllers
+namespace PlayCourt.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

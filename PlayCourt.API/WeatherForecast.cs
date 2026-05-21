@@ -1,4 +1,4 @@
-namespace PlayCount.API
+namespace PlayCourt.API
 {
     public class WeatherForecast
     {

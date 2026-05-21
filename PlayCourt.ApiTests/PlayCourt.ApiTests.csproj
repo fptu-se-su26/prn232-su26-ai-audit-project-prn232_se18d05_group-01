@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlayCount.API\PlayCount.API.csproj" />
+    <ProjectReference Include="..\PlayCourt.API\PlayCourt.API.csproj" />
   </ItemGroup>
 
 </Project>

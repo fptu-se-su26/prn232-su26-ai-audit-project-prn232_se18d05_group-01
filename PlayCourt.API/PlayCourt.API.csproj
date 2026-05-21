@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlayCount.Application\PlayCount.Application.csproj" />
-    <ProjectReference Include="..\PlayCount.Infrastructure\PlayCount.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlayCourt.Application\PlayCourt.Application.csproj" />
+    <ProjectReference Include="..\PlayCourt.Infrastructure\PlayCourt.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
