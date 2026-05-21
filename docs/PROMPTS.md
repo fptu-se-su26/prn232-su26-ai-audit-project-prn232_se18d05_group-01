@@ -55,7 +55,7 @@ Sinh viên/nhóm cần ghi lại:
 | STT | Ngày | Công cụ AI | Mục đích | Prompt tóm tắt | Kết quả chính | Có sử dụng vào bài không? | Minh chứng |
 |---:|---|---|---|---|---|---|---|
 | 1 | 14/05/2026 | Codex | Cập nhật tài liệu ban đầu | Điền thông tin project, ngày bắt đầu/kết thúc và danh sách công cụ AI | README và tài liệu trong `docs/` được cập nhật thông tin nền ban đầu | Có | `README.md`, `docs/` |
-| 2 |  |  |  |  |  | Có / Không |  |
+| 2 | 21/05/2026 | Codex | Hướng dẫn tạo model và DbContext | Tạo entity model, enum, DbContext, relationship, index, constraint và migration cho PlayCourt | Hoàn thiện model, DbContext và migration EF Core | Có | `PlayCourt.Domain/`, `PlayCourt.Infrastructure/Data/` |
 | 3 |  |  |  |  |  | Có / Không |  |
 | 4 |  |  |  |  |  | Có / Không |  |
 | 5 |  |  |  |  |  | Có / Không |  |
@@ -157,68 +157,68 @@ Các prompt tiếp theo sẽ được bổ sung trong quá trình làm project.
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích |  |
-| Phần việc liên quan | Requirement / Design / Database / Coding / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỏi ý tưởng / Hỏi giải thích / Hỏi review / Hỏi debug / Hỏi sinh code / Hỏi tối ưu |
+| Ngày sử dụng | 21/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Hướng dẫn tạo domain model và DbContext |
+| Phần việc liên quan | Database / Coding / Debug |
+| Mức độ sử dụng | Hỏi giải thích / Hỏi review / Hỏi sinh code mẫu |
 
 #### 5.1. Prompt nguyên văn
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Hãy hướng dẫn tôi tạo các entity model và cấu hình DbContext cho hệ thống đặt sân thể thao PlayCourt bằng ASP.NET Core và EF Core. Cần có DbSet, relationship, navigation properties, enum thay magic number, soft-delete query filter, index, check constraint và migration.
 ```
 
 #### 5.2. Bối cảnh khi viết prompt
 
 ```text
-Viết tại đây...
+Nhóm cần xây dựng tầng Domain và Infrastructure cho PlayCourt API, trong đó database cần có entity model rõ ràng và DbContext đủ cấu hình để chạy migration.
 ```
 
 #### 5.3. Kết quả AI trả về
 
 ```text
-Viết tại đây...
+AI gợi ý cấu trúc entity, enum, navigation properties, cấu hình Fluent API trong DbContext, soft-delete query filter, check constraints, index và migration.
 ```
 
 #### 5.4. Kết quả đã áp dụng vào bài
 
 ```text
-Viết tại đây...
+Nhóm áp dụng để tạo/cập nhật entity model, enum, DbContext và migration cho database.
 ```
 
 #### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
 
 ```text
-Viết tại đây...
+Nhóm tự kiểm tra lại bằng code review, dotnet format, dotnet build, dotnet ef migrations has-pending-model-changes và dotnet test. Một số cấu hình được chỉnh lại để tránh duplicate index và cảnh báo query filter của EF Core.
 ```
 
 #### 5.6. Đánh giá chất lượng prompt
 
-- [ ] Prompt rõ ràng
-- [ ] Prompt có đủ bối cảnh
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
 - [ ] Prompt còn thiếu thông tin
-- [ ] Prompt tạo ra kết quả tốt
+- [x] Prompt tạo ra kết quả tốt
 - [ ] Prompt tạo ra kết quả chưa phù hợp
-- [ ] Cần hỏi lại AI nhiều lần
-- [ ] Cần tự kiểm tra và chỉnh sửa nhiều
+- [x] Cần hỏi lại AI nhiều lần
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
 - [ ] Kết quả AI có lỗi hoặc chưa chính xác
 
 #### 5.7. Minh chứng liên quan
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.Domain/Entities/`, `PlayCourt.Domain/Enums/DomainEnums.cs`, `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Data/Migrations/` |
 | Screenshot |  |
-| Kết quả chạy/test |  |
-| Link tài liệu/báo cáo |  |
-| Ghi chú khác |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln --no-restore`, `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md`, `docs/REFLECTION.md` |
+| Ghi chú khác | Nội dung AI hỗ trợ tập trung vào model và DbContext |
 
 #### 5.8. Ghi chú thêm
 
 ```text
-Viết tại đây...
+Prompt này được ghi nhận vì ảnh hưởng trực tiếp đến phần model và database configuration của project.
 ```
 
 ---
@@ -300,31 +300,31 @@ Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
 ### 6.1. Prompt được chọn
 
 ```text
-Dán prompt quan trọng nhất tại đây.
+Hãy hướng dẫn tôi tạo các entity model và cấu hình DbContext cho hệ thống đặt sân thể thao PlayCourt bằng ASP.NET Core và EF Core. Cần có DbSet, relationship, navigation properties, enum thay magic number, soft-delete query filter, index, check constraint và migration.
 ```
 
 ### 6.2. Vì sao prompt này quan trọng?
 
 ```text
-Viết tại đây...
+Prompt này quan trọng vì nó định hướng phần Domain model và EF Core DbContext, là nền tảng để tạo database bằng migration.
 ```
 
 ### 6.3. Kết quả prompt này mang lại
 
 ```text
-Viết tại đây...
+Kết quả giúp nhóm hoàn thiện entity model, enum, navigation properties, DbContext configuration và migration.
 ```
 
 ### 6.4. Sinh viên/nhóm đã kiểm tra kết quả như thế nào?
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra bằng format, build, EF pending model changes, test tự động và review lại các constraint/index trong DbContext.
 ```
 
 ### 6.5. Sinh viên/nhóm đã cải tiến gì từ kết quả AI?
 
 ```text
-Viết tại đây...
+Nhóm chỉnh lại connection string template, loại bỏ duplicate index, thêm soft-delete filter phù hợp và đảm bảo migration đồng bộ với model.
 ```
 
 ---
