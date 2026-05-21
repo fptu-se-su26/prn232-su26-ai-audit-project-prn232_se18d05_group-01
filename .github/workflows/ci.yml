@@ -25,13 +25,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore PlayCount.sln
+        run: dotnet restore PlayCourt.sln
 
       - name: Format check
-        run: dotnet format PlayCount.sln --verify-no-changes --no-restore
+        run: dotnet format PlayCourt.sln --verify-no-changes --no-restore
 
       - name: Build
-        run: dotnet build PlayCount.sln --configuration Release --no-restore
+        run: dotnet build PlayCourt.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test PlayCount.sln --configuration Release --no-build
+        run: dotnet test PlayCourt.sln --configuration Release --no-build

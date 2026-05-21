@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace PlayCount.ApiTests;
+namespace PlayCourt.ApiTests;
 
 public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>>
 {

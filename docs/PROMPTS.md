@@ -8,7 +8,7 @@
 | Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| Project | PlayCount API - Sport Court Booking System |
+| Project | PlayCourt API - Sport Court Booking System |
 | Nhóm | Group 01 |
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |

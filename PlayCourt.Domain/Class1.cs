@@ -1,4 +1,4 @@
-namespace PlayCount.Application
+namespace PlayCourt.Domain
 {
     public class Class1
     {
