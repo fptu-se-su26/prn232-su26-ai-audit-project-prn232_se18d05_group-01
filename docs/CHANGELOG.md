@@ -126,31 +126,31 @@ Thông tin ban đầu được cập nhật trước khi project đi vào các p
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
+| 1 | Tạo domain entity model cho các bảng chính của PlayCourt | Nguyen Phan Huy | `PlayCourt.Domain/Entities/` | Commit sẽ cập nhật |
+| 2 | Tạo enum cho các trường trạng thái/loại dữ liệu thay cho magic number | Nguyen Phan Huy | `PlayCourt.Domain/Enums/DomainEnums.cs` | Commit sẽ cập nhật |
+| 3 | Cấu hình DbContext, relationship, index, check constraint, soft-delete filter và migration | Nguyen Phan Huy | `PlayCourt.Infrastructure/Data/` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+AI hướng dẫn tạo model và cấu hình DbContext cho EF Core, bao gồm entity, enum, relationship, index, constraint, soft-delete filter và migration.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Commit sẽ cập nhật sau khi hoàn tất.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Nhóm đã kiểm tra lại bằng format, build, EF migration check và test trước khi commit.
 ```
 
 ---

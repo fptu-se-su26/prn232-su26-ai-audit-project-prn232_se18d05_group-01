@@ -134,51 +134,51 @@ Viết tại đây...
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 21/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Hướng dẫn tạo domain model và cấu hình DbContext |
+| Phần việc liên quan | Database / Backend |
+| Mức độ sử dụng | Hỗ trợ nhiều |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Hãy hướng dẫn tôi tạo các entity model và cấu hình DbContext cho hệ thống đặt sân thể thao PlayCourt bằng ASP.NET Core và EF Core. Cần có DbSet, quan hệ khóa ngoại, index, check constraint, migration và cấu hình connection string an toàn cho team.
 ```
 
 #### 4.2. Kết quả AI gợi ý
 
 ```text
-Viết tại đây...
+AI gợi ý tạo các entity trong Domain, thêm navigation properties, dùng enum cho các trường trạng thái, cấu hình PlayCourtDbContext với DbSet, relationship, index, soft-delete query filter, check constraint và migration.
 ```
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 
 ```text
-Viết tại đây...
+Nhóm sử dụng gợi ý để hoàn thiện entity model, enum, DbContext configuration và migration cho database PlayCourt.
 ```
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra lại mapping EF Core, sửa duplicate index, bổ sung soft-delete filter, kiểm tra connection string không chứa thông tin cá nhân và chạy build/test để xác nhận.
 ```
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.Domain/Entities/`, `PlayCourt.Domain/Enums/`, `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Data/Migrations/` |
 | Screenshot |  |
-| Kết quả chạy/test |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln --no-restore`, `dotnet test PlayCourt.sln --no-build` |
 | Link video demo |  |
-| Ghi chú khác |  |
+| Ghi chú khác | AI chỉ hỗ trợ hướng dẫn và review, nhóm kiểm tra lại trước khi commit |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
 ```text
-Viết tại đây...
+AI giúp nhóm định hướng nhanh cấu trúc model và DbContext, nhưng các ràng buộc database, migration và kết quả build/test vẫn cần tự kiểm tra kỹ trước khi sử dụng.
 ```
 
 ---
@@ -244,12 +244,12 @@ Viết tại đây...
 |---|:---:|:---:|:---:|:---:|---|
 | Phân tích yêu cầu |  |  |  |  |  |
 | Viết user story/use case |  |  |  |  |  |
-| Thiết kế database |  |  |  |  |  |
-| Thiết kế kiến trúc hệ thống |  |  |  |  |  |
+| Thiết kế database |  |  | x |  | AI hướng dẫn tạo model và DbContext |
+| Thiết kế kiến trúc hệ thống |  | x |  |  | AI hỗ trợ định hướng tầng Domain/Infrastructure |
 | Thiết kế giao diện |  |  |  |  |  |
 | Code frontend |  |  |  |  |  |
-| Code backend |  |  |  |  |  |
-| Debug lỗi |  |  |  |  |  |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum và EF Core configuration |
+| Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter và constraint |
 | Viết test case |  |  |  |  |  |
 | Kiểm thử sản phẩm |  |  |  |  |  |
 | Tối ưu code |  |  |  |  |  |
@@ -290,7 +290,7 @@ Có thể bao gồm:
 ### Nội dung kiểm chứng
 
 ```text
-Viết tại đây...
+Nhóm kiểm chứng bằng cách format code, build solution, kiểm tra EF Core pending model changes và chạy test tự động. Các thay đổi liên quan database được kiểm tra lại qua migration và DbContext snapshot.
 ```
 
 ---
