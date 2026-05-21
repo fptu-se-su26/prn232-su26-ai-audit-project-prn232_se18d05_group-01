@@ -1,32 +1,19 @@
-using Microsoft.EntityFrameworkCore;
-using PlayCourt.Infrastructure.Data;
+using PlayCourt.API;
+using PlayCourt.Application;
+using PlayCourt.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<PlayCourtDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Gom đăng ký service theo từng layer để Program.cs gọn và team dễ mở rộng.
+builder.Services
+    .AddApiServices()
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+// Gom HTTP pipeline trong PlayCourt.API/DependencyInjection.cs.
+app.UseApiPipeline();
 
 app.Run();
 
