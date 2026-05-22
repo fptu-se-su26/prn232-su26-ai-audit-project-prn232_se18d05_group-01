@@ -13,7 +13,7 @@
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
-| Ngày cập nhật gần nhất | 14/05/2026 |
+| Ngày cập nhật gần nhất | 21/05/2026 |
 
 ---
 
@@ -56,7 +56,7 @@ Sinh viên/nhóm cần ghi lại:
 |---:|---|---|---|---|---|---|---|
 | 1 | 14/05/2026 | Codex | Cập nhật tài liệu ban đầu | Điền thông tin project, ngày bắt đầu/kết thúc và danh sách công cụ AI | README và tài liệu trong `docs/` được cập nhật thông tin nền ban đầu | Có | `README.md`, `docs/` |
 | 2 | 21/05/2026 | Codex | Hướng dẫn tạo model và DbContext | Tạo entity model, enum, DbContext, relationship, index, constraint và migration cho PlayCourt | Hoàn thiện model, DbContext và migration EF Core | Có | `PlayCourt.Domain/`, `PlayCourt.Infrastructure/Data/` |
-| 3 |  |  |  |  |  | Có / Không |  |
+| 3 | 21/05/2026 | Codex | Setup application layer | Tách DI theo layer, thêm middleware exception, ApiResponse và service placeholder | Program.cs gọn hơn, các layer có extension registration riêng và có response/error shape dùng chung | Có | `PlayCourt.API/`, `PlayCourt.Application/`, `PlayCourt.Infrastructure/` |
 | 4 |  |  |  |  |  | Có / Không |  |
 | 5 |  |  |  |  |  | Có / Không |  |
 | 6 |  |  |  |  |  | Có / Không |  |
@@ -227,68 +227,68 @@ Prompt này được ghi nhận vì ảnh hưởng trực tiếp đến phần m
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích |  |
-| Phần việc liên quan | Requirement / Design / Database / Coding / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỏi ý tưởng / Hỏi giải thích / Hỏi review / Hỏi debug / Hỏi sinh code / Hỏi tối ưu |
+| Ngày sử dụng | 21/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Setup application layer và dependency injection foundation |
+| Phần việc liên quan | Design / Coding / Testing / Debug |
+| Mức độ sử dụng | Hỏi ý tưởng / Hỏi review / Hỏi sinh code mẫu |
 
 #### 5.1. Prompt nguyên văn
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Tôi muốn setup application layer cho project PlayCourt API. Hãy đề xuất cách tổ chức theo từng layer để Program.cs ngắn gọn hơn, API có DependencyInjection và middleware xử lý exception, Application có common response/interface/DTO placeholder, Infrastructure đăng ký DbContext và service implementation. Sau đó review diff so với nhánh dev, chỉ commit phần code liên quan và kiểm tra format/build/test.
 ```
 
 #### 5.2. Bối cảnh khi viết prompt
 
 ```text
-Viết tại đây...
+Sau khi có Domain và Infrastructure nền tảng, nhóm cần tiếp tục chuẩn hóa Application layer để các feature sau có nơi đặt DTO, interface, service contract và response shape dùng chung.
 ```
 
 #### 5.3. Kết quả AI trả về
 
 ```text
-Viết tại đây...
+AI gợi ý tạo extension method AddApiServices, UseApiPipeline, AddApplicationServices và AddInfrastructureServices; thêm ExceptionHandlingMiddleware; thêm ApiResponse<T>; tạo IService/Service placeholder; xoá Class1.cs mặc định và cập nhật package reference cần thiết.
 ```
 
 #### 5.4. Kết quả đã áp dụng vào bài
 
 ```text
-Viết tại đây...
+Nhóm áp dụng các phần liên quan đến setup layer, gom registration/pipeline khỏi Program.cs và giữ các class placeholder tối thiểu để các thành viên khác dễ mở rộng.
 ```
 
 #### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra lại dependency direction giữa các layer, loại bỏ test không phù hợp với contract hiện tại, chạy dotnet format, dotnet build và dotnet test trước khi chuẩn bị commit.
 ```
 
 #### 5.6. Đánh giá chất lượng prompt
 
-- [ ] Prompt rõ ràng
-- [ ] Prompt có đủ bối cảnh
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
 - [ ] Prompt còn thiếu thông tin
-- [ ] Prompt tạo ra kết quả tốt
+- [x] Prompt tạo ra kết quả tốt
 - [ ] Prompt tạo ra kết quả chưa phù hợp
-- [ ] Cần hỏi lại AI nhiều lần
-- [ ] Cần tự kiểm tra và chỉnh sửa nhiều
+- [x] Cần hỏi lại AI nhiều lần
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
 - [ ] Kết quả AI có lỗi hoặc chưa chính xác
 
 #### 5.7. Minh chứng liên quan
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Program.cs`, `PlayCourt.API/DependencyInjection.cs`, `PlayCourt.API/Middlewares/ExceptionHandlingMiddleware.cs`, `PlayCourt.Application/Common/Responses/ApiResponse.cs`, `PlayCourt.Application/DependencyInjection.cs`, `PlayCourt.Application/Interfaces/IService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs`, `PlayCourt.Infrastructure/Services/Service.cs` |
 | Screenshot |  |
-| Kết quả chạy/test |  |
-| Link tài liệu/báo cáo |  |
-| Ghi chú khác |  |
+| Kết quả chạy/test | `dotnet format PlayCourt.sln --verify-no-changes --no-restore` passed; `dotnet build PlayCourt.sln` passed; `dotnet test PlayCourt.sln` passed 3/3 tests |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md`, `docs/REFLECTION.md` |
+| Ghi chú khác | Nội dung tập trung vào setup foundation, chưa triển khai nghiệp vụ cụ thể |
 
 #### 5.8. Ghi chú thêm
 
 ```text
-Viết tại đây...
+Prompt này được ghi nhận vì ảnh hưởng trực tiếp đến cấu trúc Application/API/Infrastructure layer và cách team mở rộng service sau này.
 ```
 
 ---
