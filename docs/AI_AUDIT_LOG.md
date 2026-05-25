@@ -134,51 +134,51 @@ Viết tại đây...
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 21/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Hướng dẫn tạo domain model và cấu hình DbContext |
+| Phần việc liên quan | Database / Backend |
+| Mức độ sử dụng | Hỗ trợ nhiều |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Hãy hướng dẫn tôi tạo các entity model và cấu hình DbContext cho hệ thống đặt sân thể thao PlayCourt bằng ASP.NET Core và EF Core. Cần có DbSet, quan hệ khóa ngoại, index, check constraint, migration và cấu hình connection string an toàn cho team.
 ```
 
 #### 4.2. Kết quả AI gợi ý
 
 ```text
-Viết tại đây...
+AI gợi ý tạo các entity trong Domain, thêm navigation properties, dùng enum cho các trường trạng thái, cấu hình PlayCourtDbContext với DbSet, relationship, index, soft-delete query filter, check constraint và migration.
 ```
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 
 ```text
-Viết tại đây...
+Nhóm sử dụng gợi ý để hoàn thiện entity model, enum, DbContext configuration và migration cho database PlayCourt.
 ```
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
 ```text
-Viết tại đây...
+Nhóm kiểm tra lại mapping EF Core, sửa duplicate index, bổ sung soft-delete filter, kiểm tra connection string không chứa thông tin cá nhân và chạy build/test để xác nhận.
 ```
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.Domain/Entities/`, `PlayCourt.Domain/Enums/`, `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Data/Migrations/` |
 | Screenshot |  |
-| Kết quả chạy/test |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln --no-restore`, `dotnet test PlayCourt.sln --no-build` |
 | Link video demo |  |
-| Ghi chú khác |  |
+| Ghi chú khác | AI chỉ hỗ trợ hướng dẫn và review, nhóm kiểm tra lại trước khi commit |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
 ```text
-Viết tại đây...
+AI giúp nhóm định hướng nhanh cấu trúc model và DbContext, nhưng các ràng buộc database, migration và kết quả build/test vẫn cần tự kiểm tra kỹ trước khi sử dụng.
 ```
 
 ---
@@ -187,51 +187,51 @@ Viết tại đây...
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 21/05/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Thiết lập application layer, dependency injection và response/error handling nền tảng |
+| Phần việc liên quan | Design / Backend / Testing / Debug |
+| Mức độ sử dụng | Hỗ trợ nhiều |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+Hãy giúp tôi setup application layer cho PlayCourt API theo hướng clean architecture nhẹ: Program.cs gọn, mỗi layer có DependencyInjection riêng, API có middleware xử lý exception thống nhất, Application có common ApiResponse, Infrastructure đăng ký DbContext và service implementation. Hãy review để code build được, không thay đổi docs/README trong commit code.
 ```
 
 #### 4.2. Kết quả AI gợi ý
 
 ```text
-Viết tại đây...
+AI gợi ý tách đăng ký service khỏi Program.cs sang các extension method theo API, Application và Infrastructure; thêm ExceptionHandlingMiddleware để trả lỗi dạng ApiResponse; tạo interface/service placeholder để team có điểm mở rộng cho các feature sau; đồng thời loại bỏ các Class1.cs mặc định.
 ```
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 
 ```text
-Viết tại đây...
+Nhóm áp dụng cấu trúc DependencyInjection cho từng layer, thêm middleware xử lý exception, thêm ApiResponse dùng chung, thêm IService/Service placeholder và cập nhật project reference/package cần thiết.
 ```
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
 ```text
-Viết tại đây...
+Nhóm tự kiểm tra lại scope thay đổi so với nhánh dev, giữ commit code tách riêng với docs, chạy dotnet format, dotnet build và dotnet test. File test không phù hợp với contract hiện tại đã được loại khỏi scope trước khi verify lại.
 ```
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Program.cs`, `PlayCourt.API/DependencyInjection.cs`, `PlayCourt.API/Middlewares/ExceptionHandlingMiddleware.cs`, `PlayCourt.Application/Common/Responses/ApiResponse.cs`, `PlayCourt.Application/DependencyInjection.cs`, `PlayCourt.Application/Interfaces/IService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs`, `PlayCourt.Infrastructure/Services/Service.cs` |
 | Screenshot |  |
-| Kết quả chạy/test |  |
+| Kết quả chạy/test | `dotnet format PlayCourt.sln --verify-no-changes --no-restore` passed; `dotnet build PlayCourt.sln` passed; `dotnet test PlayCourt.sln` passed 3/3 tests |
 | Link video demo |  |
-| Ghi chú khác |  |
+| Ghi chú khác | Thay đổi tập trung vào setup layer và backend foundation |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
 ```text
-Viết tại đây...
+AI giúp nhóm định hình nhanh cách gom DI và pipeline theo layer, nhưng nhóm vẫn phải review lại dependency direction, package reference và kết quả build/test trước khi commit.
 ```
 
 ---
@@ -244,14 +244,14 @@ Viết tại đây...
 |---|:---:|:---:|:---:|:---:|---|
 | Phân tích yêu cầu |  |  |  |  |  |
 | Viết user story/use case |  |  |  |  |  |
-| Thiết kế database |  |  |  |  |  |
-| Thiết kế kiến trúc hệ thống |  |  |  |  |  |
+| Thiết kế database |  |  | x |  | AI hướng dẫn tạo model và DbContext |
+| Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  |  |  |  |  |
 | Code frontend |  |  |  |  |  |
-| Code backend |  |  |  |  |  |
-| Debug lỗi |  |  |  |  |  |
-| Viết test case |  |  |  |  |  |
-| Kiểm thử sản phẩm |  |  |  |  |  |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration và setup layer |
+| Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
+| Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke/verify DI |
+| Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
 | Tối ưu code |  |  |  |  |  |
 | Viết báo cáo |  |  |  |  |  |
 | Làm slide thuyết trình |  |  |  |  |  |
@@ -290,7 +290,7 @@ Có thể bao gồm:
 ### Nội dung kiểm chứng
 
 ```text
-Viết tại đây...
+Nhóm kiểm chứng bằng cách format code, build solution, kiểm tra EF Core pending model changes và chạy test tự động. Các thay đổi liên quan database được kiểm tra lại qua migration và DbContext snapshot.
 ```
 
 ---
