@@ -14,13 +14,24 @@ namespace PlayCourt.Infrastructure.Services
         private const string PlayerRole = "Player";
         private const string OwnerRole = "Owner";
         private const string InvalidLoginError = "Invalid email/phone or password";
+        private const int VerifyEmailOtpExpiryMinutes = 10;
+        private const int ResendCooldownSeconds = 60;
+        private const int MaxOtpFailedAttempts = 5;
         private readonly PlayCourtDbContext _dbContext;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IVerificationTokenService _verificationTokenService;
+        private readonly IEmailService _emailService;
 
-        public AuthService(PlayCourtDbContext dbContext, IJwtTokenService jwtTokenService)
+        public AuthService(
+            PlayCourtDbContext dbContext,
+            IJwtTokenService jwtTokenService,
+            IVerificationTokenService verificationTokenService,
+            IEmailService emailService)
         {
             _dbContext = dbContext;
             _jwtTokenService = jwtTokenService;
+            _verificationTokenService = verificationTokenService;
+            _emailService = emailService;
         }
 
         public async Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
@@ -91,6 +102,20 @@ namespace PlayCourt.Infrastructure.Services
 
             await transaction.CommitAsync();
 
+            var registerMessage = "Register successfully";
+            try
+            {
+                var otp = await _verificationTokenService.CreateOtpAsync(
+                    user.Id,
+                    VerificationTokenPurpose.EmailVerification,
+                    VerifyEmailOtpExpiryMinutes);
+                await _emailService.SendVerifyEmailAsync(user.Email, otp);
+            }
+            catch
+            {
+                registerMessage = "Register successfully, but verification email could not be sent. Please request a new code.";
+            }
+
             return ApiResponse<RegisterResponseDto>.Ok(new RegisterResponseDto
             {
                 Id = user.Id,
@@ -101,7 +126,7 @@ namespace PlayCourt.Infrastructure.Services
                 Status = user.Status.ToString(),
                 IsEmailVerified = user.IsEmailVerified,
                 BusinessName = businessName
-            }, "Register successfully");
+            }, registerMessage);
         }
 
         public async Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginRequestDto request)
@@ -145,6 +170,120 @@ namespace PlayCourt.Infrastructure.Services
                     IsEmailVerified = user.IsEmailVerified
                 }
             }, "Login successfully");
+        }
+
+        public async Task<ApiResponse<object>> VerifyEmailAsync(VerifyEmailRequestDto request)
+        {
+            var errors = ValidateVerifyEmailRequest(request);
+            if (errors.Count > 0)
+            {
+                return ApiResponse<object>.Fail("Validation failed", errors);
+            }
+
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+            if (user is null)
+            {
+                return ApiResponse<object>.Fail("User not found.");
+            }
+
+            if (user.IsEmailVerified)
+            {
+                return ApiResponse<object>.Fail("Email already verified.");
+            }
+
+            var latestToken = await GetLatestUnusedEmailVerificationTokenAsync(user.Id);
+            if (latestToken is null)
+            {
+                return ApiResponse<object>.Fail("Invalid verification code.");
+            }
+
+            if (latestToken.ExpiresAt <= DateTimeOffset.Now)
+            {
+                return ApiResponse<object>.Fail("Verification code has expired.");
+            }
+
+            if (latestToken.FailedAttempts >= MaxOtpFailedAttempts)
+            {
+                return ApiResponse<object>.Fail("Invalid verification code.");
+            }
+
+            var isValid = await _verificationTokenService.VerifyOtpAsync(
+                user.Id,
+                VerificationTokenPurpose.EmailVerification,
+                request.Otp);
+
+            if (!isValid)
+            {
+                return ApiResponse<object>.Fail("Invalid verification code.");
+            }
+
+            user.IsEmailVerified = true;
+            user.UpdatedAt = DateTimeOffset.Now;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<object>.Ok(null, "Email verified successfully.");
+        }
+
+        public async Task<ApiResponse<object>> ResendVerifyEmailAsync(ResendVerifyEmailRequestDto request)
+        {
+            var errors = ValidateResendVerifyEmailRequest(request);
+            if (errors.Count > 0)
+            {
+                return ApiResponse<object>.Fail("Validation failed", errors);
+            }
+
+            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+            if (user is null)
+            {
+                return ApiResponse<object>.Fail("User not found.");
+            }
+
+            if (user.IsEmailVerified)
+            {
+                return ApiResponse<object>.Fail("Email already verified.");
+            }
+
+            var now = DateTimeOffset.Now;
+            var latestToken = await GetLatestUnusedEmailVerificationTokenAsync(user.Id);
+            if (latestToken is not null
+                && latestToken.CreatedAt.AddSeconds(ResendCooldownSeconds) > now)
+            {
+                return ApiResponse<object>.Fail("Please wait before requesting another code.");
+            }
+
+            var oldTokens = await _dbContext.VerificationTokens
+                .Where(t => t.UserId == user.Id
+                    && t.Purpose == VerificationTokenPurpose.EmailVerification
+                    && t.UsedAt == null)
+                .ToListAsync();
+
+            foreach (var token in oldTokens)
+            {
+                token.UsedAt = now;
+                token.UpdatedAt = now;
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            var otp = await _verificationTokenService.CreateOtpAsync(
+                user.Id,
+                VerificationTokenPurpose.EmailVerification,
+                VerifyEmailOtpExpiryMinutes);
+
+            try
+            {
+                await _emailService.SendVerifyEmailAsync(user.Email, otp);
+            }
+            catch
+            {
+                return ApiResponse<object>.Fail("Verification email could not be sent.");
+            }
+
+            return ApiResponse<object>.Ok(null, "Verification code has been sent to your email.");
         }
 
         private static List<string> ValidateRequest(RegisterRequestDto request)
@@ -211,6 +350,57 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             return errors;
+        }
+
+        private static List<string> ValidateVerifyEmailRequest(VerifyEmailRequestDto request)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                errors.Add("Email is required");
+            }
+            else if (!new EmailAddressAttribute().IsValid(request.Email))
+            {
+                errors.Add("Invalid email format");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Otp))
+            {
+                errors.Add("Otp is required");
+            }
+            else if (request.Otp.Trim().Length != 6)
+            {
+                errors.Add("Otp must be 6 digits");
+            }
+
+            return errors;
+        }
+
+        private static List<string> ValidateResendVerifyEmailRequest(ResendVerifyEmailRequestDto request)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                errors.Add("Email is required");
+            }
+            else if (!new EmailAddressAttribute().IsValid(request.Email))
+            {
+                errors.Add("Invalid email format");
+            }
+
+            return errors;
+        }
+
+        private Task<VerificationToken?> GetLatestUnusedEmailVerificationTokenAsync(int userId)
+        {
+            return _dbContext.VerificationTokens
+                .Where(t => t.UserId == userId
+                    && t.Purpose == VerificationTokenPurpose.EmailVerification
+                    && t.UsedAt == null)
+                .OrderByDescending(t => t.CreatedAt)
+                .FirstOrDefaultAsync();
         }
 
         private static bool IsAllowedFrontendRole(string role)

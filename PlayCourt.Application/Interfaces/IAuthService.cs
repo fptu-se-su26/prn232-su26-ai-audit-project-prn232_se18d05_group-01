@@ -7,5 +7,7 @@ namespace PlayCourt.Application.Interfaces
     {
         Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request);
         Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginRequestDto request);
+        Task<ApiResponse<object>> VerifyEmailAsync(VerifyEmailRequestDto request);
+        Task<ApiResponse<object>> ResendVerifyEmailAsync(ResendVerifyEmailRequestDto request);
     }
 }

@@ -59,5 +59,49 @@ namespace PlayCourt.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.VerifyEmailAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("resend-verify-email")]
+        public async Task<IActionResult> ResendVerifyEmail([FromBody] ResendVerifyEmailRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.ResendVerifyEmailAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

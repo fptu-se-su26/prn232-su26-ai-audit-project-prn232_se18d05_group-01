@@ -22,5 +22,13 @@ namespace PlayCourt.Infrastructure.Services
 
             return Task.CompletedTask;
         }
+
+        public Task SendVerifyEmailAsync(string toEmail, string otp, CancellationToken cancellationToken = default)
+        {
+            return SendAsync(
+                toEmail,
+                "Verify your PlayCourt email",
+                $"Your PlayCourt verification code is {otp}. This code will expire in 10 minutes.");
+        }
     }
 }

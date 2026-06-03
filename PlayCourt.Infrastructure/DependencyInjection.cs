@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlayCourt.Application.Interfaces;
+using PlayCourt.Application.Settings;
 using PlayCourt.Infrastructure.Data;
 using PlayCourt.Infrastructure.Services;
 
@@ -25,7 +26,18 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
-            services.AddScoped<IEmailService, DevelopmentEmailService>();
+            services.Configure<EmailSettings>(settings =>
+            {
+                var emailSection = configuration.GetSection("EmailSettings");
+                settings.Host = emailSection["Host"] ?? string.Empty;
+                settings.Port = int.TryParse(emailSection["Port"], out var port) ? port : 587;
+                settings.UserName = emailSection["UserName"] ?? string.Empty;
+                settings.Password = emailSection["Password"] ?? string.Empty;
+                settings.FromEmail = emailSection["FromEmail"] ?? string.Empty;
+                settings.FromName = emailSection["FromName"] ?? "PlayCourt";
+                settings.EnableSsl = !bool.TryParse(emailSection["EnableSsl"], out var enableSsl) || enableSsl;
+            });
+            services.AddScoped<IEmailService, SmtpEmailService>();
 
             return services;
         }

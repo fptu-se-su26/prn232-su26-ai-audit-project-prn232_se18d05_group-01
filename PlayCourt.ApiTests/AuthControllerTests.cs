@@ -95,6 +95,53 @@ public sealed class AuthControllerTests
         Assert.Equal(400, badRequest.StatusCode);
     }
 
+    [Fact]
+    public async Task VerifyEmail_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            verifyEmailResponse: ApiResponse<object>.Ok(null, "Email verified successfully.")));
+
+        var result = await controller.VerifyEmail(new VerifyEmailRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "123456"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task VerifyEmail_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            verifyEmailResponse: ApiResponse<object>.Fail("Invalid verification code.")));
+
+        var result = await controller.VerifyEmail(new VerifyEmailRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "000000"
+        });
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResendVerifyEmail_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            resendVerifyEmailResponse: ApiResponse<object>.Ok(null, "Verification code has been sent to your email.")));
+
+        var result = await controller.ResendVerifyEmail(new ResendVerifyEmailRequestDto
+        {
+            Email = "player@example.com"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
     private static RegisterRequestDto CreateRequest()
     {
         return new RegisterRequestDto
@@ -118,7 +165,9 @@ public sealed class AuthControllerTests
 
     private sealed class StubAuthService(
         ApiResponse<RegisterResponseDto>? registerResponse = null,
-        ApiResponse<LoginResponseDto>? loginResponse = null) : IAuthService
+        ApiResponse<LoginResponseDto>? loginResponse = null,
+        ApiResponse<object>? verifyEmailResponse = null,
+        ApiResponse<object>? resendVerifyEmailResponse = null) : IAuthService
     {
         public Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
         {
@@ -130,6 +179,18 @@ public sealed class AuthControllerTests
         {
             return Task.FromResult(loginResponse
                 ?? ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto()));
+        }
+
+        public Task<ApiResponse<object>> VerifyEmailAsync(VerifyEmailRequestDto request)
+        {
+            return Task.FromResult(verifyEmailResponse
+                ?? ApiResponse<object>.Ok(null));
+        }
+
+        public Task<ApiResponse<object>> ResendVerifyEmailAsync(ResendVerifyEmailRequestDto request)
+        {
+            return Task.FromResult(resendVerifyEmailResponse
+                ?? ApiResponse<object>.Ok(null));
         }
     }
 }
