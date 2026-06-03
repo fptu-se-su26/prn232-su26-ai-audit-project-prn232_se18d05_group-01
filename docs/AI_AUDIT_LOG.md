@@ -289,6 +289,59 @@ AI hỗ trợ nhanh phần code backend, nhưng nhóm cần kiểm tra lại cô
 
 ---
 
+### Lần sử dụng AI số 5
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai Login API với JWT |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement Login API cho PlayCourt Backend. Dùng JWT, BCrypt verify password, login bằng email hoặc số điện thoại, dùng ApiResponse<T>, không thêm migration và không thêm LastLoginAt.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý thêm LoginRequestDto, LoginResponseDto, IJwtTokenService, JwtTokenService, LoginAsync trong AuthService, endpoint /api/auth/login và cấu hình JWT authentication.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để triển khai đăng nhập, kiểm tra password bằng BCrypt, tạo JWT token và trả thông tin user an toàn.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra role claim để tương thích authorization policy, không thay đổi database provider và không tạo migration.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/JwtTokenService.cs`, `PlayCourt.Application/DTOs/Auth/` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link video demo |  |
+| Ghi chú khác | Login API dùng JWT Bearer và BCrypt |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ nhanh phần JWT và flow đăng nhập, nhưng nhóm vẫn cần tự kiểm tra package, claim và middleware order.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -301,7 +354,7 @@ AI hỗ trợ nhanh phần code backend, nhưng nhóm cần kiểm tra lại cô
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer và Register API |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API và Login API |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke/verify DI |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |

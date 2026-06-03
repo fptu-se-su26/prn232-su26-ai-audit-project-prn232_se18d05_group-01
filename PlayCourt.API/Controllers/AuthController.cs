@@ -37,5 +37,27 @@ namespace PlayCourt.API.Controllers
 
             return CreatedAtAction(nameof(Register), response);
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<LoginResponseDto>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.LoginAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

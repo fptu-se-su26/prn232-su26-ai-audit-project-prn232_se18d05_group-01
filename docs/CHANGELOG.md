@@ -243,6 +243,8 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 5 | Đăng ký dependency injection theo từng layer và cập nhật package reference cần thiết | Nguyen Phan Huy | `PlayCourt.Application/DependencyInjection.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs`, `*.csproj` | Commit sẽ cập nhật |
 | 6 | Thêm Register API cho Player và Owner | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
 | 7 | Thêm BCrypt để hash password khi đăng ký | Nguyen Phan Huy | `PlayCourt.Infrastructure/PlayCourt.Infrastructure.csproj` | Commit sẽ cập nhật |
+| 8 | Thêm Login API bằng email/số điện thoại | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
+| 9 | Thêm JWT token service và cấu hình JWT Bearer | Nguyen Phan Huy | `PlayCourt.Infrastructure/Services/JwtTokenService.cs`, `PlayCourt.API/DependencyInjection.cs`, `PlayCourt.API/appsettings.json` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
@@ -264,7 +266,7 @@ Commit sẽ cập nhật sau khi hoàn tất.
 ## Ghi chú
 
 ```text
-Thay đổi này gồm backend foundation và Register API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
+Thay đổi này gồm backend foundation, Register API và Login API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
 ```
 
 ---
@@ -300,6 +302,7 @@ Thay đổi này gồm backend foundation và Register API. Kết quả kiểm c
 | 3 | Controller có thể trả validation mặc định không đúng wrapper | ApiController tự xử lý ModelState | Suppress auto validation và trả ApiResponse<T> | Fixed |
 | 4 | Role FE Owner khác enum backend CourtOwner | Tên role khác nhau giữa FE và BE | Map Owner sang UserRole.CourtOwner | Fixed |
 | 5 | Duplicate email/phone có thể lỗi DB | Chưa check trước khi save | Check bằng EF trước transaction | Fixed |
+| 6 | JWT role claim chưa có dạng literal `role` | Token ban đầu chỉ có `ClaimTypes.Role` | Thêm claim `role` để dễ kiểm tra và vẫn giữ policy compatibility | Fixed |
 
 ## Thay đổi chi tiết
 
@@ -307,7 +310,8 @@ Thay đổi này gồm backend foundation và Register API. Kết quả kiểm c
 |---:|---|---|---|---|
 | 1 | Thêm test controller cho Register success/fail | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | `dotnet test PlayCourt.sln --no-build` |
 | 2 | Chạy build toàn solution | Nguyen Phan Huy | `PlayCourt.sln` | Build passed |
-| 3 | Chạy test toàn solution | Nguyen Phan Huy | `PlayCourt.ApiTests` | 5/5 tests passed |
+| 3 | Chạy test toàn solution | Nguyen Phan Huy | `PlayCourt.ApiTests` | 9/9 tests passed |
+| 4 | Thêm test Login controller và JWT role claim | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs`, `PlayCourt.ApiTests/JwtTokenServiceTests.cs` | Tests passed |
 
 ## AI có hỗ trợ không?
 
@@ -349,41 +353,41 @@ Testing hiện tập trung vào smoke test và controller test, chưa có integr
 - [ ] Hoàn thiện report
 - [ ] Hoàn thiện slide
 - [ ] Hoàn thiện video demo
-- [x] Kiểm tra lại `AI_AUDIT_LOG.md`
-- [x] Kiểm tra lại `PROMPTS.md`
+- [ ] Kiểm tra lại `AI_AUDIT_LOG.md`
+- [ ] Kiểm tra lại `PROMPTS.md`
 - [ ] Hoàn thiện `REFLECTION.md`
-- [x] Kiểm tra lại `CHANGELOG.md`
+- [ ] Kiểm tra lại `CHANGELOG.md`
 - [ ] Đóng gói bài nộp
 
 ## Thay đổi chi tiết
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 | Bổ sung AI audit log ngắn gọn | Nguyen Phan Huy | `docs/AI_AUDIT_LOG.md` | Commit sẽ cập nhật |
-| 2 | Bổ sung prompt log | Nguyen Phan Huy | `docs/PROMPTS.md` | Commit sẽ cập nhật |
-| 3 | Bổ sung changelog các phase chính | Nguyen Phan Huy | `docs/CHANGELOG.md` | Commit sẽ cập nhật |
+| 1 |  |  |  |  |
+| 2 |  |  |  |  |
+| 3 |  |  |  |  |
 
 ## AI có hỗ trợ không?
 
-- [x] Có
+- [ ] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-AI hỗ trợ viết nội dung tài liệu ngắn gọn, nhóm kiểm tra lại để không sửa file reflection riêng.
+Viết sau khi hoàn thiện báo cáo cuối project.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Commit sẽ cập nhật sau khi hoàn tất.
+Chưa cập nhật trong giai đoạn này.
 ```
 
 ## Ghi chú
 
 ```text
-Tài liệu được viết ngắn gọn để dễ đọc và dễ cập nhật tiếp.
+Chưa ghi nhận nội dung cho phase này.
 ```
 
 ---
@@ -398,7 +402,8 @@ Tài liệu được viết ngắn gọn để dễ đọc và dễ cập nhật
 | 2 | Domain model và DbContext | Completed | `PlayCourt.Domain`, `PlayCourt.Infrastructure/Data` | Đã có entity, enum, migration |
 | 3 | Clean Architecture foundation | Completed | `Program.cs`, DI, middleware | Program.cs gọn hơn |
 | 4 | Register API | Completed | `AuthController`, `AuthService` | Player/Owner register |
-| 5 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server |
+| 5 | Login API | Completed | `AuthController`, `AuthService`, `JwtTokenService` | Email/phone login và JWT |
+| 6 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server |
 
 ---
 
@@ -408,7 +413,7 @@ Tài liệu được viết ngắn gọn để dễ đọc và dễ cập nhật
 |---:|---|---|---|
 | 1 | Frontend hoàn chỉnh | Chưa nằm trong scope hiện tại | Làm sau khi backend ổn định |
 | 2 | Integration test SQL Server | Cần database test riêng | Tạo test database hoặc container SQL Server |
-| 3 | Login/JWT đầy đủ | Mới làm register | Triển khai ở phase auth tiếp theo |
+| 3 | Refresh token | Ngoài scope Login API hiện tại | Triển khai sau nếu cần phiên đăng nhập dài hơn |
 
 ---
 
@@ -419,9 +424,9 @@ Tài liệu được viết ngắn gọn để dễ đọc và dễ cập nhật
 | Requirement | Có | Trung bình | Tóm tắt yêu cầu và role |
 | Design | Có | Nhiều | Gợi ý layer và flow |
 | Database | Có | Nhiều | Entity, DbContext, migration |
-| Coding | Có | Nhiều | Backend foundation và Register API |
+| Coding | Có | Nhiều | Backend foundation, Register API và Login API |
 | Debug | Có | Trung bình | Kiểm tra lỗi package, build, validation |
-| Testing | Có | Ít | Smoke test và controller test |
+| Testing | Có | Ít | Smoke test, controller test và JWT claim test |
 | Report | Có | Trung bình | Hoàn thiện docs ngắn gọn |
 | Presentation | Không | Ít | Chưa thực hiện |
 
@@ -438,7 +443,7 @@ AI giúp làm nhanh hơn nhưng vẫn cần kiểm tra lại bằng build, test 
 ## 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Cần bổ sung login/JWT, integration test SQL Server và tài liệu hướng dẫn chạy chi tiết hơn.
+Cần bổ sung refresh token, integration test SQL Server và tài liệu hướng dẫn chạy chi tiết hơn.
 ```
 
 ---
