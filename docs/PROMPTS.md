@@ -13,7 +13,7 @@
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
-| Ngày cập nhật gần nhất | 21/05/2026 |
+| Ngày cập nhật gần nhất | 03/06/2026 |
 
 ---
 
@@ -57,8 +57,8 @@ Sinh viên/nhóm cần ghi lại:
 | 1 | 14/05/2026 | Codex | Cập nhật tài liệu ban đầu | Điền thông tin project, ngày bắt đầu/kết thúc và danh sách công cụ AI | README và tài liệu trong `docs/` được cập nhật thông tin nền ban đầu | Có | `README.md`, `docs/` |
 | 2 | 21/05/2026 | Codex | Hướng dẫn tạo model và DbContext | Tạo entity model, enum, DbContext, relationship, index, constraint và migration cho PlayCourt | Hoàn thiện model, DbContext và migration EF Core | Có | `PlayCourt.Domain/`, `PlayCourt.Infrastructure/Data/` |
 | 3 | 21/05/2026 | Codex | Setup application layer | Tách DI theo layer, thêm middleware exception, ApiResponse và service placeholder | Program.cs gọn hơn, các layer có extension registration riêng và có response/error shape dùng chung | Có | `PlayCourt.API/`, `PlayCourt.Application/`, `PlayCourt.Infrastructure/` |
-| 4 |  |  |  |  |  | Có / Không |  |
-| 5 |  |  |  |  |  | Có / Không |  |
+| 4 | 03/06/2026 | Codex | Triển khai Register API | Tạo API đăng ký tài khoản theo Clean Architecture | Có endpoint register, service, DTO, validation và BCrypt | Có | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs` |
+| 5 | 03/06/2026 | Codex | Hoàn thiện tài liệu audit | Viết ngắn gọn các file docs, không sửa REFLECTION.md | Docs được bổ sung nội dung cơ bản | Có | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | 6 |  |  |  |  |  | Có / Không |  |
 | 7 |  |  |  |  |  | Có / Không |  |
 | 8 |  |  |  |  |  | Có / Không |  |
@@ -293,6 +293,74 @@ Prompt này được ghi nhận vì ảnh hưởng trực tiếp đến cấu tr
 
 ---
 
+### Prompt số 4
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Register API |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Register API cho PlayCourt Backend. Frontend gửi fullName, email, phoneNumber, password, role và businessName. Dùng ApiResponse<T>, BCrypt, Clean Architecture, tạo User, UserProfile và CourtOwnerProfile nếu Owner.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project cần endpoint đăng ký tài khoản để Player và Owner có thể tạo tài khoản mới.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý tạo DTO, service interface, service implementation, controller, DI registration và kiểm tra build/test.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để triển khai endpoint POST /api/auth/register, validate input, hash password và lưu dữ liệu vào SQL Server qua EF Core.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chỉnh lại theo entity thật của project, không dùng SQLite test package và đảm bảo controller không chứa business logic.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [ ] Prompt còn thiếu thông tin
+- [x] Prompt tạo ra kết quả tốt
+- [ ] Prompt tạo ra kết quả chưa phù hợp
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Application/DTOs/Auth/`, `PlayCourt.Infrastructure/Services/AuthService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Register API dùng SQL Server và BCrypt |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này giúp nhóm hoàn thành một chức năng backend quan trọng của hệ thống.
+```
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -336,13 +404,13 @@ Ghi lại ít nhất một prompt chưa tạo ra kết quả tốt hoặc chưa 
 ### 7.1. Prompt chưa hiệu quả
 
 ```text
-Dán prompt chưa hiệu quả tại đây.
+Viết test bằng SQLite cho Register API.
 ```
 
 ### 7.2. Vì sao prompt này chưa hiệu quả?
 
 ```text
-Viết tại đây...
+Prompt này chưa hiệu quả vì project đang dùng SQL Server, thêm SQLite làm test provider có thể gây lệch công nghệ và thêm package không cần thiết.
 ```
 
 Gợi ý nguyên nhân:
@@ -359,19 +427,19 @@ Gợi ý nguyên nhân:
 ### 7.3. Cách cải thiện prompt
 
 ```text
-Viết tại đây...
+Nêu rõ project chỉ dùng SQL Server và nếu viết test thì không thêm database provider khác.
 ```
 
 ### 7.4. Prompt sau khi cải tiến
 
 ```text
-Dán prompt đã được cải tiến tại đây.
+Hãy viết test đơn giản cho AuthController bằng fake IAuthService, không thêm SQLite hoặc database provider mới.
 ```
 
 ### 7.5. Kết quả sau khi cải tiến prompt
 
 ```text
-Viết tại đây...
+Kết quả phù hợp hơn vì test chỉ kiểm tra HTTP response của controller, không thay đổi công nghệ database của project.
 ```
 
 ---
@@ -381,7 +449,7 @@ Viết tại đây...
 ### 8.1. Khi viết prompt, em/nhóm cần cung cấp thông tin gì để AI trả lời tốt hơn?
 
 ```text
-Viết tại đây...
+Cần cung cấp mục tiêu, bối cảnh project, công nghệ đang dùng, input/output mong muốn, ràng buộc kiến trúc và cách kiểm chứng.
 ```
 
 Gợi ý:
@@ -398,13 +466,13 @@ Gợi ý:
 ### 8.2. Em/nhóm đã học được gì về cách đặt câu hỏi cho AI?
 
 ```text
-Viết tại đây...
+Prompt càng rõ thì AI càng trả lời sát hơn. Nếu thiếu bối cảnh, AI dễ đề xuất giải pháp không phù hợp với project.
 ```
 
 ### 8.3. Lần sau em/nhóm sẽ cải thiện prompt như thế nào?
 
 ```text
-Viết tại đây...
+Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture và yêu cầu không thêm package ngoài scope.
 ```
 
 ---
@@ -415,18 +483,18 @@ Viết tại đây...
 
 | Loại prompt | Số lượng | Ví dụ prompt tiêu biểu |
 |---|---:|---|
-| Prompt phân tích yêu cầu |  |  |
-| Prompt giải thích kiến thức |  |  |
-| Prompt thiết kế giải pháp |  |  |
-| Prompt thiết kế database |  |  |
-| Prompt sinh code mẫu |  |  |
-| Prompt debug lỗi |  |  |
-| Prompt viết test case |  |  |
-| Prompt review code |  |  |
-| Prompt tối ưu code |  |  |
-| Prompt viết báo cáo |  |  |
-| Prompt chuẩn bị thuyết trình |  |  |
-| Prompt khác |  |  |
+| Prompt phân tích yêu cầu | 1 | Tóm tắt yêu cầu Register API |
+| Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
+| Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
+| Prompt thiết kế database | 1 | Tạo entity model và DbContext |
+| Prompt sinh code mẫu | 2 | Setup layer và Register API |
+| Prompt debug lỗi | 1 | Kiểm tra package/test chưa phù hợp |
+| Prompt viết test case | 1 | Test AuthController |
+| Prompt review code | 1 | Review DI, response và build |
+| Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
+| Prompt viết báo cáo | 1 | Hoàn thiện tài liệu audit |
+| Prompt chuẩn bị thuyết trình | 0 | Chưa thực hiện |
+| Prompt khác | 0 |  |
 
 ---
 
@@ -436,16 +504,16 @@ Sinh viên/nhóm tự kiểm tra chất lượng prompt đã dùng.
 
 | Tiêu chí | Đã đạt? | Ghi chú |
 |---|:---:|---|
-| Prompt có mục tiêu rõ ràng |  |  |
-| Prompt có đủ bối cảnh |  |  |
-| Prompt có nêu công nghệ/ngôn ngữ sử dụng |  |  |
-| Prompt có nêu yêu cầu đầu ra |  |  |
-| Prompt không yêu cầu AI làm toàn bộ bài một cách máy móc |  |  |
-| Prompt có yêu cầu AI giải thích hoặc phân tích |  |  |
-| Kết quả AI được kiểm tra lại |  |  |
-| Kết quả AI được chỉnh sửa trước khi sử dụng |  |  |
-| Prompt quan trọng được ghi lại đầy đủ |  |  |
-| Prompt sai/chưa hiệu quả được rút kinh nghiệm |  |  |
+| Prompt có mục tiêu rõ ràng | Đạt | Nêu rõ chức năng cần làm |
+| Prompt có đủ bối cảnh | Đạt | Có mô tả project và công nghệ |
+| Prompt có nêu công nghệ/ngôn ngữ sử dụng | Đạt | ASP.NET Core, EF Core, SQL Server |
+| Prompt có nêu yêu cầu đầu ra | Đạt | Có file, endpoint, response mẫu |
+| Prompt không yêu cầu AI làm toàn bộ bài một cách máy móc | Đạt | Nhóm vẫn review và chỉnh sửa |
+| Prompt có yêu cầu AI giải thích hoặc phân tích | Đạt | Có yêu cầu theo Clean Architecture |
+| Kết quả AI được kiểm tra lại | Đạt | Chạy build/test và review package |
+| Kết quả AI được chỉnh sửa trước khi sử dụng | Đạt | Chỉnh theo entity và DbContext thật |
+| Prompt quan trọng được ghi lại đầy đủ | Đạt | Có prompt model, layer, register |
+| Prompt sai/chưa hiệu quả được rút kinh nghiệm | Đạt | Ghi nhận lỗi SQLite test package |
 
 ---
 
@@ -461,4 +529,4 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |
+| Nguyen Phan Huy | 03/06/2026 |
