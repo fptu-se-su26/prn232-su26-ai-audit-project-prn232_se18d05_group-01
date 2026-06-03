@@ -35,9 +35,61 @@ public sealed class AuthControllerTests
     public async Task Register_WhenServiceFails_ReturnsBadRequest()
     {
         var controller = new AuthController(new StubAuthService(
-            ApiResponse<RegisterResponseDto>.Fail("Register failed", ["Email already exists"])));
+            registerResponse: ApiResponse<RegisterResponseDto>.Fail("Register failed", ["Email already exists"])));
 
         var result = await controller.Register(CreateRequest());
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_WhenServiceSucceeds_ReturnsOk()
+    {
+        var responseDto = new LoginResponseDto
+        {
+            AccessToken = "token",
+            ExpiresAt = DateTime.UtcNow.AddMinutes(60),
+            User = new LoginUserDto
+            {
+                Id = 1,
+                FullName = "Nguyen Van A",
+                Email = "player@example.com",
+                PhoneNumber = "0909123456",
+                Role = "Player",
+                Status = "Active",
+                IsEmailVerified = false
+            }
+        };
+        var controller = new AuthController(new StubAuthService(
+            loginResponse: ApiResponse<LoginResponseDto>.Ok(responseDto, "Login successfully")));
+
+        var result = await controller.Login(CreateLoginRequest());
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            loginResponse: ApiResponse<LoginResponseDto>.Fail("Login failed", ["Invalid email/phone or password"])));
+
+        var result = await controller.Login(CreateLoginRequest());
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_WhenModelStateInvalid_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            loginResponse: ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto(), "Login successfully")));
+        controller.ModelState.AddModelError("Identifier", "Identifier is required");
+
+        var result = await controller.Login(CreateLoginRequest());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(400, badRequest.StatusCode);
@@ -55,11 +107,29 @@ public sealed class AuthControllerTests
         };
     }
 
-    private sealed class StubAuthService(ApiResponse<RegisterResponseDto> response) : IAuthService
+    private static LoginRequestDto CreateLoginRequest()
+    {
+        return new LoginRequestDto
+        {
+            Identifier = "player@example.com",
+            Password = "123456"
+        };
+    }
+
+    private sealed class StubAuthService(
+        ApiResponse<RegisterResponseDto>? registerResponse = null,
+        ApiResponse<LoginResponseDto>? loginResponse = null) : IAuthService
     {
         public Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
         {
-            return Task.FromResult(response);
+            return Task.FromResult(registerResponse
+                ?? ApiResponse<RegisterResponseDto>.Ok(new RegisterResponseDto()));
+        }
+
+        public Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginRequestDto request)
+        {
+            return Task.FromResult(loginResponse
+                ?? ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto()));
         }
     }
 }
