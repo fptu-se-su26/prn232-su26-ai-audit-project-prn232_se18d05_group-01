@@ -395,6 +395,59 @@ AI hỗ trợ nhanh phần cấu trúc OTP, nhưng nhóm vẫn cần kiểm tra 
 
 ---
 
+### Lần sử dụng AI số 7
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai Verify Email bằng OTP và SMTP |
+| Phần việc liên quan | Backend / Auth / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement Verify Email bằng OTP 6 số. Register tạo OTP và gửi email, thêm endpoint verify-email, resend-verify-email, dùng ApiResponse<T>, dùng MailKit SMTP và không sửa login flow.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý thêm DTO VerifyEmail/ResendVerifyEmail, EmailSettings, SmtpEmailService, cập nhật AuthService, AuthController, appsettings và controller tests.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để gửi OTP sau register, verify OTP để set IsEmailVerified, resend OTP có cooldown và gửi email bằng Gmail SMTP.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ password SMTP trong appsettings.Development.json local, appsettings.json chỉ dùng placeholder, và kiểm tra build/test sau khi thêm MailKit.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/DTOs/Auth/VerifyEmailRequestDto.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link video demo |  |
+| Ghi chú khác | Thêm endpoints `/api/auth/verify-email` và `/api/auth/resend-verify-email` |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ triển khai nhanh flow verify email, nhưng nhóm cần tự kiểm tra bảo mật config để không đưa SMTP password vào file shared.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -407,7 +460,7 @@ AI hỗ trợ nhanh phần cấu trúc OTP, nhưng nhóm vẫn cần kiểm tra 
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API và Email OTP infrastructure |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP infrastructure và Verify Email |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke/verify DI |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |

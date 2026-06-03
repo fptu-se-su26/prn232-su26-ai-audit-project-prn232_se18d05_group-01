@@ -248,6 +248,8 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 10 | Thêm VerificationToken entity và purpose enum | Nguyen Phan Huy | `PlayCourt.Domain/Entities/VerificationToken.cs`, `PlayCourt.Domain/Enums/DomainEnums.cs`, `PlayCourt.Domain/Entities/User.cs` | Commit sẽ cập nhật |
 | 11 | Thêm DbContext config và migration cho VerificationTokens | Nguyen Phan Huy | `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Data/Migrations/20260603081015_AddVerificationTokenTable.cs` | Commit sẽ cập nhật |
 | 12 | Thêm OTP service và development email service | Nguyen Phan Huy | `PlayCourt.Infrastructure/Services/VerificationTokenService.cs`, `PlayCourt.Infrastructure/Services/DevelopmentEmailService.cs`, `PlayCourt.Application/Interfaces/` | Commit sẽ cập nhật |
+| 13 | Thêm Verify Email và Resend Verify Email API | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
+| 14 | Thêm SMTP email service bằng MailKit | Nguyen Phan Huy | `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/Settings/EmailSettings.cs`, `PlayCourt.Infrastructure/PlayCourt.Infrastructure.csproj` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
@@ -269,7 +271,7 @@ Commit sẽ cập nhật sau khi hoàn tất.
 ## Ghi chú
 
 ```text
-Thay đổi này gồm backend foundation, Register API, Login API và Email OTP infrastructure. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
+Thay đổi này gồm backend foundation, Register API, Login API, Email OTP infrastructure và Verify Email. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
 ```
 
 ---
@@ -307,6 +309,7 @@ Thay đổi này gồm backend foundation, Register API, Login API và Email OTP
 | 5 | Duplicate email/phone có thể lỗi DB | Chưa check trước khi save | Check bằng EF trước transaction | Fixed |
 | 6 | JWT role claim chưa có dạng literal `role` | Token ban đầu chỉ có `ClaimTypes.Role` | Thêm claim `role` để dễ kiểm tra và vẫn giữ policy compatibility | Fixed |
 | 7 | Build bị khóa DLL bởi process API đang chạy | `PlayCourt.API` đang giữ file trong `bin` | Dừng đúng process API rồi chạy lại build | Fixed |
+| 8 | EmailSettings bind lỗi overload cấu hình | Project thiếu extension bind trực tiếp từ IConfigurationSection | Bind thủ công từng field trong DI | Fixed |
 
 ## Thay đổi chi tiết
 
@@ -314,9 +317,10 @@ Thay đổi này gồm backend foundation, Register API, Login API và Email OTP
 |---:|---|---|---|---|
 | 1 | Thêm test controller cho Register success/fail | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | `dotnet test PlayCourt.sln --no-build` |
 | 2 | Chạy build toàn solution | Nguyen Phan Huy | `PlayCourt.sln` | Build passed |
-| 3 | Chạy test toàn solution | Nguyen Phan Huy | `PlayCourt.ApiTests` | 9/9 tests passed |
+| 3 | Chạy test toàn solution | Nguyen Phan Huy | `PlayCourt.ApiTests` | 12/12 tests passed |
 | 4 | Thêm test Login controller và JWT role claim | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs`, `PlayCourt.ApiTests/JwtTokenServiceTests.cs` | Tests passed |
 | 5 | Tạo và apply migration VerificationTokens | Nguyen Phan Huy | `PlayCourt.Infrastructure/Data/Migrations/20260603081015_AddVerificationTokenTable.cs` | `dotnet ef database update` succeeded |
+| 6 | Thêm test Verify Email và Resend Verify Email controller | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | Tests passed |
 
 ## AI có hỗ trợ không?
 
@@ -409,7 +413,8 @@ Chưa ghi nhận nội dung cho phase này.
 | 4 | Register API | Completed | `AuthController`, `AuthService` | Player/Owner register |
 | 5 | Login API | Completed | `AuthController`, `AuthService`, `JwtTokenService` | Email/phone login và JWT |
 | 6 | Email OTP infrastructure | Completed | `VerificationToken`, `VerificationTokenService`, migration | Dùng cho verify email/reset password sau này |
-| 7 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
+| 7 | Verify Email API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Verify/resend OTP qua email |
+| 8 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
 
 ---
 
@@ -419,7 +424,7 @@ Chưa ghi nhận nội dung cho phase này.
 |---:|---|---|---|
 | 1 | Frontend hoàn chỉnh | Chưa nằm trong scope hiện tại | Làm sau khi backend ổn định |
 | 2 | Integration test SQL Server | Cần database test riêng | Tạo test database hoặc container SQL Server |
-| 3 | Verify Email/Forgot Password endpoint | Hiện mới làm OTP infrastructure | Triển khai endpoint ở task tiếp theo |
+| 3 | Forgot Password endpoint | Hiện mới có OTP infrastructure và verify email | Triển khai ở task tiếp theo |
 
 ---
 
@@ -430,9 +435,9 @@ Chưa ghi nhận nội dung cho phase này.
 | Requirement | Có | Trung bình | Tóm tắt yêu cầu và role |
 | Design | Có | Nhiều | Gợi ý layer và flow |
 | Database | Có | Nhiều | Entity, DbContext, migration |
-| Coding | Có | Nhiều | Backend foundation, Register API, Login API và Email OTP infrastructure |
+| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP infrastructure và Verify Email |
 | Debug | Có | Trung bình | Kiểm tra lỗi package, build, validation |
-| Testing | Có | Ít | Smoke test, controller test, JWT claim test và migration update |
+| Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test và migration update |
 | Report | Có | Trung bình | Hoàn thiện docs ngắn gọn |
 | Presentation | Không | Ít | Chưa thực hiện |
 
@@ -449,7 +454,7 @@ AI giúp làm nhanh hơn nhưng vẫn cần kiểm tra lại bằng build, test 
 ## 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Cần bổ sung refresh token, Verify Email/Forgot Password endpoint và integration test SQL Server.
+Cần bổ sung refresh token, Forgot Password endpoint và integration test SQL Server.
 ```
 
 ---
