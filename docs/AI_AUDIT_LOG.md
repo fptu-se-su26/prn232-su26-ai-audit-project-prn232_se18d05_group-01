@@ -342,6 +342,59 @@ AI hỗ trợ nhanh phần JWT và flow đăng nhập, nhưng nhóm vẫn cần 
 
 ---
 
+### Lần sử dụng AI số 6
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai Email OTP infrastructure |
+| Phần việc liên quan | Backend / Database / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement Email/OTP infrastructure cho PlayCourt Backend bằng EF Core Code First. Thêm VerificationToken entity, enum purpose, DbContext config, migration, OTP service và development email service. Không thêm endpoint verify/forgot password.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý thêm VerificationTokenPurpose, VerificationToken entity, User navigation, DbSet, Fluent API config, migration, IVerificationTokenService, IEmailService, VerificationTokenService và DevelopmentEmailService.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để tạo bảng VerificationTokens, sinh OTP 6 số, hash OTP bằng BCrypt, kiểm tra hạn dùng, one-time use và failed attempts.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra migration, chạy database update, giữ SQL Server, không thêm SMTP package và không triển khai endpoint ngoài scope.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.Domain/Entities/VerificationToken.cs`, `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Services/VerificationTokenService.cs`, `PlayCourt.Infrastructure/Services/DevelopmentEmailService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet ef migrations add AddVerificationTokenTable`, `dotnet ef database update`, `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link video demo |  |
+| Ghi chú khác | Chỉ triển khai infrastructure, chưa có verify email/reset password endpoint |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ nhanh phần cấu trúc OTP, nhưng nhóm vẫn cần kiểm tra migration và database update để đảm bảo bảng được tạo đúng.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -354,7 +407,7 @@ AI hỗ trợ nhanh phần JWT và flow đăng nhập, nhưng nhóm vẫn cần 
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API và Login API |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API và Email OTP infrastructure |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke/verify DI |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
