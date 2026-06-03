@@ -501,6 +501,59 @@ AI hỗ trợ nhanh phần auth flow, nhưng nhóm cần tự kiểm tra lại b
 
 ---
 
+### Lần sử dụng AI số 9
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai User Profile API |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement User Profile APIs for PlayCourt API: GET /api/users/me and PUT /api/users/me. Keep profile logic separate from AuthService, use ApiResponse<T>, do not expose PasswordHash, do not allow updating account or court-owner business fields, add controller tests and update docs.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý tạo DTO trong Application, IUserService, UserService dùng EF Core Include User/CourtOwnerProfile, UsersController đọc ClaimTypes.NameIdentifier và controller tests bằng stub service.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để tạo GET/PUT /api/users/me, mapping response thủ công, validation FullName/Gender trong service và test controller cho success/fail/unauthorized.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ AuthService không đổi, không tạo migration, không thêm upload avatar, kiểm tra field nhạy cảm không trả về và chạy build/test toàn solution.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.ApiTests/UsersControllerTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link video demo |  |
+| Ghi chú khác | Không thêm migration; AvatarUrl chỉ là string URL |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI giúp triển khai nhanh theo pattern hiện có, nhưng nhóm vẫn cần tự kiểm tra boundary bảo mật giữa profile, auth và court-owner business data.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -513,9 +566,9 @@ AI hỗ trợ nhanh phần auth flow, nhưng nhóm cần tự kiểm tra lại b
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email và Password Management |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management và User Profile API |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
-| Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test và password management test |
+| Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test và user profile test |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
 | Tối ưu code |  | x |  |  | AI hỗ trợ review code đơn giản |
 | Viết báo cáo |  | x |  |  | AI hỗ trợ chỉnh tài liệu ngắn gọn |

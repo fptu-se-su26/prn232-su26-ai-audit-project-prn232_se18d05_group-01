@@ -62,7 +62,7 @@ Sinh viên/nhóm cần ghi lại:
 | 6 | 03/06/2026 | Codex | Triển khai Email OTP infrastructure | Tạo VerificationToken table, OTP service và dev email logger | Có entity, enum, migration, service OTP và email logging | Có | `VerificationToken.cs`, `VerificationTokenService.cs`, migration `AddVerificationTokenTable` |
 | 7 | 03/06/2026 | Codex | Triển khai Verify Email | Tạo verify/resend OTP endpoints và SMTP email service | Register gửi OTP, verify email, resend OTP, MailKit SMTP | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
 | 8 | 03/06/2026 | Codex | Triển khai Password Management | Tạo forgot/reset/change password endpoints | Dùng lại OTP PasswordReset, SMTP email và BCrypt | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
-| 9 |  |  |  |  |  | Có / Không |  |
+| 9 | 03/06/2026 | Codex | Triển khai User Profile API | Tạo GET/PUT `/api/users/me` tách riêng AuthService | Có UsersController, UserService, DTO, validation và test | Có | `UsersController.cs`, `UserService.cs`, `UsersControllerTests.cs` |
 | 10 |  |  |  |  |  | Có / Không |  |
 
 ---
@@ -629,6 +629,76 @@ Prompt này được ghi nhận vì Password Management là chức năng auth ch
 
 ---
 
+### Prompt số 9
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai User Profile API |
+| Phần việc liên quan | Coding / Testing / Documentation |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi test case / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement User Profile APIs for PlayCourt API: GET /api/users/me and PUT /api/users/me. Allow authenticated users to get and update safe personal profile fields, keep logic separate from AuthService, use ApiResponse<T>, do not expose PasswordHash, do not update account/court-owner business fields, do not add migration, add controller tests and update docs.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có User, UserProfile, CourtOwnerProfile, JWT authentication, ClaimTypes.NameIdentifier, ApiResponse<T>, manual DTO mapping và test controller bằng stub service.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất tạo DTOs trong PlayCourt.Application/DTOs/Users, IUserService, UserService dùng EF Core, UsersController có Authorize và tests cho success/fail/unauthorized.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm endpoint GET /api/users/me và PUT /api/users/me, trả profile hiện tại, cập nhật safe fields, đăng ký DI và thêm UsersControllerTests.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chỉnh theo entity thật của project, giữ AuthService không đổi, không tạo migration, chỉ validate FullName/Gender trong service và kiểm chứng bằng build/test.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [ ] Prompt còn thiếu thông tin
+- [x] Prompt tạo ra kết quả tốt
+- [ ] Prompt tạo ra kết quả chưa phù hợp
+- [ ] Cần hỏi lại AI nhiều lần
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
+- [ ] Kết quả AI có lỗi hoặc chưa chính xác
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.ApiTests/UsersControllerTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/CHANGELOG.md`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md` |
+| Ghi chú khác | Không thêm migration và không expose PasswordHash |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì User Profile API là chức năng người dùng đăng nhập quan trọng và có yêu cầu bảo mật field rõ ràng.
+```
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -755,9 +825,9 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 6 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email và Password Management |
-| Prompt debug lỗi | 3 | Kiểm tra package/test chưa phù hợp, build bị khóa process API và null principal trong controller test |
-| Prompt viết test case | 4 | Test AuthController, JwtTokenService, verify/resend endpoints và password management endpoints |
+| Prompt sinh code mẫu | 7 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management và User Profile API |
+| Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
+| Prompt viết test case | 5 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints và user profile endpoints |
 | Prompt review code | 1 | Review DI, response và build |
 | Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
 | Prompt viết báo cáo | 0 | Chưa ghi nhận riêng |
