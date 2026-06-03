@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using PlayCourt.API.Controllers;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Auth;
 using PlayCourt.Application.Interfaces;
+using System.Security.Claims;
 
 namespace PlayCourt.ApiTests;
 
@@ -95,6 +97,163 @@ public sealed class AuthControllerTests
         Assert.Equal(400, badRequest.StatusCode);
     }
 
+    [Fact]
+    public async Task VerifyEmail_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            verifyEmailResponse: ApiResponse<object>.Ok(null, "Email verified successfully.")));
+
+        var result = await controller.VerifyEmail(new VerifyEmailRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "123456"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task VerifyEmail_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            verifyEmailResponse: ApiResponse<object>.Fail("Invalid verification code.")));
+
+        var result = await controller.VerifyEmail(new VerifyEmailRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "000000"
+        });
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResendVerifyEmail_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            resendVerifyEmailResponse: ApiResponse<object>.Ok(null, "Verification code has been sent to your email.")));
+
+        var result = await controller.ResendVerifyEmail(new ResendVerifyEmailRequestDto
+        {
+            Email = "player@example.com"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            forgotPasswordResponse: ApiResponse<object>.Ok(null, "If this email exists, a password reset code has been sent.")));
+
+        var result = await controller.ForgotPassword(new ForgotPasswordRequestDto
+        {
+            Email = "player@example.com"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            forgotPasswordResponse: ApiResponse<object>.Fail("Validation failed", ["Email is required."])));
+
+        var result = await controller.ForgotPassword(new ForgotPasswordRequestDto());
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            resetPasswordResponse: ApiResponse<object>.Ok(null, "Password reset successfully.")));
+
+        var result = await controller.ResetPassword(new ResetPasswordRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "123456",
+            NewPassword = "NewPassword123!"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            resetPasswordResponse: ApiResponse<object>.Fail("Invalid or expired reset code.")));
+
+        var result = await controller.ResetPassword(new ResetPasswordRequestDto
+        {
+            Email = "player@example.com",
+            Otp = "000000",
+            NewPassword = "NewPassword123!"
+        });
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WhenServiceSucceeds_ReturnsOk()
+    {
+        var controller = new AuthController(new StubAuthService(
+            changePasswordResponse: ApiResponse<object>.Ok(null, "Password changed successfully.")));
+        SetUserIdClaim(controller, "1");
+
+        var result = await controller.ChangePassword(new ChangePasswordRequestDto
+        {
+            CurrentPassword = "OldPassword123!",
+            NewPassword = "NewPassword123!"
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(200, ok.StatusCode);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WhenServiceFails_ReturnsBadRequest()
+    {
+        var controller = new AuthController(new StubAuthService(
+            changePasswordResponse: ApiResponse<object>.Fail("Current password is incorrect.")));
+        SetUserIdClaim(controller, "1");
+
+        var result = await controller.ChangePassword(new ChangePasswordRequestDto
+        {
+            CurrentPassword = "WrongPassword123!",
+            NewPassword = "NewPassword123!"
+        });
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(400, badRequest.StatusCode);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WhenUserIdClaimMissing_ReturnsUnauthorized()
+    {
+        var controller = new AuthController(new StubAuthService());
+
+        var result = await controller.ChangePassword(new ChangePasswordRequestDto
+        {
+            CurrentPassword = "OldPassword123!",
+            NewPassword = "NewPassword123!"
+        });
+
+        var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+        Assert.Equal(401, unauthorized.StatusCode);
+    }
+
     private static RegisterRequestDto CreateRequest()
     {
         return new RegisterRequestDto
@@ -116,9 +275,27 @@ public sealed class AuthControllerTests
         };
     }
 
+    private static void SetUserIdClaim(AuthController controller, string userId)
+    {
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [new Claim(ClaimTypes.NameIdentifier, userId)],
+                    "TestAuth"))
+            }
+        };
+    }
+
     private sealed class StubAuthService(
         ApiResponse<RegisterResponseDto>? registerResponse = null,
-        ApiResponse<LoginResponseDto>? loginResponse = null) : IAuthService
+        ApiResponse<LoginResponseDto>? loginResponse = null,
+        ApiResponse<object>? verifyEmailResponse = null,
+        ApiResponse<object>? resendVerifyEmailResponse = null,
+        ApiResponse<object>? forgotPasswordResponse = null,
+        ApiResponse<object>? resetPasswordResponse = null,
+        ApiResponse<object>? changePasswordResponse = null) : IAuthService
     {
         public Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
         {
@@ -130,6 +307,36 @@ public sealed class AuthControllerTests
         {
             return Task.FromResult(loginResponse
                 ?? ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto()));
+        }
+
+        public Task<ApiResponse<object>> VerifyEmailAsync(VerifyEmailRequestDto request)
+        {
+            return Task.FromResult(verifyEmailResponse
+                ?? ApiResponse<object>.Ok(null));
+        }
+
+        public Task<ApiResponse<object>> ResendVerifyEmailAsync(ResendVerifyEmailRequestDto request)
+        {
+            return Task.FromResult(resendVerifyEmailResponse
+                ?? ApiResponse<object>.Ok(null));
+        }
+
+        public Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordRequestDto request)
+        {
+            return Task.FromResult(forgotPasswordResponse
+                ?? ApiResponse<object>.Ok(null));
+        }
+
+        public Task<ApiResponse<object>> ResetPasswordAsync(ResetPasswordRequestDto request)
+        {
+            return Task.FromResult(resetPasswordResponse
+                ?? ApiResponse<object>.Ok(null));
+        }
+
+        public Task<ApiResponse<object>> ChangePasswordAsync(int userId, ChangePasswordRequestDto request)
+        {
+            return Task.FromResult(changePasswordResponse
+                ?? ApiResponse<object>.Ok(null));
         }
     }
 }

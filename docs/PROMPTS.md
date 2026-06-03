@@ -60,8 +60,8 @@ Sinh viên/nhóm cần ghi lại:
 | 4 | 03/06/2026 | Codex | Triển khai Register API | Tạo API đăng ký tài khoản theo Clean Architecture | Có endpoint register, service, DTO, validation và BCrypt | Có | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs` |
 | 5 | 03/06/2026 | Codex | Triển khai Login API | Tạo API đăng nhập bằng email/số điện thoại và trả JWT | Có endpoint login, JWT service, cấu hình bearer auth và test | Có | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/JwtTokenService.cs` |
 | 6 | 03/06/2026 | Codex | Triển khai Email OTP infrastructure | Tạo VerificationToken table, OTP service và dev email logger | Có entity, enum, migration, service OTP và email logging | Có | `VerificationToken.cs`, `VerificationTokenService.cs`, migration `AddVerificationTokenTable` |
-| 7 |  |  |  |  |  | Có / Không |  |
-| 8 |  |  |  |  |  | Có / Không |  |
+| 7 | 03/06/2026 | Codex | Triển khai Verify Email | Tạo verify/resend OTP endpoints và SMTP email service | Register gửi OTP, verify email, resend OTP, MailKit SMTP | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
+| 8 | 03/06/2026 | Codex | Triển khai Password Management | Tạo forgot/reset/change password endpoints | Dùng lại OTP PasswordReset, SMTP email và BCrypt | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
 | 9 |  |  |  |  |  | Có / Không |  |
 | 10 |  |  |  |  |  | Có / Không |  |
 
@@ -495,6 +495,140 @@ Prompt này được ghi nhận vì OTP infrastructure là nền tảng cho các
 
 ---
 
+### Prompt số 7
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Verify Email bằng OTP và SMTP |
+| Phần việc liên quan | Backend / Auth / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Verify Email feature. Register tạo OTP và gửi email, thêm endpoint /api/auth/verify-email và /api/auth/resend-verify-email, dùng ApiResponse<T>, MailKit SMTP, Gmail app password trong appsettings.Development.json local.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có Register/Login và OTP infrastructure, cần hoàn thiện flow verify email để frontend có thể xác thực tài khoản người dùng.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý thêm VerifyEmailRequestDto, ResendVerifyEmailRequestDto, EmailSettings, SmtpEmailService, cập nhật AuthService/RegisterAsync, thêm VerifyEmailAsync, ResendVerifyEmailAsync và controller tests.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để register gửi OTP qua SMTP, verify OTP set IsEmailVerified, resend OTP có cooldown 60 giây và cấu hình EmailSettings.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ credential SMTP trong appsettings.Development.json local, shared appsettings chỉ dùng placeholder và kiểm tra không đưa password thật vào file tracked.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc bảo mật
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/Settings/EmailSettings.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không ghi SMTP password thật trong docs |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Verify Email là chức năng auth chính, dùng lại OTP infrastructure đã có.
+```
+
+---
+
+### Prompt số 8
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Forgot/Reset/Change Password |
+| Phần việc liên quan | Backend / Auth / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Forgot Password, Reset Password và Change Password cho PlayCourt. Dùng lại VerificationTokenPurpose.PasswordReset, VerificationTokenService, SMTP email service, BCrypt, endpoint change-password có Authorize và không thêm migration.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có Register/Login, JWT, Email OTP infrastructure và Verify Email nên cần hoàn thiện flow quản lý mật khẩu.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý thêm DTO request, mở rộng IAuthService/AuthService, thêm reset password email template, thêm 3 endpoint trong AuthController và controller tests.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm `/api/auth/forgot-password`, `/api/auth/reset-password` và `/api/auth/change-password`, dùng OTP PasswordReset và hash password mới bằng BCrypt.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ SQL Server, không thêm migration, trả message forgot password dạng chung và kiểm tra bằng build/test.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc không thêm migration
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Application/DTOs/Auth/`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/SmtpEmailService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` passed 19/19 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không ghi SMTP password thật trong docs |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Password Management là chức năng auth chính và dùng lại hạ tầng OTP đã có.
+```
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -621,9 +755,9 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 4 | Setup layer, Register API, Login API và Email OTP infrastructure |
-| Prompt debug lỗi | 2 | Kiểm tra package/test chưa phù hợp và build bị khóa process API |
-| Prompt viết test case | 2 | Test AuthController và JwtTokenService |
+| Prompt sinh code mẫu | 6 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email và Password Management |
+| Prompt debug lỗi | 3 | Kiểm tra package/test chưa phù hợp, build bị khóa process API và null principal trong controller test |
+| Prompt viết test case | 4 | Test AuthController, JwtTokenService, verify/resend endpoints và password management endpoints |
 | Prompt review code | 1 | Review DI, response và build |
 | Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
 | Prompt viết báo cáo | 0 | Chưa ghi nhận riêng |
