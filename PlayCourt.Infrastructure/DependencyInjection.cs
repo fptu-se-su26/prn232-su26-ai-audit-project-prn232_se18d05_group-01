@@ -22,6 +22,7 @@ namespace PlayCourt.Infrastructure
             // Interface nam o Application, class Service nam o Infrastructure.
             // Vi du khi co SportService: services.AddScoped<ISportService, SportService>();
             services.AddScoped<IService, Service>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }
