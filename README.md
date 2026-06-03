@@ -162,6 +162,12 @@ copy PlayCourt.API\appsettings.Development.example.json PlayCourt.API\appsetting
   },
   "ConnectionStrings": {
     "DefaultConnection": "Server=YOUR_SERVER;Database=PlayCourtDb;User Id=YOUR_USERNAME;Password=YOUR_PASSWORD;Encrypt=True;TrustServerCertificate=True"
+  },
+  "Jwt": {
+    "Key": "YOUR_DEVELOPMENT_SECRET_KEY_AT_LEAST_32_CHARACTERS",
+    "Issuer": "PlayCourt",
+    "Audience": "PlayCourtClient",
+    "ExpiresInMinutes": 60
   }
 }
 ```
@@ -179,6 +185,17 @@ Thay các giá trị sau:
 > ```
 > Server=(localdb)\mssqllocaldb;Database=PlayCourtDb;Trusted_Connection=True;TrustServerCertificate=True
 > ```
+
+#### Cấu hình JWT
+
+| Placeholder | Điền gì |
+|---|---|
+| `YOUR_DEVELOPMENT_SECRET_KEY_AT_LEAST_32_CHARACTERS` | Khóa bí mật dùng để ký JWT trong môi trường development, tối thiểu 32 ký tự |
+| `Issuer` | Tên hệ thống phát hành token, mặc định `PlayCourt` |
+| `Audience` | Client/API audience, mặc định `PlayCourtClient` |
+| `ExpiresInMinutes` | Thời gian hết hạn token, mặc định `60` phút |
+
+> Không commit secret thật hoặc production secret. Chỉ dùng placeholder/dev key trong file mẫu.
 
 Không commit `appsettings.Development.json`. Chỉ commit `appsettings.json` với default an toàn và `appsettings.Development.example.json` làm mẫu.
 
@@ -220,6 +237,31 @@ Mở trình duyệt và truy cập:
 | Swagger UI | [http://localhost:5187/swagger](http://localhost:5187/swagger) |
 | HTTPS Swagger | [https://localhost:7174/swagger](https://localhost:7174/swagger) |
 
+#### Verify Login API with JWT
+
+Sau khi chạy API, mở Swagger và test:
+
+```http
+POST /api/auth/login
+```
+
+Sample body:
+
+```json
+{
+  "identifier": "player@example.com",
+  "password": "123456"
+}
+```
+
+Nếu login thành công, copy `accessToken`, bấm nút **Authorize** trong Swagger và nhập:
+
+```text
+Bearer <accessToken>
+```
+
+Sau đó có thể test các API yêu cầu authentication/authorization.
+
 ### Chạy Tests
 
 ```bash
@@ -258,6 +300,7 @@ dotnet run --project PlayCourt.API/PlayCourt.API.csproj --launch-profile http
 | `dotnet ef not found` | Chưa cài EF Core Tools | Chạy `dotnet tool install --global dotnet-ef` |
 | `LocalDB not installed` | Chưa cài SQL Server LocalDB | Cài Visual Studio 2022 (chọn workload ASP.NET) hoặc [cài riêng LocalDB](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb) |
 | `Build failed` | Thiếu .NET SDK 8.0 | [Download .NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| `Jwt:Key is missing or invalid` | Chưa cấu hình `Jwt:Key` hoặc key quá ngắn | Kiểm tra `Jwt` config trong `appsettings.Development.json`, key nên tối thiểu 32 ký tự |
 
 ---
 
