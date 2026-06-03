@@ -9,7 +9,11 @@ namespace PlayCourt.API
         {
             // Đăng ký các service thuộc tầng API tại đây.
             // Ví dụ: controllers, Swagger, CORS, authentication, authorization.
-            services.AddControllers();
+            services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
