@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Auth;
@@ -95,6 +97,79 @@ namespace PlayCourt.API.Controllers
             }
 
             var response = await _authService.ResendVerifyEmailAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.ForgotPasswordAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.ResetPasswordAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var userIdClaim = User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(ApiResponse<object>.Fail("Invalid authentication token."));
+            }
+
+            var response = await _authService.ChangePasswordAsync(userId, request);
 
             if (!response.Success)
             {

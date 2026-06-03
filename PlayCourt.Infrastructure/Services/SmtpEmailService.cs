@@ -36,6 +36,21 @@ namespace PlayCourt.Infrastructure.Services
             return SendAsync(toEmail, subject, body, cancellationToken);
         }
 
+        public Task SendResetPasswordEmailAsync(string toEmail, string otp, CancellationToken cancellationToken = default)
+        {
+            const string subject = "Reset your PlayCourt password";
+            var body = $"""
+                <h2>Reset your PlayCourt password</h2>
+                <p>Your password reset code is:</p>
+                <h1>{otp}</h1>
+                <p>This code will expire in 10 minutes.</p>
+                <p>If you did not request a password reset, please ignore this email.</p>
+                <p>Do not share this code with anyone.</p>
+                """;
+
+            return SendAsync(toEmail, subject, body, cancellationToken);
+        }
+
         private async Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken)
         {
             var message = new MimeMessage();

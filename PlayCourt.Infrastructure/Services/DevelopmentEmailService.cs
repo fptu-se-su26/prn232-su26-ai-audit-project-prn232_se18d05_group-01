@@ -30,5 +30,13 @@ namespace PlayCourt.Infrastructure.Services
                 "Verify your PlayCourt email",
                 $"Your PlayCourt verification code is {otp}. This code will expire in 10 minutes.");
         }
+
+        public Task SendResetPasswordEmailAsync(string toEmail, string otp, CancellationToken cancellationToken = default)
+        {
+            return SendAsync(
+                toEmail,
+                "Reset your PlayCourt password",
+                $"Your PlayCourt password reset code is {otp}. This code will expire in 10 minutes.");
+        }
     }
 }
