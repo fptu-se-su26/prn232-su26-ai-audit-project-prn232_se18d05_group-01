@@ -13,11 +13,14 @@ namespace PlayCourt.Infrastructure.Services
     {
         private const string PlayerRole = "Player";
         private const string OwnerRole = "Owner";
+        private const string InvalidLoginError = "Invalid email/phone or password";
         private readonly PlayCourtDbContext _dbContext;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public AuthService(PlayCourtDbContext dbContext)
+        public AuthService(PlayCourtDbContext dbContext, IJwtTokenService jwtTokenService)
         {
             _dbContext = dbContext;
+            _jwtTokenService = jwtTokenService;
         }
 
         public async Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
@@ -101,6 +104,49 @@ namespace PlayCourt.Infrastructure.Services
             }, "Register successfully");
         }
 
+        public async Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginRequestDto request)
+        {
+            var errors = ValidateLoginRequest(request);
+            if (errors.Count > 0)
+            {
+                return ApiResponse<LoginResponseDto>.Fail("Login failed", errors);
+            }
+
+            var identifier = request.Identifier.Trim();
+            var normalizedIdentifier = identifier.ToLowerInvariant();
+            var user = await _dbContext.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Email == normalizedIdentifier || u.Phone == identifier);
+
+            if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return ApiResponse<LoginResponseDto>.Fail("Login failed", [InvalidLoginError]);
+            }
+
+            if (user.Status != UserStatus.Active)
+            {
+                return ApiResponse<LoginResponseDto>.Fail("Login failed", ["User account is not active"]);
+            }
+
+            var token = _jwtTokenService.GenerateAccessToken(user, user.UserProfile);
+
+            return ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto
+            {
+                AccessToken = token.AccessToken,
+                ExpiresAt = token.ExpiresAt,
+                User = new LoginUserDto
+                {
+                    Id = user.Id,
+                    FullName = user.UserProfile?.FullName ?? string.Empty,
+                    Email = user.Email,
+                    PhoneNumber = user.Phone ?? string.Empty,
+                    Role = user.Role.ToString(),
+                    Status = user.Status.ToString(),
+                    IsEmailVerified = user.IsEmailVerified
+                }
+            }, "Login successfully");
+        }
+
         private static List<string> ValidateRequest(RegisterRequestDto request)
         {
             var errors = new List<string>();
@@ -145,6 +191,23 @@ namespace PlayCourt.Infrastructure.Services
                 && string.IsNullOrWhiteSpace(request.BusinessName))
             {
                 errors.Add("BusinessName is required when role is Owner");
+            }
+
+            return errors;
+        }
+
+        private static List<string> ValidateLoginRequest(LoginRequestDto request)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(request.Identifier))
+            {
+                errors.Add("Identifier is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                errors.Add("Password is required");
             }
 
             return errors;

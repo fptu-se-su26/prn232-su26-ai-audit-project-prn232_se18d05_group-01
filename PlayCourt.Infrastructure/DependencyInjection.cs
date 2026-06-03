@@ -23,6 +23,7 @@ namespace PlayCourt.Infrastructure
             // Vi du khi co SportService: services.AddScoped<ISportService, SportService>();
             services.AddScoped<IService, Service>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }
