@@ -251,6 +251,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 13 | Thêm Verify Email và Resend Verify Email API | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
 | 14 | Thêm SMTP email service bằng MailKit | Nguyen Phan Huy | `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/Settings/EmailSettings.cs`, `PlayCourt.Infrastructure/PlayCourt.Infrastructure.csproj` | Commit sẽ cập nhật |
 | 15 | Thêm Forgot Password, Reset Password và Change Password API | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
+| 16 | Thêm User Profile API cho người dùng đăng nhập | Nguyen Phan Huy | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
@@ -272,7 +273,7 @@ Commit sẽ cập nhật sau khi hoàn tất.
 ## Ghi chú
 
 ```text
-Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email và Password Management. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
+Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email, Password Management và User Profile API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
 ```
 
 ---
@@ -312,6 +313,7 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 | 7 | Build bị khóa DLL bởi process API đang chạy | `PlayCourt.API` đang giữ file trong `bin` | Dừng đúng process API rồi chạy lại build | Fixed |
 | 8 | EmailSettings bind lỗi overload cấu hình | Project thiếu extension bind trực tiếp từ IConfigurationSection | Bind thủ công từng field trong DI | Fixed |
 | 9 | Change Password test thiếu HttpContext bị lỗi null principal | Controller đọc claim khi chưa có principal | Kiểm tra `User` null và trả Unauthorized | Fixed |
+| 10 | User Profile red test bị khóa bởi API process đang chạy | `PlayCourt.API` đang giữ DLL trong `bin` | Dừng process API rồi chạy lại test để thấy lỗi missing symbol đúng kỳ vọng | Fixed |
 
 ## Thay đổi chi tiết
 
@@ -324,6 +326,7 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 | 5 | Tạo và apply migration VerificationTokens | Nguyen Phan Huy | `PlayCourt.Infrastructure/Data/Migrations/20260603081015_AddVerificationTokenTable.cs` | `dotnet ef database update` succeeded |
 | 6 | Thêm test Verify Email và Resend Verify Email controller | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | Tests passed |
 | 7 | Thêm test Forgot/Reset/Change Password controller | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | 19/19 tests passed |
+| 8 | Thêm test User Profile controller | Nguyen Phan Huy | `PlayCourt.ApiTests/UsersControllerTests.cs` | 26/26 tests passed |
 
 ## AI có hỗ trợ không?
 
@@ -418,7 +421,8 @@ Chưa ghi nhận nội dung cho phase này.
 | 6 | Email OTP infrastructure | Completed | `VerificationToken`, `VerificationTokenService`, migration | Dùng cho verify email/reset password sau này |
 | 7 | Verify Email API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Verify/resend OTP qua email |
 | 8 | Password Management API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Forgot/reset/change password |
-| 9 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
+| 9 | User Profile API | Completed | `UsersController`, `UserService`, `UsersControllerTests` | GET/PUT `/api/users/me` |
+| 10 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
 
 ---
 
@@ -439,9 +443,9 @@ Chưa ghi nhận nội dung cho phase này.
 | Requirement | Có | Trung bình | Tóm tắt yêu cầu và role |
 | Design | Có | Nhiều | Gợi ý layer và flow |
 | Database | Có | Nhiều | Entity, DbContext, migration |
-| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email và Password Management |
+| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email, Password Management và User Profile API |
 | Debug | Có | Trung bình | Kiểm tra lỗi package, build, validation |
-| Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test, password management test và migration update |
+| Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test, password management test, user profile test và migration update |
 | Report | Có | Trung bình | Hoàn thiện docs ngắn gọn |
 | Presentation | Không | Ít | Chưa thực hiện |
 
