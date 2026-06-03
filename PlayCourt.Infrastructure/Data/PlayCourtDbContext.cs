@@ -25,6 +25,7 @@ namespace PlayCourt.Infrastructure.Data
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<CourtOwnerProfile> CourtOwnerProfiles => Set<CourtOwnerProfile>();
         public DbSet<UserFavoriteVenue> UserFavoriteVenues => Set<UserFavoriteVenue>();
+        public DbSet<VerificationToken> VerificationTokens => Set<VerificationToken>();
 
         // Sports
         public DbSet<Sport> Sports => Set<Sport>();
@@ -66,6 +67,7 @@ namespace PlayCourt.Infrastructure.Data
             ConfigureUsers(modelBuilder);
             ConfigureUserProfiles(modelBuilder);
             ConfigureCourtOwnerProfiles(modelBuilder);
+            ConfigureVerificationTokens(modelBuilder);
             ConfigureSports(modelBuilder);
             ConfigurePlayerSports(modelBuilder);
             ConfigureVenues(modelBuilder);
@@ -182,6 +184,40 @@ namespace PlayCourt.Infrastructure.Data
                 entity.ToTable(t =>
                 {
                     t.HasCheckConstraint("CHK_CourtOwnerProfiles_VerificationStatus", "[VerificationStatus] IN (0,1,2)");
+                });
+            });
+        }
+
+        private static void ConfigureVerificationTokens(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<VerificationToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Purpose).IsRequired();
+                entity.Property(e => e.TokenHash).HasMaxLength(255).IsRequired();
+                entity.Property(e => e.ExpiresAt).IsRequired();
+                entity.Property(e => e.FailedAttempts).HasDefaultValue(0).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false).IsRequired();
+
+                entity.HasQueryFilter(e => !e.IsDeleted);
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_VerificationTokens_UserId");
+
+                entity.HasIndex(e => new { e.UserId, e.Purpose, e.ExpiresAt })
+                    .HasDatabaseName("IX_VerificationTokens_User_Purpose_ExpiresAt");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.VerificationTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CHK_VerificationTokens_Purpose", "[Purpose] IN (0,1)");
+                    t.HasCheckConstraint("CHK_VerificationTokens_FailedAttempts", "[FailedAttempts] >= 0");
                 });
             });
         }

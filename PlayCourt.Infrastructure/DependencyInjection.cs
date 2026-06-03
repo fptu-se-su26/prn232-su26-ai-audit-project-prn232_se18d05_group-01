@@ -24,6 +24,8 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IService, Service>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IVerificationTokenService, VerificationTokenService>();
+            services.AddScoped<IEmailService, DevelopmentEmailService>();
 
             return services;
         }
