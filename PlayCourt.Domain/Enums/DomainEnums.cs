@@ -127,4 +127,10 @@ namespace PlayCourt.Domain.Enums
         Review = 3,
         Venue = 4
     }
+
+    public enum VerificationTokenPurpose : short
+    {
+        EmailVerification = 0,
+        PasswordReset = 1
+    }
 }

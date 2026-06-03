@@ -1,0 +1,26 @@
+using Microsoft.Extensions.Logging;
+using PlayCourt.Application.Interfaces;
+
+namespace PlayCourt.Infrastructure.Services
+{
+    public sealed class DevelopmentEmailService : IEmailService
+    {
+        private readonly ILogger<DevelopmentEmailService> _logger;
+
+        public DevelopmentEmailService(ILogger<DevelopmentEmailService> logger)
+        {
+            _logger = logger;
+        }
+
+        public Task SendAsync(string to, string subject, string body)
+        {
+            _logger.LogInformation(
+                "Development email. To: {To}. Subject: {Subject}. Body: {Body}",
+                to,
+                subject,
+                body);
+
+            return Task.CompletedTask;
+        }
+    }
+}
