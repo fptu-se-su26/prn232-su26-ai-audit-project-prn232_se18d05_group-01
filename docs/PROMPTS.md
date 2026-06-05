@@ -13,7 +13,7 @@
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
-| Ngày cập nhật gần nhất | 03/06/2026 |
+| Ngày cập nhật gần nhất | 04/06/2026 |
 
 ---
 
@@ -63,7 +63,7 @@ Sinh viên/nhóm cần ghi lại:
 | 7 | 03/06/2026 | Codex | Triển khai Verify Email | Tạo verify/resend OTP endpoints và SMTP email service | Register gửi OTP, verify email, resend OTP, MailKit SMTP | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
 | 8 | 03/06/2026 | Codex | Triển khai Password Management | Tạo forgot/reset/change password endpoints | Dùng lại OTP PasswordReset, SMTP email và BCrypt | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
 | 9 | 03/06/2026 | Codex | Triển khai User Profile API | Tạo GET/PUT `/api/users/me` tách riêng AuthService | Có UsersController, UserService, DTO, validation và test | Có | `UsersController.cs`, `UserService.cs`, `UsersControllerTests.cs` |
-| 10 |  |  |  |  |  | Có / Không |  |
+| 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
 
 ---
 
@@ -699,6 +699,73 @@ Prompt này được ghi nhận vì User Profile API là chức năng người d
 
 ---
 
+### Prompt số 10
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 04/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Sport Management API |
+| Phần việc liên quan | Coding / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi test case / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Sport Management cho PlayCourt Backend. Tạo API quản lý môn thể thao, dùng ApiResponse<T>, tách logic vào SportService, admin mới được create/update/toggle active, có validate code/name/player count và thêm test.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có entity Sport, DbContext, ApiResponse<T>, JWT authorization policy và pattern controller/service/test cho các feature trước.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất thêm SportsController, DTOs trong PlayCourt.Application/DTOs/Sports, ISportService, SportService dùng EF Core và test cho controller/service.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm API GET danh sách sport, GET sport theo id, POST tạo sport, PUT cập nhật sport và PATCH toggle active.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra lại phân quyền admin cho API thay đổi dữ liệu, validate duplicate code/name, chuẩn hóa sport code và chạy test toàn solution.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ phân quyền
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/SportsController.cs`, `PlayCourt.Application/DTOs/Sports/`, `PlayCourt.Application/Interfaces/ISportService.cs`, `PlayCourt.Infrastructure/Services/SportService.cs`, `PlayCourt.ApiTests/SportsControllerTests.cs`, `PlayCourt.ApiTests/SportServiceTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-build` passed 39/39 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không thêm migration vì bảng Sport đã có |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Sport Management là chức năng backend dùng để quản lý danh mục môn thể thao trong hệ thống.
+```
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -825,9 +892,9 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 7 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management và User Profile API |
+| Prompt sinh code mẫu | 8 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API và Sport Management API |
 | Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
-| Prompt viết test case | 5 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints và user profile endpoints |
+| Prompt viết test case | 6 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints và sport management endpoints/service |
 | Prompt review code | 1 | Review DI, response và build |
 | Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
 | Prompt viết báo cáo | 0 | Chưa ghi nhận riêng |

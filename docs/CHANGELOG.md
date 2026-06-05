@@ -224,7 +224,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 - [x] Xây dựng backend
 - [ ] Xây dựng frontend
 - [x] Xây dựng authentication/authorization
-- [ ] Xử lý CRUD
+- [x] Xử lý CRUD
 - [x] Xử lý validation
 - [ ] Tích hợp API
 - [ ] Xử lý upload/download file
@@ -252,6 +252,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 14 | Thêm SMTP email service bằng MailKit | Nguyen Phan Huy | `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/Settings/EmailSettings.cs`, `PlayCourt.Infrastructure/PlayCourt.Infrastructure.csproj` | Commit sẽ cập nhật |
 | 15 | Thêm Forgot Password, Reset Password và Change Password API | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
 | 16 | Thêm User Profile API cho người dùng đăng nhập | Nguyen Phan Huy | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/` | Commit sẽ cập nhật |
+| 17 | Thêm Sport Management API cho danh mục môn thể thao | Nguyen Phan Huy | `PlayCourt.API/Controllers/SportsController.cs`, `PlayCourt.Infrastructure/Services/SportService.cs`, `PlayCourt.Application/DTOs/Sports/` | Commit sẽ cập nhật |
 
 ## AI có hỗ trợ không?
 
@@ -261,7 +262,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-AI hỗ trợ đề xuất cách setup layer, gom DependencyInjection theo API/Application/Infrastructure, thêm middleware exception và common ApiResponse. Nhóm tự review dependency direction, scope thay đổi và chạy kiểm chứng trước khi commit.
+AI hỗ trợ đề xuất cách setup layer, gom DependencyInjection theo API/Application/Infrastructure, thêm middleware exception, common ApiResponse và các API backend như Auth, User Profile, Sport Management. Nhóm tự review scope thay đổi và chạy kiểm chứng trước khi commit.
 ```
 
 ## Commit/Screenshot minh chứng
@@ -273,7 +274,7 @@ Commit sẽ cập nhật sau khi hoàn tất.
 ## Ghi chú
 
 ```text
-Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email, Password Management và User Profile API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
+Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
 ```
 
 ---
@@ -314,6 +315,7 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 | 8 | EmailSettings bind lỗi overload cấu hình | Project thiếu extension bind trực tiếp từ IConfigurationSection | Bind thủ công từng field trong DI | Fixed |
 | 9 | Change Password test thiếu HttpContext bị lỗi null principal | Controller đọc claim khi chưa có principal | Kiểm tra `User` null và trả Unauthorized | Fixed |
 | 10 | User Profile red test bị khóa bởi API process đang chạy | `PlayCourt.API` đang giữ DLL trong `bin` | Dừng process API rồi chạy lại test để thấy lỗi missing symbol đúng kỳ vọng | Fixed |
+| 11 | Sport Management cần chặn trùng code/name | Nếu không kiểm tra trước có thể lỗi database hoặc dữ liệu trùng | Validate trong SportService trước khi save | Fixed |
 
 ## Thay đổi chi tiết
 
@@ -327,6 +329,7 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 | 6 | Thêm test Verify Email và Resend Verify Email controller | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | Tests passed |
 | 7 | Thêm test Forgot/Reset/Change Password controller | Nguyen Phan Huy | `PlayCourt.ApiTests/AuthControllerTests.cs` | 19/19 tests passed |
 | 8 | Thêm test User Profile controller | Nguyen Phan Huy | `PlayCourt.ApiTests/UsersControllerTests.cs` | 26/26 tests passed |
+| 9 | Thêm test Sport Management controller và service | Nguyen Phan Huy | `PlayCourt.ApiTests/SportsControllerTests.cs`, `PlayCourt.ApiTests/SportServiceTests.cs` | 39/39 tests passed |
 
 ## AI có hỗ trợ không?
 
@@ -336,13 +339,13 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-AI hỗ trợ viết test đơn giản và phân tích lỗi, nhóm tự kiểm tra lại bằng build/test.
+AI hỗ trợ viết test đơn giản cho controller/service và phân tích lỗi, nhóm tự kiểm tra lại bằng build/test.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Kết quả: dotnet build PlayCourt.sln passed, dotnet test PlayCourt.sln --no-build passed 19/19 tests.
+Kết quả: dotnet build PlayCourt.sln passed, dotnet test PlayCourt.sln --no-build passed 39/39 tests.
 ```
 
 ## Ghi chú
@@ -422,7 +425,8 @@ Chưa ghi nhận nội dung cho phase này.
 | 7 | Verify Email API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Verify/resend OTP qua email |
 | 8 | Password Management API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Forgot/reset/change password |
 | 9 | User Profile API | Completed | `UsersController`, `UserService`, `UsersControllerTests` | GET/PUT `/api/users/me` |
-| 10 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
+| 10 | Sport Management API | Completed | `SportsController`, `SportService`, `SportServiceTests` | Quản lý danh mục môn thể thao |
+| 11 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
 
 ---
 
@@ -443,9 +447,9 @@ Chưa ghi nhận nội dung cho phase này.
 | Requirement | Có | Trung bình | Tóm tắt yêu cầu và role |
 | Design | Có | Nhiều | Gợi ý layer và flow |
 | Database | Có | Nhiều | Entity, DbContext, migration |
-| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email, Password Management và User Profile API |
+| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API |
 | Debug | Có | Trung bình | Kiểm tra lỗi package, build, validation |
-| Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test, password management test, user profile test và migration update |
+| Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test, password management test, user profile test, sport management test và migration update |
 | Report | Có | Trung bình | Hoàn thiện docs ngắn gọn |
 | Presentation | Không | Ít | Chưa thực hiện |
 
