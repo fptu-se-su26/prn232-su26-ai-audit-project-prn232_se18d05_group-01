@@ -26,6 +26,7 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISportService, SportService>();
+            services.AddScoped<ICourtService, CourtService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
             services.Configure<EmailSettings>(settings =>
