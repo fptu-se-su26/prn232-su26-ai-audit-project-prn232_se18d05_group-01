@@ -110,6 +110,28 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        // DELETE /api/courts/{id}
+        // Chỉ CourtOwner sở hữu court mới được xóa mềm. Verify ownership trong service.
+        [HttpDelete("api/courts/{id:int}")]
+        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId is null)
+            {
+                return Unauthorized(ApiResponse<bool>.Fail("Không xác định được danh tính người dùng."));
+            }
+
+            var response = await _courtService.DeleteAsync(id, currentUserId.Value);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
         // ─── PRIVATE HELPERS ─────────────────────────────────────────────────────
 
         // Lấy userId từ JWT claim (ClaimTypes.NameIdentifier = user.Id.ToString()).
