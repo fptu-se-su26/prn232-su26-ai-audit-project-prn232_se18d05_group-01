@@ -607,6 +607,58 @@ AI hỗ trợ nhanh phần CRUD backend và test, nhưng nhóm vẫn cần tự 
 
 ---
 
+---
+
+### Lần sử dụng AI số 11
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 06/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai Venue Management API cho CourtOwner |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement feature/de180310-venue-management cho PlayCourt API. Scope gồm POST /api/venues, GET /api/venues/my, GET /api/venues/{id}, PUT /api/venues/{id}. Chỉ CourtOwner được tạo/sửa/xem Venue của mình. Venue mới tạo có Status = Pending. Không làm Admin approve, không upload file thật, không làm Venue Images/Amenities trong branch này.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý tạo VenuesController, DTOs/Venues, IVenueService, VenueService dùng EF Core và đăng ký DI. API dùng policy CourtOwner, lấy userId từ JWT claim, tìm CourtOwnerProfile và chỉ thao tác với Venue thuộc owner hiện tại.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để tạo các endpoint quản lý Venue cho CourtOwner, mapping VenueResponseDto thủ công, validate Name/Address/Latitude/Longitude/OpenTime/CloseTime và kiểm tra ownership bằng CourtOwnerProfileId.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giới hạn đúng scope branch, không làm Admin approve, không làm upload file, không làm Venue Images/Amenities, không thêm migration, không sửa AuthService và chỉ thêm dòng DI cần thiết cho IVenueService.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `556a7fc` |
+| File liên quan | `PlayCourt.API/Controllers/VenuesController.cs`, `PlayCourt.Application/DTOs/Venues/`, `PlayCourt.Application/Interfaces/IVenueService.cs`, `PlayCourt.Infrastructure/Services/VenueService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed; `dotnet test PlayCourt.sln --no-build` passed 39/39 |
+| Link video demo |  |
+| Ghi chú khác | Không thêm migration; không cập nhật `docs/REFLECTION.md` |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI giúp triển khai nhanh theo pattern sẵn có, nhưng nhóm vẫn cần tự kiểm tra route, phân quyền CourtOwner, ownership của Venue và kết quả build/test trước khi commit.
+```
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -619,7 +671,7 @@ AI hỗ trợ nhanh phần CRUD backend và test, nhưng nhóm vẫn cần tự 
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API và Venue Management API |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test, user profile test và sport management test |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
