@@ -607,6 +607,166 @@ AI hỗ trợ nhanh phần CRUD backend và test, nhưng nhóm vẫn cần tự 
 
 ---
 
+---
+
+### Lần sử dụng AI số 11
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 06/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Triển khai Venue Management API cho CourtOwner |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement feature/de180310-venue-management cho PlayCourt API. Scope gồm POST /api/venues, GET /api/venues/my, GET /api/venues/{id}, PUT /api/venues/{id}. Chỉ CourtOwner được tạo/sửa/xem Venue của mình. Venue mới tạo có Status = Pending. Không làm Admin approve, không upload file thật, không làm Venue Images/Amenities trong branch này.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý tạo VenuesController, DTOs/Venues, IVenueService, VenueService dùng EF Core và đăng ký DI. API dùng policy CourtOwner, lấy userId từ JWT claim, tìm CourtOwnerProfile và chỉ thao tác với Venue thuộc owner hiện tại.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Nhóm áp dụng để tạo các endpoint quản lý Venue cho CourtOwner, mapping VenueResponseDto thủ công, validate Name/Address/Latitude/Longitude/OpenTime/CloseTime và kiểm tra ownership bằng CourtOwnerProfileId.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giới hạn đúng scope branch, không làm Admin approve, không làm upload file, không làm Venue Images/Amenities, không thêm migration, không sửa AuthService và chỉ thêm dòng DI cần thiết cho IVenueService.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `556a7fc` |
+| File liên quan | `PlayCourt.API/Controllers/VenuesController.cs`, `PlayCourt.Application/DTOs/Venues/`, `PlayCourt.Application/Interfaces/IVenueService.cs`, `PlayCourt.Infrastructure/Services/VenueService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed; `dotnet test PlayCourt.sln --no-build` passed 39/39 |
+| Link video demo |  |
+| Ghi chú khác | Không thêm migration; không cập nhật `docs/REFLECTION.md` |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI giúp triển khai nhanh theo pattern sẵn có, nhưng nhóm vẫn cần tự kiểm tra route, phân quyền CourtOwner, ownership của Venue và kết quả build/test trước khi commit.
+```
+---
+
+### Lần sử dụng AI số 12
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai Court Management API và DTOs/PricingRules |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement Court Management API cho PlayCourt Backend. Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules. Chỉ CourtOwner sở hữu Venue mới được thêm/sửa Court. Court cần SportId. Không sửa AuthService, không format toàn bộ solution, DependencyInjection.cs chỉ thêm đúng dòng service của mình.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý tạo CourtDto, CreateCourtRequestDto, UpdateCourtRequestDto trong DTOs/Courts; PricingRuleDto, CreatePricingRuleRequestDto, UpdatePricingRuleRequestDto trong DTOs/PricingRules; ICourtService với 4 phương thức; CourtService với ownership verification qua chain Venue → CourtOwnerProfile → UserProfile → UserId; CourtsController với explicit route attributes hỗ trợ /api/venues/{venueId}/courts và /api/courts/{id}; đăng ký DI thêm 1 dòng.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng để tạo đủ Controller, Interface, Service và DTOs theo đúng scope. Verify ownership theo chain entity thực của project. Lấy currentUserId từ ClaimTypes.NameIdentifier nhất quán với JwtTokenService hiện có.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Kiểm tra lại scope — AI ban đầu tạo thêm PricingRuleService, IPricingRuleService, PricingRulesController ngoài yêu cầu, đã yêu cầu AI xóa đúng scope chỉ giữ DTOs/PricingRules. Kiểm tra DependencyInjection.cs chỉ thêm đúng 1 dòng ICourtService. Chạy dotnet build toàn solution để xác nhận.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `8c80134` |
+| File liên quan | `PlayCourt.API/Controllers/CourtsController.cs`, `PlayCourt.Application/Interfaces/ICourtService.cs`, `PlayCourt.Infrastructure/Services/CourtService.cs`, `PlayCourt.Application/DTOs/Courts/`, `PlayCourt.Application/DTOs/PricingRules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed — 0 Warning(s), 0 Error(s) |
+| Link video demo |  |
+| Ghi chú khác | Không sửa AuthService, không sửa DbContext, không format toàn solution |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cần kiểm soát scope chặt — AI có xu hướng làm thêm ngoài yêu cầu (thêm PricingRule service/controller khi chỉ cần DTOs). Việc review và yêu cầu AI revert là cần thiết trước khi commit.
+```
+
+---
+
+### Lần sử dụng AI số 13
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai Pricing Rule API (CRUD bảng giá giờ) |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Branch tiếp theo: feature/de180313-pricing-rules. Scope: POST /api/courts/{courtId}/pricing-rules, GET /api/courts/{courtId}/pricing-rules, PUT /api/pricing-rules/{id}, DELETE /api/pricing-rules/{id}. DTOs đã có từ branch trước. Thêm logic validate để kiểm tra không cho phép tạo PricingRule bị overlap giờ (StartAt và EndAt) trong cùng 1 Court. Owner chỉ được thao tác với PricingRule của Court do Venue của mình quản lý.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất tạo PricingRulesController với 4 endpoints, IPricingRuleService và PricingRuleService. Service sẽ kiểm tra quyền sở hữu bằng cách join từ PricingRule -> Court -> Venue -> CourtOwnerProfile. Logic chống overlap: StartAt < request.EndAt && EndAt > request.StartAt. DI đăng ký thêm IPricingRuleService.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng toàn bộ cấu trúc API, validation logic chống overlap và ownership check.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Chạy build và test tự động để đảm bảo logic chạy đúng. Không có thay đổi lớn so với code AI sinh.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `3582d61` |
+| File liên quan | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
+| Link video demo |  |
+| Ghi chú khác | Validation chống overlap hoạt động ổn định. |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI xử lý tốt logic kiểm tra overlap giờ (StartAt < EndAt overlap) và chain kiểm tra quyền sở hữu.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
@@ -619,7 +779,7 @@ AI hỗ trợ nhanh phần CRUD backend và test, nhưng nhóm vẫn cần tự 
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API và Venue Management API |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test, user profile test và sport management test |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |

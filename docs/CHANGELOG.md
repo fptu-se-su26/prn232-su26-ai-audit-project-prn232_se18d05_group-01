@@ -253,6 +253,10 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 15 | Thêm Forgot Password, Reset Password và Change Password API | Nguyen Phan Huy | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Application/DTOs/Auth/` | Commit sẽ cập nhật |
 | 16 | Thêm User Profile API cho người dùng đăng nhập | Nguyen Phan Huy | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/` | Commit sẽ cập nhật |
 | 17 | Thêm Sport Management API cho danh mục môn thể thao | Nguyen Phan Huy | `PlayCourt.API/Controllers/SportsController.cs`, `PlayCourt.Infrastructure/Services/SportService.cs`, `PlayCourt.Application/DTOs/Sports/` | Commit sẽ cập nhật |
+| 18 | Thêm Venue Management API cho CourtOwner | Phan Quoc Khanh | `PlayCourt.API/Controllers/VenuesController.cs`, `PlayCourt.Application/DTOs/Venues/`, `PlayCourt.Application/Interfaces/IVenueService.cs`, `PlayCourt.Infrastructure/Services/VenueService.cs` | `556a7fc` |
+| 19 | Đăng ký VenueService vào dependency injection | Phan Quoc Khanh | `PlayCourt.Infrastructure/DependencyInjection.cs` | `556a7fc` |
+| 20 | Thêm Court Management API và DTOs/PricingRules | Vo Van Hai | `PlayCourt.API/Controllers/CourtsController.cs`, `PlayCourt.Application/Interfaces/ICourtService.cs`, `PlayCourt.Infrastructure/Services/CourtService.cs`, `PlayCourt.Application/DTOs/Courts/`, `PlayCourt.Application/DTOs/PricingRules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` | `8c80134` |
+| 21 | Thêm Pricing Rule API | Vo Van Hai | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` | `3582d61` |
 
 ## AI có hỗ trợ không?
 
@@ -262,7 +266,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-AI hỗ trợ đề xuất cách setup layer, gom DependencyInjection theo API/Application/Infrastructure, thêm middleware exception, common ApiResponse và các API backend như Auth, User Profile, Sport Management. Nhóm tự review scope thay đổi và chạy kiểm chứng trước khi commit.
+AI hỗ trợ đề xuất cách setup layer, gom DependencyInjection theo API/Application/Infrastructure, thêm middleware exception, common ApiResponse và các API backend như Auth, User Profile, Sport Management, Venue Management. Nhóm tự review scope thay đổi và chạy kiểm chứng trước khi commit.
 ```
 
 ## Commit/Screenshot minh chứng
@@ -274,7 +278,7 @@ Commit sẽ cập nhật sau khi hoàn tất.
 ## Ghi chú
 
 ```text
-Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
+Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API và Pricing Rule API. Kết quả kiểm chứng: dotnet build passed và dotnet test passed.
 ```
 
 ---
@@ -426,7 +430,10 @@ Chưa ghi nhận nội dung cho phase này.
 | 8 | Password Management API | Completed | `AuthController`, `AuthService`, `SmtpEmailService` | Forgot/reset/change password |
 | 9 | User Profile API | Completed | `UsersController`, `UserService`, `UsersControllerTests` | GET/PUT `/api/users/me` |
 | 10 | Sport Management API | Completed | `SportsController`, `SportService`, `SportServiceTests` | Quản lý danh mục môn thể thao |
-| 11 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
+| 11 | Venue Management API | Completed | `VenuesController`, `VenueService`, `DTOs/Venues` | POST/GET/PUT Venue cho CourtOwner |
+| 12 | Court Management API và DTOs/PricingRules | Completed | `CourtsController`, `CourtService`, `ICourtService`, `DTOs/Courts/`, `DTOs/PricingRules/` | DE180313 — POST/GET/PUT Court |
+| 13 | Pricing Rule API | Completed | `PricingRulesController`, `PricingRuleService`, `IPricingRuleService` | DE180313 — CRUD cho bảng giá giờ |
+| 14 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
 
 ---
 
@@ -447,7 +454,7 @@ Chưa ghi nhận nội dung cho phase này.
 | Requirement | Có | Trung bình | Tóm tắt yêu cầu và role |
 | Design | Có | Nhiều | Gợi ý layer và flow |
 | Database | Có | Nhiều | Entity, DbContext, migration |
-| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API và Sport Management API |
+| Coding | Có | Nhiều | Backend foundation, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API và Pricing Rule API |
 | Debug | Có | Trung bình | Kiểm tra lỗi package, build, validation |
 | Testing | Có | Ít | Smoke test, controller test, JWT claim test, verify/resend test, password management test, user profile test, sport management test và migration update |
 | Report | Có | Trung bình | Hoàn thiện docs ngắn gọn |
