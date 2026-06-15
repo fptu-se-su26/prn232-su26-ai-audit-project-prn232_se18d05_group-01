@@ -65,6 +65,7 @@ Sinh viên/nhóm cần ghi lại:
 | 9 | 03/06/2026 | Codex | Triển khai User Profile API | Tạo GET/PUT `/api/users/me` tách riêng AuthService | Có UsersController, UserService, DTO, validation và test | Có | `UsersController.cs`, `UserService.cs`, `UsersControllerTests.cs` |
 | 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
 | 11 | 06/06/2026 | Codex | Triển khai Venue Management API | Tạo API POST/GET/PUT Venue cho CourtOwner, giữ đúng scope không admin approve/upload/images/amenities | Có VenuesController, IVenueService, VenueService, DTOs/Venues và DI registration | Có | `556a7fc`, `VenuesController.cs`, `VenueService.cs`, `DTOs/Venues/` |
+| 12 | 07/06/2026 | Antigravity | Triển khai Court Management API và DTOs/PricingRules | Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules, ownership verify qua chain Venue → CourtOwnerProfile → UserProfile | Có CourtsController, CourtService, ICourtService, 3 DTOs Courts, 3 DTOs PricingRules, +1 dòng DI | Có | `8c80134`, `CourtsController.cs`, `CourtService.cs`, `DTOs/Courts/`, `DTOs/PricingRules/` |
 
 ---
 
@@ -833,6 +834,76 @@ Prompt này được ghi nhận vì Venue Management là chức năng backend ch
 ```
 
 ---
+
+### Prompt số 12
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Court Management API và DTOs/PricingRules |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review / Hỏi revert scope thừa |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Court Management API cho PlayCourt Backend. Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules. Chỉ CourtOwner sở hữu Venue mới được thêm/sửa Court. Court cần SportId. Không sửa AuthService, không format toàn bộ solution, DependencyInjection.cs chỉ thêm đúng dòng service của mình.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có entity Court, Venue, CourtOwnerProfile, UserProfile và chain quan hệ FK đầy đủ. Cần triển khai API quản lý sân con cho CourtOwner theo đúng domain của DE180313 để tránh conflict với thành viên khác.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI tạo CourtDto, CreateCourtRequestDto, UpdateCourtRequestDto; PricingRuleDto, CreatePricingRuleRequestDto, UpdatePricingRuleRequestDto; ICourtService với 4 method; CourtService verify ownership qua Venue → CourtOwnerProfile → UserProfile.UserId; CourtsController với explicit route /api/venues/{venueId}/courts và /api/courts/{id}. AI ban đầu tạo thêm IPricingRuleService, PricingRuleService, PricingRulesController ngoài scope.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng phần trong scope: CourtsController, ICourtService, CourtService, DTOs/Courts, DTOs/PricingRules và +1 dòng DI. Yêu cầu AI xóa phần ngoài scope (IPricingRuleService, PricingRuleService, PricingRulesController).
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Kiểm tra lại scope sau mỗi bước, yêu cầu AI revert phần thừa, xác nhận DI chỉ có đúng 1 dòng mới, chạy dotnet build toàn solution để xác nhận 0 Warning 0 Error.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc không sửa file người khác
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần hỏi lại AI để revert scope thừa
+- [x] Cần tự kiểm tra build
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `8c80134` |
+| File liên quan | `PlayCourt.API/Controllers/CourtsController.cs`, `PlayCourt.Application/Interfaces/ICourtService.cs`, `PlayCourt.Infrastructure/Services/CourtService.cs`, `PlayCourt.Application/DTOs/Courts/`, `PlayCourt.Application/DTOs/PricingRules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed — 0 Warning(s), 0 Error(s) |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không sửa AuthService, không sửa DbContext, không format toàn solution |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Court Management là domain chính của DE180313 trong sprint này.
+```
+
+---
+
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -959,7 +1030,7 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 9 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API và Venue Management API |
+| Prompt sinh code mẫu | 10 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API và Court Management API |
 | Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
 | Prompt viết test case | 6 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints và sport management endpoints/service |
 | Prompt review code | 1 | Review DI, response và build |

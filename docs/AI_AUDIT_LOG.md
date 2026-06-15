@@ -659,6 +659,60 @@ Nhóm giới hạn đúng scope branch, không làm Admin approve, không làm u
 ```text
 AI giúp triển khai nhanh theo pattern sẵn có, nhưng nhóm vẫn cần tự kiểm tra route, phân quyền CourtOwner, ownership của Venue và kết quả build/test trước khi commit.
 ```
+---
+
+### Lần sử dụng AI số 12
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai Court Management API và DTOs/PricingRules |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Implement Court Management API cho PlayCourt Backend. Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules. Chỉ CourtOwner sở hữu Venue mới được thêm/sửa Court. Court cần SportId. Không sửa AuthService, không format toàn bộ solution, DependencyInjection.cs chỉ thêm đúng dòng service của mình.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý tạo CourtDto, CreateCourtRequestDto, UpdateCourtRequestDto trong DTOs/Courts; PricingRuleDto, CreatePricingRuleRequestDto, UpdatePricingRuleRequestDto trong DTOs/PricingRules; ICourtService với 4 phương thức; CourtService với ownership verification qua chain Venue → CourtOwnerProfile → UserProfile → UserId; CourtsController với explicit route attributes hỗ trợ /api/venues/{venueId}/courts và /api/courts/{id}; đăng ký DI thêm 1 dòng.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng để tạo đủ Controller, Interface, Service và DTOs theo đúng scope. Verify ownership theo chain entity thực của project. Lấy currentUserId từ ClaimTypes.NameIdentifier nhất quán với JwtTokenService hiện có.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Kiểm tra lại scope — AI ban đầu tạo thêm PricingRuleService, IPricingRuleService, PricingRulesController ngoài yêu cầu, đã yêu cầu AI xóa đúng scope chỉ giữ DTOs/PricingRules. Kiểm tra DependencyInjection.cs chỉ thêm đúng 1 dòng ICourtService. Chạy dotnet build toàn solution để xác nhận.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `8c80134` |
+| File liên quan | `PlayCourt.API/Controllers/CourtsController.cs`, `PlayCourt.Application/Interfaces/ICourtService.cs`, `PlayCourt.Infrastructure/Services/CourtService.cs`, `PlayCourt.Application/DTOs/Courts/`, `PlayCourt.Application/DTOs/PricingRules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed — 0 Warning(s), 0 Error(s) |
+| Link video demo |  |
+| Ghi chú khác | Không sửa AuthService, không sửa DbContext, không format toàn solution |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cần kiểm soát scope chặt — AI có xu hướng làm thêm ngoài yêu cầu (thêm PricingRule service/controller khi chỉ cần DTOs). Việc review và yêu cầu AI revert là cần thiết trước khi commit.
+```
+
+---
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
