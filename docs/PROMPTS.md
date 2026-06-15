@@ -66,7 +66,7 @@ Sinh viên/nhóm cần ghi lại:
 | 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
 | 11 | 06/06/2026 | Codex | Triển khai Venue Management API | Tạo API POST/GET/PUT Venue cho CourtOwner, giữ đúng scope không admin approve/upload/images/amenities | Có VenuesController, IVenueService, VenueService, DTOs/Venues và DI registration | Có | `556a7fc`, `VenuesController.cs`, `VenueService.cs`, `DTOs/Venues/` |
 | 12 | 07/06/2026 | Antigravity | Triển khai Court Management API và DTOs/PricingRules | Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules, ownership verify qua chain Venue → CourtOwnerProfile → UserProfile | Có CourtsController, CourtService, ICourtService, 3 DTOs Courts, 3 DTOs PricingRules, +1 dòng DI | Có | `8c80134`, `CourtsController.cs`, `CourtService.cs`, `DTOs/Courts/`, `DTOs/PricingRules/` |
-| 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo API CRUD cho bảng giá giờ, logic chống overlap giờ | Có PricingRulesController, IPricingRuleService, PricingRuleService, DI | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
+| 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo PricingRulesController, IPricingRuleService, PricingRuleService cho các bảng giá giờ, có logic validate không cho phép overlap StartAt/EndAt. | Có Controller, Service, Interface và check logic overlap | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
 
 ---
 
@@ -970,6 +970,7 @@ Prompt này hướng AI xử lý bài toán domain logic (trùng lặp khung gi�
 ```
 
 ---
+
 
 ## 6. Prompt quan trọng nhất
 

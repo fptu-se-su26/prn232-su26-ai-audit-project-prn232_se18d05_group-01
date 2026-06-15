@@ -713,6 +713,7 @@ AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cầ
 ```
 
 ---
+<<<<<<< HEAD
 
 ### Lần sử dụng AI số 13
 
@@ -766,6 +767,7 @@ AI xử lý tốt logic kiểm tra overlap giờ (StartAt < EndAt overlap) và c
 ```
 
 ---
+
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
