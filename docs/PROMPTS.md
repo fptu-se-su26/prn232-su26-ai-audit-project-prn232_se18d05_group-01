@@ -66,7 +66,6 @@ Sinh viên/nhóm cần ghi lại:
 | 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
 | 11 | 06/06/2026 | Codex | Triển khai Venue Management API | Tạo API POST/GET/PUT Venue cho CourtOwner, giữ đúng scope không admin approve/upload/images/amenities | Có VenuesController, IVenueService, VenueService, DTOs/Venues và DI registration | Có | `556a7fc`, `VenuesController.cs`, `VenueService.cs`, `DTOs/Venues/` |
 | 12 | 07/06/2026 | Antigravity | Triển khai Court Management API và DTOs/PricingRules | Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules, ownership verify qua chain Venue → CourtOwnerProfile → UserProfile | Có CourtsController, CourtService, ICourtService, 3 DTOs Courts, 3 DTOs PricingRules, +1 dòng DI | Có | `8c80134`, `CourtsController.cs`, `CourtService.cs`, `DTOs/Courts/`, `DTOs/PricingRules/` |
-| 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo PricingRulesController, IPricingRuleService, PricingRuleService cho các bảng giá giờ, có logic validate không cho phép overlap StartAt/EndAt. | Có Controller, Service, Interface và check logic overlap | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
 
 ---
 
@@ -904,73 +903,6 @@ Prompt này được ghi nhận vì Court Management là domain chính của DE1
 
 ---
 
-### Prompt số 13
-
-| Nội dung | Thông tin |
-|---|---|
-| Ngày sử dụng | 07/06/2026 |
-| Công cụ AI | Antigravity |
-| Mục đích | Triển khai Pricing Rule API |
-| Phần việc liên quan | Backend / Testing |
-| Mức độ sử dụng | Hỏi sinh code mẫu |
-
-#### 5.1. Prompt nguyên văn
-
-```text
-Branch tiếp theo: feature/de180313-pricing-rules. Scope: POST /api/courts/{courtId}/pricing-rules, GET /api/courts/{courtId}/pricing-rules, PUT /api/pricing-rules/{id}, DELETE /api/pricing-rules/{id}. DTOs đã có từ branch trước. Thêm logic validate để kiểm tra không cho phép tạo PricingRule bị overlap giờ (StartAt và EndAt) trong cùng 1 Court. Owner chỉ được thao tác với PricingRule của Court do Venue của mình quản lý.
-```
-
-#### 5.2. Bối cảnh khi viết prompt
-
-```text
-Court và DTOs cho PricingRule đã được tạo trước đó. Cần tạo Service và Controller để CourtOwner quản lý bảng giá giờ cho sân của họ.
-```
-
-#### 5.3. Kết quả AI trả về
-
-```text
-AI đề xuất tạo PricingRulesController với 4 endpoints, IPricingRuleService và PricingRuleService. Service kiểm tra quyền sở hữu và check logic chống overlap (StartAt < request.EndAt && EndAt > request.StartAt). Đăng ký IPricingRuleService vào DI.
-```
-
-#### 5.4. Kết quả đã áp dụng vào bài
-
-```text
-Áp dụng toàn bộ Service, Controller và DI. Chống overlap giờ hoạt động hiệu quả.
-```
-
-#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
-
-```text
-Tiến hành chạy build và unit test tự động để đảm bảo logic không có lỗi compile và không làm hỏng test cũ.
-```
-
-#### 5.6. Đánh giá chất lượng prompt
-
-- [x] Prompt rõ ràng
-- [x] Prompt có đủ bối cảnh
-- [x] Prompt định hướng logic nghiệp vụ cụ thể (chống overlap)
-- [x] Prompt tạo ra kết quả tốt
-- [x] Cần tự kiểm tra build/test
-
-#### 5.7. Minh chứng liên quan
-
-| Loại minh chứng | Nội dung |
-|---|---|
-| Link commit | `3582d61` |
-| File liên quan | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
-| Screenshot |  |
-| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
-| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
-| Ghi chú khác | Logic check overlap được xử lý ở Service layer |
-
-#### 5.8. Ghi chú thêm
-
-```text
-Prompt này hướng AI xử lý bài toán domain logic (trùng lặp khung giờ).
-```
-
----
-
 
 ## 6. Prompt quan trọng nhất
 
@@ -1098,7 +1030,7 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 11 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API và Pricing Rule API |
+| Prompt sinh code mẫu | 10 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API và Court Management API |
 | Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
 | Prompt viết test case | 6 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints và sport management endpoints/service |
 | Prompt review code | 1 | Review DI, response và build |
