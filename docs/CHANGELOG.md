@@ -435,7 +435,6 @@ Chưa ghi nhận nội dung cho phase này.
 | 12 | Court Management API và DTOs/PricingRules | Completed | `CourtsController`, `CourtService`, `ICourtService`, `DTOs/Courts/`, `DTOs/PricingRules/` | DE180313 — POST/GET/PUT Court |
 | 13 | Pricing Rule API | Completed | `PricingRulesController`, `PricingRuleService`, `IPricingRuleService` | DE180313 — CRUD cho bảng giá giờ |
 | 14 | Court Schedule API | Completed | `CourtSchedulesController`, `CourtScheduleService`, `ICourtScheduleService`, `DTOs/CourtSchedules/` | DE180313 — CRUD quản lý lịch khóa sân |
-| 15 | Test cơ bản | Partial | `PlayCourt.ApiTests` | Chưa có integration test SQL Server cho OTP service |
 
 ---
 

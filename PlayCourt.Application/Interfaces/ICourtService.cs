@@ -16,5 +16,8 @@ namespace PlayCourt.Application.Interfaces
 
         // Cập nhật thông tin court. currentUserId dùng để verify CourtOwner ownership.
         Task<ApiResponse<CourtDto>> UpdateAsync(int id, int currentUserId, UpdateCourtRequestDto request);
+
+        // Xóa mềm court. currentUserId dùng để verify CourtOwner ownership.
+        Task<ApiResponse<bool>> DeleteAsync(int id, int currentUserId);
     }
 }

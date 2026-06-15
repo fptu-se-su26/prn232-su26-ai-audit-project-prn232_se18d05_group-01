@@ -26,6 +26,7 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISportService, SportService>();
+            services.AddScoped<IVenueService, VenueService>();
             services.AddScoped<ICourtService, CourtService>();
             services.AddScoped<IPricingRuleService, PricingRuleService>();
             services.AddScoped<ICourtScheduleService, CourtScheduleService>();

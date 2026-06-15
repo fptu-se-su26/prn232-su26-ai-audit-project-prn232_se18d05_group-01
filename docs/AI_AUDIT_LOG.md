@@ -767,6 +767,7 @@ AI xử lý tốt logic kiểm tra overlap giờ (StartAt < EndAt overlap) và c
 
 ---
 
+
 ### Lần sử dụng AI số 14
 
 | Nội dung | Thông tin |
@@ -819,6 +820,7 @@ AI hỗ trợ viết các endpoints một cách nhất quán dựa trên các ki
 ```
 
 ---
+
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 

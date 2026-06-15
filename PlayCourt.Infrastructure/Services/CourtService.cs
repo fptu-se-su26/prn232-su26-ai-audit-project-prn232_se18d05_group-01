@@ -199,6 +199,42 @@ namespace PlayCourt.Infrastructure.Services
                 "Court updated successfully.");
         }
 
+        // ─── DELETE ──────────────────────────────────────────────────────────────
+
+        public async Task<ApiResponse<bool>> DeleteAsync(int id, int currentUserId)
+        {
+            if (id <= 0)
+            {
+                return ApiResponse<bool>.Fail("Không tìm thấy sân.");
+            }
+
+            // Lấy court kèm ownership chain.
+            var court = await _dbContext.Courts
+                .Include(c => c.Venue)
+                    .ThenInclude(v => v.CourtOwnerProfile)
+                        .ThenInclude(cop => cop.UserProfile)
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+
+            if (court is null)
+            {
+                return ApiResponse<bool>.Fail("Không tìm thấy sân.");
+            }
+
+            // Verify ownership.
+            if (court.Venue.CourtOwnerProfile.UserProfile.UserId != currentUserId)
+            {
+                return ApiResponse<bool>.Fail("Bạn không có quyền xóa sân này.");
+            }
+
+            // Thực hiện xóa mềm.
+            court.IsDeleted = true;
+            court.UpdatedAt = DateTimeOffset.Now;
+
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<bool>.Ok(true, "Court deleted successfully.");
+        }
+
         // ─── PRIVATE HELPERS ─────────────────────────────────────────────────────
 
         private static CourtDto MapToDto(Court court)
