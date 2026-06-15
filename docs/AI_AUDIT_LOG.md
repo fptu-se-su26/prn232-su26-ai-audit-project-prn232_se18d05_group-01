@@ -713,7 +713,6 @@ AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cầ
 ```
 
 ---
-
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
