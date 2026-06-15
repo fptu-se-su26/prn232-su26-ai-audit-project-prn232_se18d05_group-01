@@ -713,7 +713,6 @@ AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cầ
 ```
 
 ---
-<<<<<<< HEAD
 
 ### Lần sử dụng AI số 13
 
@@ -764,6 +763,60 @@ Chạy build và test tự động để đảm bảo logic chạy đúng. Khôn
 
 ```text
 AI xử lý tốt logic kiểm tra overlap giờ (StartAt < EndAt overlap) và chain kiểm tra quyền sở hữu.
+```
+
+---
+
+
+### Lần sử dụng AI số 14
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai Court Schedule API (Quản lý lịch khóa sân) |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Branch tiếp theo: feature/de180313-court-schedule. POST /api/courts/{courtId}/schedules, GET /api/courts/{courtId}/schedules, DELETE /api/court-schedules/{id}. Áp dụng và làm tiếp chức năng này.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất tạo CourtSchedulesController, ICourtScheduleService, CourtScheduleService và các DTOs tương ứng. Service tiếp tục tái sử dụng logic check quyền sở hữu (ownership chain) và thêm cơ chế validate chống trùng lặp giờ khóa sân.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Sử dụng toàn bộ DTOs, Interface, Controller và Service do AI tạo ra. Kiểm tra validation logic chống overlap hoàn toàn tương thích với phần PricingRule.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Kiểm tra code bằng dotnet build và tự chạy dotnet test toàn bộ solution (pass 39/39).
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `3fe045c` |
+| File liên quan | `PlayCourt.API/Controllers/CourtSchedulesController.cs`, `PlayCourt.Application/Interfaces/ICourtScheduleService.cs`, `PlayCourt.Infrastructure/Services/CourtScheduleService.cs`, `PlayCourt.Application/DTOs/CourtSchedules/` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
+| Link video demo |  |
+| Ghi chú khác | Hoàn thiện module cho CourtOwner |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ viết các endpoints một cách nhất quán dựa trên các kiến trúc đã có. Validation chính xác.
 ```
 
 ---

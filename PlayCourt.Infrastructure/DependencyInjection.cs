@@ -29,6 +29,7 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IVenueService, VenueService>();
             services.AddScoped<ICourtService, CourtService>();
             services.AddScoped<IPricingRuleService, PricingRuleService>();
+            services.AddScoped<ICourtScheduleService, CourtScheduleService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
             services.Configure<EmailSettings>(settings =>
