@@ -713,6 +713,62 @@ AI giúp sinh code nhanh theo đúng pattern đã có trong project, nhưng cầ
 ```
 
 ---
+<<<<<<< HEAD
+
+### Lần sử dụng AI số 13
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai Pricing Rule API (CRUD bảng giá giờ) |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Branch tiếp theo: feature/de180313-pricing-rules. Scope: POST /api/courts/{courtId}/pricing-rules, GET /api/courts/{courtId}/pricing-rules, PUT /api/pricing-rules/{id}, DELETE /api/pricing-rules/{id}. DTOs đã có từ branch trước. Thêm logic validate để kiểm tra không cho phép tạo PricingRule bị overlap giờ (StartAt và EndAt) trong cùng 1 Court. Owner chỉ được thao tác với PricingRule của Court do Venue của mình quản lý.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất tạo PricingRulesController với 4 endpoints, IPricingRuleService và PricingRuleService. Service sẽ kiểm tra quyền sở hữu bằng cách join từ PricingRule -> Court -> Venue -> CourtOwnerProfile. Logic chống overlap: StartAt < request.EndAt && EndAt > request.StartAt. DI đăng ký thêm IPricingRuleService.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng toàn bộ cấu trúc API, validation logic chống overlap và ownership check.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Chạy build và test tự động để đảm bảo logic chạy đúng. Không có thay đổi lớn so với code AI sinh.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `3582d61` |
+| File liên quan | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
+| Link video demo |  |
+| Ghi chú khác | Validation chống overlap hoạt động ổn định. |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI xử lý tốt logic kiểm tra overlap giờ (StartAt < EndAt overlap) và chain kiểm tra quyền sở hữu.
+```
+
+---
+
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
