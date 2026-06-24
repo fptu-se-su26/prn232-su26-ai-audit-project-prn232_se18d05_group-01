@@ -63,6 +63,164 @@ namespace PlayCourt.Infrastructure.Services
                 "User profile updated successfully.");
         }
 
+        public async Task<ApiResponse<List<PlayerSportResponseDto>>> GetCurrentUserSportsAsync(int userId)
+        {
+            var profile = await _dbContext.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.UserId == userId);
+
+            if (profile is null)
+            {
+                return ApiResponse<List<PlayerSportResponseDto>>.Fail("User profile not found.");
+            }
+
+            var playerSports = await _dbContext.PlayerSports
+                .AsNoTracking()
+                .Include(item => item.Sport)
+                .Where(item => item.UserProfileId == profile.Id)
+                .OrderBy(item => item.Sport.Name)
+                .ToListAsync();
+
+            return ApiResponse<List<PlayerSportResponseDto>>.Ok(
+                playerSports.Select(MapPlayerSportToResponse).ToList(),
+                "User sports retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<PlayerSportResponseDto>> AddCurrentUserSportAsync(
+            int userId,
+            AddPlayerSportRequestDto request)
+        {
+            if (request.SportId <= 0)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport not found.");
+            }
+
+            if (!IsValidSkillLevel(request.SkillLevel))
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Skill level is invalid.");
+            }
+
+            var profile = await _dbContext.UserProfiles
+                .FirstOrDefaultAsync(item => item.UserId == userId);
+
+            if (profile is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("User profile not found.");
+            }
+
+            var sport = await _dbContext.Sports
+                .FirstOrDefaultAsync(item => item.Id == request.SportId);
+
+            if (sport is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport not found.");
+            }
+
+            if (!sport.IsActive)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport is inactive.");
+            }
+
+            if (await _dbContext.PlayerSports.AnyAsync(
+                    item => item.UserProfileId == profile.Id && item.SportId == sport.Id))
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail(
+                    "Sport already exists in user profile.");
+            }
+
+            var playerSport = new PlayerSport
+            {
+                UserProfileId = profile.Id,
+                SportId = sport.Id,
+                SkillLevel = (SkillLevel)request.SkillLevel,
+                Sport = sport
+            };
+
+            _dbContext.PlayerSports.Add(playerSport);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<PlayerSportResponseDto>.Ok(
+                MapPlayerSportToResponse(playerSport),
+                "Sport added to user profile successfully.");
+        }
+
+        public async Task<ApiResponse<PlayerSportResponseDto>> UpdateCurrentUserSportAsync(
+            int userId,
+            int sportId,
+            UpdatePlayerSportRequestDto request)
+        {
+            if (!IsValidSkillLevel(request.SkillLevel))
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Skill level is invalid.");
+            }
+
+            var profile = await _dbContext.UserProfiles
+                .FirstOrDefaultAsync(item => item.UserId == userId);
+
+            if (profile is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("User profile not found.");
+            }
+
+            if (sportId <= 0)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport is not in user profile.");
+            }
+
+            var playerSport = await _dbContext.PlayerSports
+                .Include(item => item.Sport)
+                .FirstOrDefaultAsync(
+                    item => item.UserProfileId == profile.Id && item.SportId == sportId);
+
+            if (playerSport is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport is not in user profile.");
+            }
+
+            playerSport.SkillLevel = (SkillLevel)request.SkillLevel;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<PlayerSportResponseDto>.Ok(
+                MapPlayerSportToResponse(playerSport),
+                "User sport skill level updated successfully.");
+        }
+
+        public async Task<ApiResponse<PlayerSportResponseDto>> RemoveCurrentUserSportAsync(
+            int userId,
+            int sportId)
+        {
+            var profile = await _dbContext.UserProfiles
+                .FirstOrDefaultAsync(item => item.UserId == userId);
+
+            if (profile is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("User profile not found.");
+            }
+
+            if (sportId <= 0)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport is not in user profile.");
+            }
+
+            var playerSport = await _dbContext.PlayerSports
+                .Include(item => item.Sport)
+                .FirstOrDefaultAsync(
+                    item => item.UserProfileId == profile.Id && item.SportId == sportId);
+
+            if (playerSport is null)
+            {
+                return ApiResponse<PlayerSportResponseDto>.Fail("Sport is not in user profile.");
+            }
+
+            var response = MapPlayerSportToResponse(playerSport);
+            _dbContext.PlayerSports.Remove(playerSport);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<PlayerSportResponseDto>.Ok(
+                response,
+                "Sport removed from user profile successfully.");
+        }
+
         private async Task<UserProfile?> FindProfileAsync(int userId)
         {
             return await _dbContext.UserProfiles
@@ -91,6 +249,24 @@ namespace PlayCourt.Infrastructure.Services
         private static string? NormalizeOptional(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static bool IsValidSkillLevel(int skillLevel)
+        {
+            return Enum.IsDefined(typeof(SkillLevel), (short)skillLevel);
+        }
+
+        private static PlayerSportResponseDto MapPlayerSportToResponse(PlayerSport playerSport)
+        {
+            return new PlayerSportResponseDto
+            {
+                Id = playerSport.Id,
+                SportId = playerSport.SportId,
+                SportCode = playerSport.Sport.Code,
+                SportName = playerSport.Sport.Name,
+                SkillLevel = playerSport.SkillLevel.ToString(),
+                CreatedAt = playerSport.CreatedAt
+            };
         }
 
         private static UserProfileResponseDto MapToResponse(UserProfile profile)
