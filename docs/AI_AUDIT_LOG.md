@@ -889,6 +889,58 @@ AI hỗ trợ tách CourtOwnerService/Controller theo layer hiện có, thêm fi
 
 ---
 
+### Lần sử dụng AI số 17
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Hoàn thiện toàn bộ tính năng Venue Module |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Bạn hãy code feature/de180310-complete-venue-module với các nội dung tôi đã đưa bạn (Public Discovery, Admin Approval, Images, Amenities, Opening Hours). Trước khi code hãy lên plan trước. Lấy lên code trên nhánh dev.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất cập nhật toàn diện cấu trúc của module Venue: viết mới AmenitiesController, AdminVenuesController; thiết kế lại VenuesController; tích hợp 3 layer Service tương ứng cùng bộ DTO đầy đủ phục vụ thao tác của Public Player, Admin và Court Owner.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng toàn bộ việc sinh API endpoint, validate nghiệp vụ, cấu trúc relation EF Core `Include` nhiều tầng, xử lý upload ảnh (mô phỏng), và pagination cho Public Discovery.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm yêu cầu AI tự động review kết quả Unit Test cũ và test nhanh qua API HTTP Get (Invoke-RestMethod) để xác nhận code sinh ra không phá hỏng luồng chạy chung của toàn solution.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/VenuesController.cs`, `AdminVenuesController.cs`, `AmenitiesController.cs`, `VenueService.cs`, `AdminVenueService.cs`, `AmenityService.cs`, `DTOs/Venues/` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-build` passed 66/66; |
+| Link video demo |  |
+| Ghi chú khác | Hoàn toàn đáp ứng được logic nghiệp vụ phức tạp của mảng Venue |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI xử lý xuất sắc các phần code tích hợp lớn, có khả năng tư duy bao quát và liên kết chặt chẽ các file với nhau trong mô hình Clean Architecture. AI cũng chủ động chạy test giúp team tiết kiệm đáng kể thời gian QA.
+```
+
+---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 

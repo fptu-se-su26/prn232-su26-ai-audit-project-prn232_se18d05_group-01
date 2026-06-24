@@ -70,6 +70,7 @@ Sinh viên/nhóm cần ghi lại:
 | 14 | 07/06/2026 | Antigravity | Triển khai Court Schedule API | Tạo API CRUD cho lịch khóa sân, logic chống overlap giờ | Có CourtSchedulesController, ICourtScheduleService, CourtScheduleService, DI | Có | `3fe045c`, `CourtSchedulesController.cs`, `CourtScheduleService.cs` |
 | 15 | 24/06/2026 | Codex | Triển khai CRUD PlayerSport cho User Profile | Phân tích nghiệp vụ và tạo API thêm, xem, đổi trình độ, xóa môn thể thao của người dùng hiện tại | Có 4 endpoint `/api/users/me/sports`, DTO, mở rộng IUserService/UserService và test controller/service | Có | `UsersController.cs`, `UserService.cs`, `UserServicePlayerSportTests.cs` |
 | 16 | 24/06/2026 | Codex | Admin xác minh CourtOwner | List/detail/filter, approve/reject và chặn owner chưa Approved tạo Venue | Có controller/service/DTO riêng, migration và build pass | Có | `CourtOwnersController.cs`, `CourtOwnerService.cs`, migration |
+| 17 | 24/06/2026 | Antigravity | Hoàn thiện toàn bộ Venue Module | Bạn hãy code feature/de180310-complete-venue-module bổ sung Public Search, Admin Approve, Images, Amenities, Opening Hours | Có VenuesController, AdminVenuesController, AmenitiesController và các services, DTOs tương ứng | Có | Sẽ cập nhật sau khi commit |
 
 ---
 

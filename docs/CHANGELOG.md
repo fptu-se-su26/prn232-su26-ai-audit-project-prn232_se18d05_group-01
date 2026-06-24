@@ -260,6 +260,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 22 | Thêm Court Schedule API | Vo Van Hai | `PlayCourt.API/Controllers/CourtSchedulesController.cs`, `PlayCourt.Application/Interfaces/ICourtScheduleService.cs`, `PlayCourt.Infrastructure/Services/CourtScheduleService.cs`, `PlayCourt.Application/DTOs/CourtSchedules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` | `3fe045c` |
 | 23 | Thêm CRUD PlayerSport cho hồ sơ người dùng hiện tại | Phan Thanh Vuong | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs` | Sẽ cập nhật sau khi commit |
 | 24 | Thêm Admin quản lý xác minh CourtOwner và chặn owner chưa duyệt tạo Venue | Nguyen Phan Huy | `CourtOwnersController.cs`, `CourtOwnerService.cs`, `DTOs/CourtOwners/`, migration `AddCourtOwnerRejectionReason`, `VenueService.cs` | Sẽ cập nhật sau khi commit |
+| 25 | Hoàn thiện toàn bộ tính năng Venue Module (Public Search, Admin Approve, Images, Amenities, Opening Hours) | DE180310 | `VenuesController.cs`, `AdminVenuesController.cs`, `AmenitiesController.cs`, `VenueService.cs`, `AdminVenueService.cs`, `AmenityService.cs` | Sẽ cập nhật sau khi commit |
 
 ## AI có hỗ trợ không?
 
@@ -441,6 +442,7 @@ Chưa ghi nhận nội dung cho phase này.
 | 14 | Court Schedule API | Completed | `CourtSchedulesController`, `CourtScheduleService`, `ICourtScheduleService`, `DTOs/CourtSchedules/` | DE180313 — CRUD quản lý lịch khóa sân |
 | 15 | PlayerSport CRUD | Completed | `UsersController`, `IUserService`, `UserService`, `UserServicePlayerSportTests` | DE180405 — GET/POST/PUT/DELETE `/api/users/me/sports` |
 | 16 | CourtOwner Approval | Completed | `CourtOwnersController`, `CourtOwnerService`, migration | Admin list/detail/approve/reject; chỉ owner Approved tạo Venue |
+| 17 | Hoàn thiện Venue Module | Completed | `VenuesController`, `AdminVenuesController`, `AmenitiesController`, `VenueService`... | DE180310 — Public Discovery, Admin Approval, Images, Amenities, Opening Hours |
 
 ---
 
