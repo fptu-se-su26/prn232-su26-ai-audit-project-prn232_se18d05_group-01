@@ -874,6 +874,21 @@ AI hỗ trợ tốt việc phân tách trách nhiệm giữa Sport catalogue và
 
 ---
 
+### Lần sử dụng AI số 16
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Admin xác minh CourtOwner và chặn tạo Venue khi chưa được duyệt |
+| Phần việc liên quan | Backend / Database / Documentation |
+
+```text
+AI hỗ trợ tách CourtOwnerService/Controller theo layer hiện có, thêm filter trạng thái, approve/reject có lý do tùy chọn và migration RejectionReason. Nhóm giữ rule tạo Venue tại VenueService; build solution đã pass 0 warning, 0 error.
+```
+
+---
+
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
@@ -887,7 +902,7 @@ AI hỗ trợ tốt việc phân tách trách nhiệm giữa Sport catalogue và
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API và PlayerSport CRUD |
+| Code backend |  |  | x |  | AI hỗ trợ các API backend, gồm CourtOwner Approval và PlayerSport CRUD |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
 | Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test, user profile test, sport management test và PlayerSport CRUD test |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
