@@ -80,6 +80,10 @@ namespace PlayCourt.Infrastructure.Services
 
             var venues = await _dbContext.Venues
                 .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
                 .Where(venue => venue.CourtOwnerProfileId == ownerProfile.Id)
                 .OrderByDescending(venue => venue.CreatedAt)
                 .Select(venue => MapToResponse(venue))
@@ -102,6 +106,10 @@ namespace PlayCourt.Infrastructure.Services
 
             var venue = await _dbContext.Venues
                 .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
                 .FirstOrDefaultAsync(venue =>
                     venue.Id == venueId &&
                     venue.CourtOwnerProfileId == ownerProfile.Id);
@@ -166,6 +174,219 @@ namespace PlayCourt.Infrastructure.Services
             return ApiResponse<VenueResponseDto>.Ok(
                 MapToResponse(venue),
                 "Venue updated successfully.");
+        }
+
+        public async Task<ApiResponse<object>> DeleteVenueAsync(int userId, int venueId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null)
+                return ApiResponse<object>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues
+                .FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+
+            if (venue is null)
+                return ApiResponse<object>.Fail("Venue not found.");
+
+            venue.IsDeleted = true;
+            venue.UpdatedAt = DateTimeOffset.Now;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<object>.Ok(null, "Venue deleted successfully.");
+        }
+
+        public async Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request)
+        {
+            var query = _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .Where(v => v.Status == VenueStatus.Approved);
+
+            if (!string.IsNullOrWhiteSpace(request.Keyword))
+            {
+                query = query.Where(v => v.Name.Contains(request.Keyword) || v.Address.Contains(request.Keyword));
+            }
+
+            // Simple pagination
+            var venues = await query
+                .OrderByDescending(v => v.CreatedAt)
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(v => MapToResponse(v))
+                .ToListAsync();
+
+            return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(venues, "Venues retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId)
+        {
+            var venue = await _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == VenueStatus.Approved);
+
+            if (venue is null)
+                return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
+
+            return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, string imageUrl, bool isCover)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<VenueImageDto>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<VenueImageDto>.Fail("Venue not found.");
+
+            if (isCover)
+            {
+                var existingCover = await _dbContext.VenueImages.FirstOrDefaultAsync(i => i.VenueId == venueId && i.IsCover);
+                if (existingCover != null) existingCover.IsCover = false;
+            }
+
+            var image = new VenueImage { VenueId = venueId, ImageUrl = imageUrl, IsCover = isCover };
+            _dbContext.VenueImages.Add(image);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<VenueImageDto>.Ok(new VenueImageDto { Id = image.Id, VenueId = image.VenueId, ImageUrl = image.ImageUrl, IsCover = image.IsCover, CreatedAt = image.CreatedAt }, "Image added successfully.");
+        }
+
+        public async Task<ApiResponse<object>> DeleteImageAsync(int userId, int venueId, int imageId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<object>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<object>.Fail("Venue not found.");
+
+            var image = await _dbContext.VenueImages.FirstOrDefaultAsync(i => i.Id == imageId && i.VenueId == venueId);
+            if (image is null) return ApiResponse<object>.Fail("Image not found.");
+
+            _dbContext.VenueImages.Remove(image);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<object>.Ok(null, "Image deleted successfully.");
+        }
+
+        public async Task<ApiResponse<VenueImageDto>> SetCoverImageAsync(int userId, int venueId, int imageId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<VenueImageDto>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<VenueImageDto>.Fail("Venue not found.");
+
+            var image = await _dbContext.VenueImages.FirstOrDefaultAsync(i => i.Id == imageId && i.VenueId == venueId);
+            if (image is null) return ApiResponse<VenueImageDto>.Fail("Image not found.");
+
+            var currentCover = await _dbContext.VenueImages.FirstOrDefaultAsync(i => i.VenueId == venueId && i.IsCover);
+            if (currentCover != null) currentCover.IsCover = false;
+
+            image.IsCover = true;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<VenueImageDto>.Ok(new VenueImageDto { Id = image.Id, VenueId = image.VenueId, ImageUrl = image.ImageUrl, IsCover = image.IsCover, CreatedAt = image.CreatedAt }, "Cover image set successfully.");
+        }
+
+        public async Task<ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>> AddVenueAmenityAsync(int userId, int venueId, int amenityId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>.Fail("Venue not found.");
+
+            var amenity = await _dbContext.Amenities.FirstOrDefaultAsync(a => a.Id == amenityId);
+            if (amenity is null) return ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>.Fail("Amenity not found.");
+
+            if (await _dbContext.VenueAmenities.AnyAsync(va => va.VenueId == venueId && va.AmenityId == amenityId))
+                return ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>.Fail("Venue already has this amenity.");
+
+            _dbContext.VenueAmenities.Add(new VenueAmenity { VenueId = venueId, AmenityId = amenityId });
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>.Ok(new PlayCourt.Application.DTOs.Amenities.AmenityDto { Id = amenity.Id, Name = amenity.Name }, "Amenity added successfully.");
+        }
+
+        public async Task<ApiResponse<object>> RemoveVenueAmenityAsync(int userId, int venueId, int amenityId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<object>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<object>.Fail("Venue not found.");
+
+            var venueAmenity = await _dbContext.VenueAmenities.FirstOrDefaultAsync(va => va.VenueId == venueId && va.AmenityId == amenityId);
+            if (venueAmenity is null) return ApiResponse<object>.Fail("Venue does not have this amenity.");
+
+            _dbContext.VenueAmenities.Remove(venueAmenity);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<object>.Ok(null, "Amenity removed successfully.");
+        }
+
+        public async Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> GetOpeningHoursAsync(int venueId)
+        {
+            var hours = await _dbContext.VenueOpeningHours
+                .AsNoTracking()
+                .Where(h => h.VenueId == venueId)
+                .OrderBy(h => h.DayOfWeek)
+                .Select(h => new VenueOpeningHourDto { Id = h.Id, VenueId = h.VenueId, DayOfWeek = h.DayOfWeek, OpenTime = h.OpenTime, CloseTime = h.CloseTime, IsClosed = h.IsClosed })
+                .ToListAsync();
+
+            return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Ok(hours, "Opening hours retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> UpdateOpeningHoursAsync(int userId, int venueId, UpdateOpeningHoursRequestDto request)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Fail("Court owner profile not found.");
+
+            var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
+            if (venue is null) return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Fail("Venue not found.");
+
+            var existingHours = await _dbContext.VenueOpeningHours.Where(h => h.VenueId == venueId).ToListAsync();
+            _dbContext.VenueOpeningHours.RemoveRange(existingHours);
+
+            var newHours = request.OpeningHours.Select(h => new VenueOpeningHour
+            {
+                VenueId = venueId,
+                DayOfWeek = h.DayOfWeek,
+                OpenTime = h.OpenTime,
+                CloseTime = h.CloseTime,
+                IsClosed = h.IsClosed
+            }).ToList();
+
+            _dbContext.VenueOpeningHours.AddRange(newHours);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetOpeningHoursAsync(venueId);
+        }
+
+        public async Task<ApiResponse<VenueStatsResponseDto>> GetOwnerStatsAsync(int userId)
+        {
+            var ownerProfile = await FindCourtOwnerProfileAsync(userId);
+            if (ownerProfile is null) return ApiResponse<VenueStatsResponseDto>.Fail("Court owner profile not found.");
+
+            var totalVenues = await _dbContext.Venues.CountAsync(v => v.CourtOwnerProfileId == ownerProfile.Id);
+            var totalCourts = await _dbContext.Courts.CountAsync(c => c.Venue.CourtOwnerProfileId == ownerProfile.Id);
+            
+            // Assuming bookings table isn't created yet or we skip it for now, just mock TodayBookings
+            var stats = new VenueStatsResponseDto
+            {
+                TotalVenues = totalVenues,
+                TotalCourts = totalCourts,
+                TodayBookings = 0 // Placeholder
+            };
+
+            return ApiResponse<VenueStatsResponseDto>.Ok(stats, "Stats retrieved successfully.");
         }
 
         private async Task<CourtOwnerProfile?> FindCourtOwnerProfileAsync(int userId)
@@ -237,7 +458,29 @@ namespace PlayCourt.Infrastructure.Services
                 CloseTime = venue.CloseTime,
                 Status = venue.Status.ToString(),
                 CreatedAt = venue.CreatedAt,
-                UpdatedAt = venue.UpdatedAt
+                UpdatedAt = venue.UpdatedAt,
+                Images = venue.Images?.Select(i => new VenueImageDto
+                {
+                    Id = i.Id,
+                    VenueId = i.VenueId,
+                    ImageUrl = i.ImageUrl,
+                    IsCover = i.IsCover,
+                    CreatedAt = i.CreatedAt
+                }).ToList() ?? new List<VenueImageDto>(),
+                Amenities = venue.VenueAmenities?.Select(va => new PlayCourt.Application.DTOs.Amenities.AmenityDto
+                {
+                    Id = va.Amenity.Id,
+                    Name = va.Amenity.Name
+                }).ToList() ?? new List<PlayCourt.Application.DTOs.Amenities.AmenityDto>(),
+                OpeningHours = venue.OpeningHours?.Select(oh => new VenueOpeningHourDto
+                {
+                    Id = oh.Id,
+                    VenueId = oh.VenueId,
+                    DayOfWeek = oh.DayOfWeek,
+                    OpenTime = oh.OpenTime,
+                    CloseTime = oh.CloseTime,
+                    IsClosed = oh.IsClosed
+                }).ToList() ?? new List<VenueOpeningHourDto>()
             };
         }
     }

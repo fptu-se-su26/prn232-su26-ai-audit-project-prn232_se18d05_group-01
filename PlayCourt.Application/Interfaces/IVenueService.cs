@@ -19,4 +19,25 @@ public interface IVenueService
         int userId,
         int venueId,
         UpdateVenueRequestDto request);
+
+    Task<ApiResponse<object>> DeleteVenueAsync(int userId, int venueId);
+
+    Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request);
+    Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId);
+
+    // Images
+    Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, string imageUrl, bool isCover);
+    Task<ApiResponse<object>> DeleteImageAsync(int userId, int venueId, int imageId);
+    Task<ApiResponse<VenueImageDto>> SetCoverImageAsync(int userId, int venueId, int imageId);
+
+    // Amenities
+    Task<ApiResponse<PlayCourt.Application.DTOs.Amenities.AmenityDto>> AddVenueAmenityAsync(int userId, int venueId, int amenityId);
+    Task<ApiResponse<object>> RemoveVenueAmenityAsync(int userId, int venueId, int amenityId);
+
+    // Opening Hours
+    Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> GetOpeningHoursAsync(int venueId);
+    Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> UpdateOpeningHoursAsync(int userId, int venueId, UpdateOpeningHoursRequestDto request);
+
+    // Dashboard
+    Task<ApiResponse<VenueStatsResponseDto>> GetOwnerStatsAsync(int userId);
 }

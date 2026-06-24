@@ -15,4 +15,8 @@ public sealed class VenueResponseDto
     public string Status { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
+    
+    public ICollection<VenueImageDto> Images { get; set; } = new List<VenueImageDto>();
+    public ICollection<PlayCourt.Application.DTOs.Amenities.AmenityDto> Amenities { get; set; } = new List<PlayCourt.Application.DTOs.Amenities.AmenityDto>();
+    public ICollection<VenueOpeningHourDto> OpeningHours { get; set; } = new List<VenueOpeningHourDto>();
 }
