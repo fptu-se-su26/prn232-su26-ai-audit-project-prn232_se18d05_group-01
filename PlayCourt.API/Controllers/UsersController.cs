@@ -64,6 +64,105 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("me/sports")]
+        public async Task<IActionResult> GetMySports()
+        {
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(ApiResponse<object>.Fail("Invalid authentication token."));
+            }
+
+            var response = await _userService.GetCurrentUserSportsAsync(userId);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("me/sports")]
+        public async Task<IActionResult> AddMySport([FromBody] AddPlayerSportRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<PlayerSportResponseDto>.Fail(
+                    "Validation failed",
+                    errors));
+            }
+
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(ApiResponse<object>.Fail("Invalid authentication token."));
+            }
+
+            var response = await _userService.AddCurrentUserSportAsync(userId, request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPut("me/sports/{sportId:int}")]
+        public async Task<IActionResult> UpdateMySport(
+            int sportId,
+            [FromBody] UpdatePlayerSportRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<PlayerSportResponseDto>.Fail(
+                    "Validation failed",
+                    errors));
+            }
+
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(ApiResponse<object>.Fail("Invalid authentication token."));
+            }
+
+            var response = await _userService.UpdateCurrentUserSportAsync(
+                userId,
+                sportId,
+                request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpDelete("me/sports/{sportId:int}")]
+        public async Task<IActionResult> RemoveMySport(int sportId)
+        {
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(ApiResponse<object>.Fail("Invalid authentication token."));
+            }
+
+            var response = await _userService.RemoveCurrentUserSportAsync(userId, sportId);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
         private bool TryGetCurrentUserId(out int userId)
         {
             var userIdClaim = User?.FindFirstValue(ClaimTypes.NameIdentifier);

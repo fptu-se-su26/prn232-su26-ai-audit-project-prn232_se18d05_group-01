@@ -13,7 +13,7 @@
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
-| Ngày cập nhật gần nhất | 04/06/2026 |
+| Ngày cập nhật gần nhất | 24/06/2026 |
 
 ---
 
@@ -66,12 +66,9 @@ Sinh viên/nhóm cần ghi lại:
 | 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
 | 11 | 06/06/2026 | Codex | Triển khai Venue Management API | Tạo API POST/GET/PUT Venue cho CourtOwner, giữ đúng scope không admin approve/upload/images/amenities | Có VenuesController, IVenueService, VenueService, DTOs/Venues và DI registration | Có | `556a7fc`, `VenuesController.cs`, `VenueService.cs`, `DTOs/Venues/` |
 | 12 | 07/06/2026 | Antigravity | Triển khai Court Management API và DTOs/PricingRules | Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules, ownership verify qua chain Venue → CourtOwnerProfile → UserProfile | Có CourtsController, CourtService, ICourtService, 3 DTOs Courts, 3 DTOs PricingRules, +1 dòng DI | Có | `8c80134`, `CourtsController.cs`, `CourtService.cs`, `DTOs/Courts/`, `DTOs/PricingRules/` |
-<<<<<<< HEAD
 | 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo API CRUD cho bảng giá giờ, logic chống overlap giờ | Có PricingRulesController, IPricingRuleService, PricingRuleService, DI | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
 | 14 | 07/06/2026 | Antigravity | Triển khai Court Schedule API | Tạo API CRUD cho lịch khóa sân, logic chống overlap giờ | Có CourtSchedulesController, ICourtScheduleService, CourtScheduleService, DI | Có | `3fe045c`, `CourtSchedulesController.cs`, `CourtScheduleService.cs` |
-=======
-| 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo PricingRulesController, IPricingRuleService, PricingRuleService cho các bảng giá giờ, có logic validate không cho phép overlap StartAt/EndAt. | Có Controller, Service, Interface và check logic overlap | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
->>>>>>> origin/dev
+| 15 | 24/06/2026 | Codex | Triển khai CRUD PlayerSport cho User Profile | Phân tích nghiệp vụ và tạo API thêm, xem, đổi trình độ, xóa môn thể thao của người dùng hiện tại | Có 4 endpoint `/api/users/me/sports`, DTO, mở rộng IUserService/UserService và test controller/service | Có | `UsersController.cs`, `UserService.cs`, `UserServicePlayerSportTests.cs` |
 
 ---
 
@@ -1047,6 +1044,73 @@ Prompt ngắn gọn nhưng AI đã hiểu được context từ các prompt trư
 
 ---
 
+### Prompt số 15
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai CRUD PlayerSport trong User Profile |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỏi phân tích nghiệp vụ / Hỏi sinh code mẫu / Hỏi hướng dẫn test |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Tôi cần làm chức năng thêm sport cho user tức PlayerSport. Hãy phân tích nghiệp vụ và nên làm vào đâu. Tôi muốn thêm vào IUserService vì bản chất vẫn là một phần của profile user. Hãy làm CRUD đầy đủ: thêm, xem, đổi trình độ, xóa.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Entity PlayerSport và cấu hình EF Core đã tồn tại, nhưng hệ thống chưa có API để người dùng đăng nhập tự quản lý danh sách môn thể thao và trình độ trong hồ sơ của mình.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất đặt nghiệp vụ trong IUserService/UserService, sử dụng userId từ JWT thay vì nhận UserProfileId từ client, tạo các endpoint GET/POST/PUT/DELETE dưới `/api/users/me/sports`, DTO riêng và validation cho Sport, SkillLevel, trạng thái active và dữ liệu trùng.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Đã triển khai đầy đủ API xem danh sách, thêm sport, cập nhật SkillLevel và xóa PlayerSport. Response trả thông tin SportCode, SportName và tên SkillLevel; không trả trực tiếp entity.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chốt PlayerSport là một phần của User Profile nên giữ trong IUserService thay vì tạo service riêng. Quyền sở hữu được giới hạn theo JWT, dùng sportId trên route và giữ unique constraint `(UserProfileId, SportId)` làm lớp bảo vệ cuối cùng. Nhóm chạy test và build toàn solution trước khi hoàn tất.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.ApiTests/UsersControllerTests.cs`, `PlayCourt.ApiTests/UserServicePlayerSportTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-restore` passed 66/66; `dotnet build PlayCourt.sln --no-restore` passed với 0 warning, 0 error |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không cần migration vì entity, quan hệ và unique constraint PlayerSport đã tồn tại. |
+
+#### 5.8. Ghi chú thêm
+
+```text
+AI cũng hướng dẫn kiểm thử thủ công bằng Swagger/Postman: đăng nhập lấy JWT, lấy sportId từ `/api/sports`, sau đó gọi các endpoint `/api/users/me/sports`.
+```
+
+---
+
 
 ## 6. Prompt quan trọng nhất
 
@@ -1174,13 +1238,9 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-<<<<<<< HEAD
-| Prompt sinh code mẫu | 12 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API, Pricing Rule API và Court Schedule API |
-=======
-| Prompt sinh code mẫu | 11 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API và Pricing Rule API |
->>>>>>> origin/dev
+| Prompt sinh code mẫu | 13 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API, Pricing Rule API, Court Schedule API và PlayerSport CRUD |
 | Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
-| Prompt viết test case | 6 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints và sport management endpoints/service |
+| Prompt viết test case | 7 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints, sport management và PlayerSport CRUD |
 | Prompt review code | 1 | Review DI, response và build |
 | Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
 | Prompt viết báo cáo | 0 | Chưa ghi nhận riêng |

@@ -821,6 +821,59 @@ AI hỗ trợ viết các endpoints một cách nhất quán dựa trên các ki
 
 ---
 
+### Lần sử dụng AI số 15
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích sử dụng | Phân tích và triển khai CRUD PlayerSport cho User Profile |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Tôi cần làm chức năng thêm sport cho user tức PlayerSport. Hãy phân tích nghiệp vụ và nên làm vào đâu. Tôi muốn thêm vào IUserService vì bản chất vẫn là một phần của profile user. Hãy làm CRUD đầy đủ: thêm, xem, đổi trình độ, xóa.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất giữ PlayerSport trong IUserService/UserService, tạo 4 endpoint tự phục vụ dưới `/api/users/me/sports`, lấy userId từ JWT, dùng DTO riêng và kiểm tra profile, sport tồn tại/active, SkillLevel hợp lệ, dữ liệu trùng và quyền sở hữu.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng cấu trúc endpoint, DTO, interface và service logic. Thêm GET danh sách, POST thêm sport, PUT đổi SkillLevel và DELETE xóa PlayerSport. Dùng ApiResponse<T> và không trả trực tiếp entity EF Core.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm lựa chọn mở rộng IUserService thay vì tạo IPlayerSportService để phù hợp phạm vi hiện tại. Route sử dụng sportId, mọi truy vấn giới hạn theo UserProfile của JWT và unique constraint database tiếp tục bảo vệ trường hợp request đồng thời. Không tạo migration vì schema đã hỗ trợ PlayerSport.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.ApiTests/UsersControllerTests.cs`, `PlayCourt.ApiTests/UserServicePlayerSportTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-restore` passed 66/66; `dotnet build PlayCourt.sln --no-restore` passed với 0 warning, 0 error |
+| Link video demo |  |
+| Ghi chú khác | Đã hướng dẫn test bằng Swagger/Postman với tài khoản mẫu và JWT Bearer. |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ tốt việc phân tách trách nhiệm giữa Sport catalogue và PlayerSport profile, đồng thời đề xuất validation và test case đầy đủ. Nhóm vẫn kiểm tra lại contract, quyền sở hữu và kết quả build/test.
+```
+
+---
+
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
@@ -834,9 +887,9 @@ AI hỗ trợ viết các endpoints một cách nhất quán dựa trên các ki
 | Thiết kế kiến trúc hệ thống |  |  | x |  | AI hỗ trợ định hướng Domain, Application, Infrastructure và API layer |
 | Thiết kế giao diện |  | x |  |  | AI hỗ trợ ý tưởng giao diện cơ bản |
 | Code frontend | x |  |  |  | Chưa triển khai chính trong giai đoạn này |
-| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API và Venue Management API |
+| Code backend |  |  | x |  | AI hỗ trợ entity, enum, EF Core configuration, setup layer, Register API, Login API, Email OTP, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API và PlayerSport CRUD |
 | Debug lỗi |  | x |  |  | AI hỗ trợ kiểm tra duplicate index, filter, constraint và lỗi compile/test |
-| Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test, user profile test và sport management test |
+| Viết test case |  | x |  |  | AI hỗ trợ định hướng test smoke, controller test, password management test, user profile test, sport management test và PlayerSport CRUD test |
 | Kiểm thử sản phẩm |  | x |  |  | Nhóm tự chạy format, build và test để kiểm chứng |
 | Tối ưu code |  | x |  |  | AI hỗ trợ review code đơn giản |
 | Viết báo cáo |  | x |  |  | AI hỗ trợ chỉnh tài liệu ngắn gọn |
