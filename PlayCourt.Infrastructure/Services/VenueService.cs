@@ -40,6 +40,12 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<VenueResponseDto>.Fail("Court owner profile not found.");
             }
 
+            if (ownerProfile.VerificationStatus != CourtOwnerVerificationStatus.Approved)
+            {
+                return ApiResponse<VenueResponseDto>.Fail(
+                    "Court owner profile must be approved before creating a venue.");
+            }
+
             var venue = new Venue
             {
                 CourtOwnerProfileId = ownerProfile.Id,

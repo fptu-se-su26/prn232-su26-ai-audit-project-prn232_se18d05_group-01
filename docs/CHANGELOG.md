@@ -259,6 +259,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 21 | Thêm Pricing Rule API | Vo Van Hai | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` | `3582d61` |
 | 22 | Thêm Court Schedule API | Vo Van Hai | `PlayCourt.API/Controllers/CourtSchedulesController.cs`, `PlayCourt.Application/Interfaces/ICourtScheduleService.cs`, `PlayCourt.Infrastructure/Services/CourtScheduleService.cs`, `PlayCourt.Application/DTOs/CourtSchedules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` | `3fe045c` |
 | 23 | Thêm CRUD PlayerSport cho hồ sơ người dùng hiện tại | Phan Thanh Vuong | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs` | Sẽ cập nhật sau khi commit |
+| 24 | Thêm Admin quản lý xác minh CourtOwner và chặn owner chưa duyệt tạo Venue | Nguyen Phan Huy | `CourtOwnersController.cs`, `CourtOwnerService.cs`, `DTOs/CourtOwners/`, migration `AddCourtOwnerRejectionReason`, `VenueService.cs` | Sẽ cập nhật sau khi commit |
 
 ## AI có hỗ trợ không?
 
@@ -439,6 +440,7 @@ Chưa ghi nhận nội dung cho phase này.
 | 13 | Pricing Rule API | Completed | `PricingRulesController`, `PricingRuleService`, `IPricingRuleService` | DE180313 — CRUD cho bảng giá giờ |
 | 14 | Court Schedule API | Completed | `CourtSchedulesController`, `CourtScheduleService`, `ICourtScheduleService`, `DTOs/CourtSchedules/` | DE180313 — CRUD quản lý lịch khóa sân |
 | 15 | PlayerSport CRUD | Completed | `UsersController`, `IUserService`, `UserService`, `UserServicePlayerSportTests` | DE180405 — GET/POST/PUT/DELETE `/api/users/me/sports` |
+| 16 | CourtOwner Approval | Completed | `CourtOwnersController`, `CourtOwnerService`, migration | Admin list/detail/approve/reject; chỉ owner Approved tạo Venue |
 
 ---
 

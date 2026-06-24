@@ -69,6 +69,7 @@ Sinh viên/nhóm cần ghi lại:
 | 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo API CRUD cho bảng giá giờ, logic chống overlap giờ | Có PricingRulesController, IPricingRuleService, PricingRuleService, DI | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
 | 14 | 07/06/2026 | Antigravity | Triển khai Court Schedule API | Tạo API CRUD cho lịch khóa sân, logic chống overlap giờ | Có CourtSchedulesController, ICourtScheduleService, CourtScheduleService, DI | Có | `3fe045c`, `CourtSchedulesController.cs`, `CourtScheduleService.cs` |
 | 15 | 24/06/2026 | Codex | Triển khai CRUD PlayerSport cho User Profile | Phân tích nghiệp vụ và tạo API thêm, xem, đổi trình độ, xóa môn thể thao của người dùng hiện tại | Có 4 endpoint `/api/users/me/sports`, DTO, mở rộng IUserService/UserService và test controller/service | Có | `UsersController.cs`, `UserService.cs`, `UserServicePlayerSportTests.cs` |
+| 16 | 24/06/2026 | Codex | Admin xác minh CourtOwner | List/detail/filter, approve/reject và chặn owner chưa Approved tạo Venue | Có controller/service/DTO riêng, migration và build pass | Có | `CourtOwnersController.cs`, `CourtOwnerService.cs`, migration |
 
 ---
 
@@ -1111,6 +1112,22 @@ AI cũng hướng dẫn kiểm thử thủ công bằng Swagger/Postman: đăng 
 
 ---
 
+### Prompt số 16
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Admin approve/reject CourtOwner và chặn tạo Venue khi chưa Approved |
+
+```text
+Phạm vi branch: Admin lấy danh sách/chi tiết CourtOwner, approve/reject có thể đổi ngược trạng thái và CourtOwner chưa Approved không được tạo Venue. Giữ cấu trúc API/Application/Infrastructure/Domain hiện có.
+```
+
+**Kết quả:** thêm `CourtOwnersController`, `ICourtOwnerService`/`CourtOwnerService`, DTO riêng, migration `AddCourtOwnerRejectionReason` và kiểm tra trạng thái Approved trong `VenueService`. Build solution pass 0 warning, 0 error.
+
+---
+
 
 ## 6. Prompt quan trọng nhất
 
@@ -1238,7 +1255,7 @@ Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture
 | Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
 | Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
 | Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
-| Prompt sinh code mẫu | 13 | Setup layer, Register API, Login API, Email OTP infrastructure, Verify Email, Password Management, User Profile API, Sport Management API, Venue Management API, Court Management API, Pricing Rule API, Court Schedule API và PlayerSport CRUD |
+| Prompt sinh code mẫu | 14 | Các API backend, gồm CourtOwner Approval và PlayerSport CRUD |
 | Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
 | Prompt viết test case | 7 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints, sport management và PlayerSport CRUD |
 | Prompt review code | 1 | Review DI, response và build |

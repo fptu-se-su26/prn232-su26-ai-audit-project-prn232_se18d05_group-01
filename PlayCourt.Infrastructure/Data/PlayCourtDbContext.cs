@@ -168,6 +168,7 @@ namespace PlayCourt.Infrastructure.Data
                 entity.Property(e => e.BusinessLicenseNo).HasMaxLength(100);
                 entity.Property(e => e.TaxCode).HasMaxLength(50);
                 entity.Property(e => e.VerificationStatus).HasDefaultValue(CourtOwnerVerificationStatus.Pending).IsRequired();
+                entity.Property(e => e.RejectionReason).HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
 
                 entity.HasQueryFilter(e => !e.UserProfile.User.IsDeleted);
