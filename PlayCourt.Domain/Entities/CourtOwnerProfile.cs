@@ -36,6 +36,9 @@ namespace PlayCourt.Domain.Entities
         [Required]
         public CourtOwnerVerificationStatus VerificationStatus { get; set; } = CourtOwnerVerificationStatus.Pending;
 
+        [MaxLength(500)]
+        public string? RejectionReason { get; set; }
+
         [Required]
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
 
