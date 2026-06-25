@@ -22,7 +22,9 @@ public interface IVenueService
 
     Task<ApiResponse<object>> DeleteVenueAsync(int userId, int venueId);
 
-    Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request);
+    /// <summary>Tìm kiếm venues public với filter và phân trang đầy đủ (có TotalCount).</summary>
+    Task<PagedResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request);
+
     Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId);
 
     // Images

@@ -5,6 +5,7 @@ using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
 using PlayCourt.Infrastructure.Data;
+using PlayCourt.Infrastructure.Helpers;
 
 namespace PlayCourt.Infrastructure.Services
 {
@@ -66,7 +67,7 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<VenueResponseDto>.Ok(
-                MapToResponse(venue),
+                VenueMapper.MapToResponse(venue),
                 "Venue created successfully.");
         }
 
@@ -86,11 +87,10 @@ namespace PlayCourt.Infrastructure.Services
                 .Include(v => v.OpeningHours)
                 .Where(venue => venue.CourtOwnerProfileId == ownerProfile.Id)
                 .OrderByDescending(venue => venue.CreatedAt)
-                .Select(venue => MapToResponse(venue))
                 .ToListAsync();
 
             return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(
-                venues,
+                venues.Select(VenueMapper.MapToResponse).ToList(),
                 "Venues retrieved successfully.");
         }
 
@@ -120,7 +120,7 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             return ApiResponse<VenueResponseDto>.Ok(
-                MapToResponse(venue),
+                VenueMapper.MapToResponse(venue),
                 "Venue retrieved successfully.");
         }
 
@@ -172,7 +172,7 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<VenueResponseDto>.Ok(
-                MapToResponse(venue),
+                VenueMapper.MapToResponse(venue),
                 "Venue updated successfully.");
         }
 
@@ -195,7 +195,7 @@ namespace PlayCourt.Infrastructure.Services
             return ApiResponse<object>.Ok(null, "Venue deleted successfully.");
         }
 
-        public async Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request)
+        public async Task<PagedResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesAsync(VenueSearchRequestDto request)
         {
             var query = _dbContext.Venues
                 .AsNoTracking()
@@ -203,22 +203,53 @@ namespace PlayCourt.Infrastructure.Services
                 .Include(v => v.VenueAmenities)
                     .ThenInclude(va => va.Amenity)
                 .Include(v => v.OpeningHours)
-                .Where(v => v.Status == VenueStatus.Approved);
+                .Where(v => v.Status == VenueStatus.Approved && !v.IsDeleted);
 
+            // Filter theo từ khoá tên hoặc địa chỉ
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
-                query = query.Where(v => v.Name.Contains(request.Keyword) || v.Address.Contains(request.Keyword));
+                var kw = request.Keyword.Trim();
+                query = query.Where(v => v.Name.Contains(kw) || v.Address.Contains(kw));
             }
 
-            // Simple pagination
+            // Filter theo bộ môn thể thao (qua Courts.SportId)
+            if (request.SportId.HasValue)
+            {
+                query = query.Where(v => v.Courts.Any(c => c.SportId == request.SportId.Value && !c.IsDeleted));
+            }
+
+            // Filter theo sân đang mở cửa tại thời điểm hiện tại
+            if (request.IsOpenNow == true)
+            {
+                var now = TimeSpan.FromTicks(DateTimeOffset.Now.TimeOfDay.Ticks);
+                var today = (int)DateTime.Today.DayOfWeek == 0 ? 7 : (int)DateTime.Today.DayOfWeek; // 1=Mon..7=Sun
+                query = query.Where(v =>
+                    v.OpeningHours.Any(oh =>
+                        oh.DayOfWeek == today &&
+                        !oh.IsClosed &&
+                        oh.OpenTime.HasValue &&
+                        oh.CloseTime.HasValue &&
+                        oh.OpenTime.Value <= now &&
+                        oh.CloseTime.Value > now));
+            }
+
+            // Đếm tổng trước khi phân trang
+            var totalCount = await query.CountAsync();
+
             var venues = await query
                 .OrderByDescending(v => v.CreatedAt)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(v => MapToResponse(v))
                 .ToListAsync();
 
-            return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(venues, "Venues retrieved successfully.");
+            var result = venues.Select(VenueMapper.MapToResponse).ToList();
+
+            return PagedResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(
+                result,
+                totalCount,
+                request.PageIndex,
+                request.PageSize,
+                "Venues retrieved successfully.");
         }
 
         public async Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId)
@@ -234,7 +265,7 @@ namespace PlayCourt.Infrastructure.Services
             if (venue is null)
                 return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
 
-            return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
+            return ApiResponse<VenueResponseDto>.Ok(VenueMapper.MapToResponse(venue), "Venue retrieved successfully.");
         }
 
         public async Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, string imageUrl, bool isCover)
@@ -334,6 +365,13 @@ namespace PlayCourt.Infrastructure.Services
 
         public async Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> GetOpeningHoursAsync(int venueId)
         {
+            // API public: chỉ trả về giờ mở cửa của venue đã được Approved
+            var venueExists = await _dbContext.Venues
+                .AnyAsync(v => v.Id == venueId && v.Status == VenueStatus.Approved && !v.IsDeleted);
+
+            if (!venueExists)
+                return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Fail("Venue not found.");
+
             var hours = await _dbContext.VenueOpeningHours
                 .AsNoTracking()
                 .Where(h => h.VenueId == venueId)
@@ -352,6 +390,32 @@ namespace PlayCourt.Infrastructure.Services
             var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
             if (venue is null) return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Fail("Venue not found.");
 
+            // Validate từng entry trước khi chạm vào DB
+            var validationErrors = new List<string>();
+            var days = new HashSet<int>();
+
+            for (var i = 0; i < request.OpeningHours.Count; i++)
+            {
+                var h = request.OpeningHours[i];
+
+                if (h.DayOfWeek < 1 || h.DayOfWeek > 7)
+                    validationErrors.Add($"Entry [{i}]: DayOfWeek phải nằm trong khoảng 1 (Thứ Hai) đến 7 (Chủ Nhật).");
+
+                if (!days.Add(h.DayOfWeek))
+                    validationErrors.Add($"Entry [{i}]: DayOfWeek '{h.DayOfWeek}' bị trùng lặp.");
+
+                if (!h.IsClosed)
+                {
+                    if (!h.OpenTime.HasValue || !h.CloseTime.HasValue)
+                        validationErrors.Add($"Entry [{i}]: OpenTime và CloseTime là bắt buộc khi IsClosed = false.");
+                    else if (h.OpenTime >= h.CloseTime)
+                        validationErrors.Add($"Entry [{i}]: OpenTime phải nhỏ hơn CloseTime.");
+                }
+            }
+
+            if (validationErrors.Count > 0)
+                return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Fail("Dữ liệu giờ mở cửa không hợp lệ.", validationErrors);
+
             var existingHours = await _dbContext.VenueOpeningHours.Where(h => h.VenueId == venueId).ToListAsync();
             _dbContext.VenueOpeningHours.RemoveRange(existingHours);
 
@@ -367,7 +431,18 @@ namespace PlayCourt.Infrastructure.Services
             _dbContext.VenueOpeningHours.AddRange(newHours);
             await _dbContext.SaveChangesAsync();
 
-            return await GetOpeningHoursAsync(venueId);
+            // Lấy lại trực tiếp từ danh sách đã lưu (không qua public endpoint để tránh check Approved)
+            var savedHours = newHours.Select(h => new VenueOpeningHourDto
+            {
+                Id = h.Id,
+                VenueId = h.VenueId,
+                DayOfWeek = h.DayOfWeek,
+                OpenTime = h.OpenTime,
+                CloseTime = h.CloseTime,
+                IsClosed = h.IsClosed
+            }).ToList();
+
+            return ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>.Ok(savedHours, "Opening hours updated successfully.");
         }
 
         public async Task<ApiResponse<VenueStatsResponseDto>> GetOwnerStatsAsync(int userId)
@@ -375,15 +450,29 @@ namespace PlayCourt.Infrastructure.Services
             var ownerProfile = await FindCourtOwnerProfileAsync(userId);
             if (ownerProfile is null) return ApiResponse<VenueStatsResponseDto>.Fail("Court owner profile not found.");
 
-            var totalVenues = await _dbContext.Venues.CountAsync(v => v.CourtOwnerProfileId == ownerProfile.Id);
-            var totalCourts = await _dbContext.Courts.CountAsync(c => c.Venue.CourtOwnerProfileId == ownerProfile.Id);
+            var totalVenues = await _dbContext.Venues
+                .CountAsync(v => v.CourtOwnerProfileId == ownerProfile.Id && !v.IsDeleted);
 
-            // Assuming bookings table isn't created yet or we skip it for now, just mock TodayBookings
+            var totalCourts = await _dbContext.Courts
+                .CountAsync(c => c.Venue.CourtOwnerProfileId == ownerProfile.Id && !c.IsDeleted);
+
+            // Đếm số lượng booking hôm nay (tất cả trạng thái trừ đã huỷ)
+            var todayStart = DateTimeOffset.Now.Date;
+            var todayEnd = todayStart.AddDays(1);
+            var todayBookings = await _dbContext.Bookings
+                .CountAsync(b =>
+                    b.Court.Venue.CourtOwnerProfileId == ownerProfile.Id &&
+                    b.StartAt >= todayStart &&
+                    b.StartAt < todayEnd &&
+                    b.Status != BookingStatus.CancelledByUser &&
+                    b.Status != BookingStatus.CancelledByOwner &&
+                    !b.IsDeleted);
+
             var stats = new VenueStatsResponseDto
             {
                 TotalVenues = totalVenues,
                 TotalCourts = totalCourts,
-                TodayBookings = 0 // Placeholder
+                TodayBookings = todayBookings
             };
 
             return ApiResponse<VenueStatsResponseDto>.Ok(stats, "Stats retrieved successfully.");
@@ -436,7 +525,7 @@ namespace PlayCourt.Infrastructure.Services
                     UserProfileId = favorite.UserProfileId,
                     VenueId = favorite.VenueId,
                     CreatedAt = favorite.CreatedAt,
-                    Venue = MapToResponse(venue),
+                    Venue = VenueMapper.MapToResponse(venue),
                 },
                 "Venue added to favorites.");
         }
@@ -471,6 +560,7 @@ namespace PlayCourt.Infrastructure.Services
             if (userProfile is null)
                 return ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>.Fail("User profile not found.");
 
+            // Chỉ trả về favorite của các venue đang ở trạng thái Approved (không hiển thị venue bị Suspend/Reject)
             var favorites = await _dbContext.UserFavoriteVenues
                 .AsNoTracking()
                 .Include(f => f.Venue)
@@ -480,19 +570,23 @@ namespace PlayCourt.Infrastructure.Services
                         .ThenInclude(va => va.Amenity)
                 .Include(f => f.Venue)
                     .ThenInclude(v => v.OpeningHours)
-                .Where(f => f.UserProfileId == userProfile.Id)
+                .Where(f =>
+                    f.UserProfileId == userProfile.Id &&
+                    f.Venue.Status == VenueStatus.Approved &&
+                    !f.Venue.IsDeleted)
                 .OrderByDescending(f => f.CreatedAt)
-                .Select(f => new FavoriteVenueResponseDto
-                {
-                    UserProfileId = f.UserProfileId,
-                    VenueId = f.VenueId,
-                    CreatedAt = f.CreatedAt,
-                    Venue = MapToResponse(f.Venue),
-                })
                 .ToListAsync();
 
+            var result = favorites.Select(f => new FavoriteVenueResponseDto
+            {
+                UserProfileId = f.UserProfileId,
+                VenueId = f.VenueId,
+                CreatedAt = f.CreatedAt,
+                Venue = VenueMapper.MapToResponse(f.Venue),
+            }).ToList();
+
             return ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>.Ok(
-                favorites,
+                result,
                 "Favorite venues retrieved successfully.");
         }
 
@@ -549,46 +643,5 @@ namespace PlayCourt.Infrastructure.Services
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        private static VenueResponseDto MapToResponse(Venue venue)
-        {
-            return new VenueResponseDto
-            {
-                Id = venue.Id,
-                CourtOwnerProfileId = venue.CourtOwnerProfileId,
-                Name = venue.Name,
-                Description = venue.Description,
-                Address = venue.Address,
-                Latitude = venue.Latitude,
-                Longitude = venue.Longitude,
-                Phone = venue.Phone,
-                OpenTime = venue.OpenTime,
-                CloseTime = venue.CloseTime,
-                Status = venue.Status.ToString(),
-                CreatedAt = venue.CreatedAt,
-                UpdatedAt = venue.UpdatedAt,
-                Images = venue.Images?.Select(i => new VenueImageDto
-                {
-                    Id = i.Id,
-                    VenueId = i.VenueId,
-                    ImageUrl = i.ImageUrl,
-                    IsCover = i.IsCover,
-                    CreatedAt = i.CreatedAt
-                }).ToList() ?? new List<VenueImageDto>(),
-                Amenities = venue.VenueAmenities?.Select(va => new PlayCourt.Application.DTOs.Amenities.AmenityDto
-                {
-                    Id = va.Amenity.Id,
-                    Name = va.Amenity.Name
-                }).ToList() ?? new List<PlayCourt.Application.DTOs.Amenities.AmenityDto>(),
-                OpeningHours = venue.OpeningHours?.Select(oh => new VenueOpeningHourDto
-                {
-                    Id = oh.Id,
-                    VenueId = oh.VenueId,
-                    DayOfWeek = oh.DayOfWeek,
-                    OpenTime = oh.OpenTime,
-                    CloseTime = oh.CloseTime,
-                    IsClosed = oh.IsClosed
-                }).ToList() ?? new List<VenueOpeningHourDto>()
-            };
-        }
     }
 }

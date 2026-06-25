@@ -44,7 +44,8 @@ namespace PlayCourt.API.Controllers
             if (!TryGetCurrentUserId(out var userId)) return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
             var response = await _venueService.CreateVenueAsync(userId, request);
             if (!response.Success) return BadRequest(response);
-            return CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response);
+            // Trỏ tới Owner endpoint vì venue mới tạo có Status=Pending, public endpoint GetById yêu cầu Approved
+            return CreatedAtAction(nameof(GetMyById), new { id = response.Data!.Id }, response);
         }
 
         [HttpGet("my")]
@@ -84,8 +85,10 @@ namespace PlayCourt.API.Controllers
         [Authorize(Policy = ApiPolicies.CourtOwner)]
         public async Task<IActionResult> AddImage(int id, [FromQuery] string imageUrl, [FromQuery] bool isCover = false)
         {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                return BadRequest(ApiResponse<object>.Fail("imageUrl không được để trống."));
             if (!TryGetCurrentUserId(out var userId)) return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
-            var response = await _venueService.AddImageAsync(userId, id, imageUrl, isCover);
+            var response = await _venueService.AddImageAsync(userId, id, imageUrl.Trim(), isCover);
             if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
