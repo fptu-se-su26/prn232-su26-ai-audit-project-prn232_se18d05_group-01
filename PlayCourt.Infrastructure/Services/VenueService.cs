@@ -377,7 +377,7 @@ namespace PlayCourt.Infrastructure.Services
 
             var totalVenues = await _dbContext.Venues.CountAsync(v => v.CourtOwnerProfileId == ownerProfile.Id);
             var totalCourts = await _dbContext.Courts.CountAsync(c => c.Venue.CourtOwnerProfileId == ownerProfile.Id);
-            
+
             // Assuming bookings table isn't created yet or we skip it for now, just mock TodayBookings
             var stats = new VenueStatsResponseDto
             {
@@ -387,6 +387,113 @@ namespace PlayCourt.Infrastructure.Services
             };
 
             return ApiResponse<VenueStatsResponseDto>.Ok(stats, "Stats retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueResponseDto>> GetMyVenueByIdAsync(int userId, int venueId)
+        {
+            return await GetVenueByIdAsync(userId, venueId);
+        }
+
+        public async Task<ApiResponse<FavoriteVenueResponseDto>> AddFavoriteAsync(int userId, int venueId)
+        {
+            var userProfile = await _dbContext.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (userProfile is null)
+                return ApiResponse<FavoriteVenueResponseDto>.Fail("User profile not found.");
+
+            var venue = await _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == VenueStatus.Approved);
+
+            if (venue is null)
+                return ApiResponse<FavoriteVenueResponseDto>.Fail("Venue not found or not approved.");
+
+            var alreadyFavorited = await _dbContext.UserFavoriteVenues
+                .AnyAsync(f => f.UserProfileId == userProfile.Id && f.VenueId == venueId);
+
+            if (alreadyFavorited)
+                return ApiResponse<FavoriteVenueResponseDto>.Fail("Venue is already in your favorites.");
+
+            var favorite = new UserFavoriteVenue
+            {
+                UserProfileId = userProfile.Id,
+                VenueId = venueId,
+                CreatedAt = DateTimeOffset.Now,
+            };
+
+            _dbContext.UserFavoriteVenues.Add(favorite);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<FavoriteVenueResponseDto>.Ok(
+                new FavoriteVenueResponseDto
+                {
+                    UserProfileId = favorite.UserProfileId,
+                    VenueId = favorite.VenueId,
+                    CreatedAt = favorite.CreatedAt,
+                    Venue = MapToResponse(venue),
+                },
+                "Venue added to favorites.");
+        }
+
+        public async Task<ApiResponse<object>> RemoveFavoriteAsync(int userId, int venueId)
+        {
+            var userProfile = await _dbContext.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (userProfile is null)
+                return ApiResponse<object>.Fail("User profile not found.");
+
+            var favorite = await _dbContext.UserFavoriteVenues
+                .FirstOrDefaultAsync(f => f.UserProfileId == userProfile.Id && f.VenueId == venueId);
+
+            if (favorite is null)
+                return ApiResponse<object>.Fail("Venue is not in your favorites.");
+
+            _dbContext.UserFavoriteVenues.Remove(favorite);
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<object>.Ok(null, "Venue removed from favorites.");
+        }
+
+        public async Task<ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>> GetMyFavoritesAsync(int userId)
+        {
+            var userProfile = await _dbContext.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (userProfile is null)
+                return ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>.Fail("User profile not found.");
+
+            var favorites = await _dbContext.UserFavoriteVenues
+                .AsNoTracking()
+                .Include(f => f.Venue)
+                    .ThenInclude(v => v.Images)
+                .Include(f => f.Venue)
+                    .ThenInclude(v => v.VenueAmenities)
+                        .ThenInclude(va => va.Amenity)
+                .Include(f => f.Venue)
+                    .ThenInclude(v => v.OpeningHours)
+                .Where(f => f.UserProfileId == userProfile.Id)
+                .OrderByDescending(f => f.CreatedAt)
+                .Select(f => new FavoriteVenueResponseDto
+                {
+                    UserProfileId = f.UserProfileId,
+                    VenueId = f.VenueId,
+                    CreatedAt = f.CreatedAt,
+                    Venue = MapToResponse(f.Venue),
+                })
+                .ToListAsync();
+
+            return ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>.Ok(
+                favorites,
+                "Favorite venues retrieved successfully.");
         }
 
         private async Task<CourtOwnerProfile?> FindCourtOwnerProfileAsync(int userId)

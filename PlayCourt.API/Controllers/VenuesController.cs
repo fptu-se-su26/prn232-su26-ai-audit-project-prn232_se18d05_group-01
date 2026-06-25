@@ -152,6 +152,56 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        // --- Owner Detail ---
+
+        [HttpGet("my/{id:int}")]
+        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        public async Task<IActionResult> GetMyById(int id)
+        {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
+            var response = await _venueService.GetMyVenueByIdAsync(userId, id);
+            if (!response.Success)
+                return NotFound(response);
+            return Ok(response);
+        }
+
+        // --- Favorites ---
+
+        [HttpPost("{id:int}/favorites")]
+        [Authorize]
+        public async Task<IActionResult> AddFavorite(int id)
+        {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
+            var response = await _venueService.AddFavoriteAsync(userId, id);
+            if (!response.Success)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpDelete("{id:int}/favorites")]
+        [Authorize]
+        public async Task<IActionResult> RemoveFavorite(int id)
+        {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
+            var response = await _venueService.RemoveFavoriteAsync(userId, id);
+            if (!response.Success)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpGet("favorites/my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyFavorites()
+        {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
+            var response = await _venueService.GetMyFavoritesAsync(userId);
+            return Ok(response);
+        }
+
         // --- Stats ---
 
         [HttpGet("stats")]

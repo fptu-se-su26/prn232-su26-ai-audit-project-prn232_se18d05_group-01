@@ -38,6 +38,14 @@ public interface IVenueService
     Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> GetOpeningHoursAsync(int venueId);
     Task<ApiResponse<IReadOnlyCollection<VenueOpeningHourDto>>> UpdateOpeningHoursAsync(int userId, int venueId, UpdateOpeningHoursRequestDto request);
 
+    // Owner detail
+    Task<ApiResponse<VenueResponseDto>> GetMyVenueByIdAsync(int userId, int venueId);
+
+    // Favorites
+    Task<ApiResponse<FavoriteVenueResponseDto>> AddFavoriteAsync(int userId, int venueId);
+    Task<ApiResponse<object>> RemoveFavoriteAsync(int userId, int venueId);
+    Task<ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>> GetMyFavoritesAsync(int userId);
+
     // Dashboard
     Task<ApiResponse<VenueStatsResponseDto>> GetOwnerStatsAsync(int userId);
 }
