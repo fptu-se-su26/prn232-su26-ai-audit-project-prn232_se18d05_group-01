@@ -15,9 +15,9 @@ public sealed class AdminVenueService : IAdminVenueService
     // State machine: key = trạng thái hiện tại, value = tập trạng thái được phép chuyển sang
     private static readonly Dictionary<VenueStatus, HashSet<VenueStatus>> _allowedTransitions = new()
     {
-        [VenueStatus.Pending]   = [VenueStatus.Approved, VenueStatus.Rejected],
-        [VenueStatus.Approved]  = [VenueStatus.Suspended],
-        [VenueStatus.Rejected]  = [],                         // không thể chuyển từ Rejected
+        [VenueStatus.Pending] = [VenueStatus.Approved, VenueStatus.Rejected],
+        [VenueStatus.Approved] = [VenueStatus.Suspended],
+        [VenueStatus.Rejected] = [],                         // không thể chuyển từ Rejected
         [VenueStatus.Suspended] = [VenueStatus.Approved],     // restore
     };
 
