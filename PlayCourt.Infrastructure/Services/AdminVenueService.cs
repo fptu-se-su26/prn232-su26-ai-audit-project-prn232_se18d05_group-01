@@ -15,10 +15,10 @@ public sealed class AdminVenueService : IAdminVenueService
     // State machine: key = trạng thái hiện tại, value = tập trạng thái được phép chuyển sang
     private static readonly Dictionary<VenueStatus, HashSet<VenueStatus>> _allowedTransitions = new()
     {
-        [VenueStatus.Pending] = [VenueStatus.Approved, VenueStatus.Rejected],
-        [VenueStatus.Approved] = [VenueStatus.Suspended],
-        [VenueStatus.Rejected] = [],                         // không thể chuyển từ Rejected
-        [VenueStatus.Suspended] = [VenueStatus.Approved],     // restore
+        [VenueStatus.Pending] = new() { VenueStatus.Approved, VenueStatus.Rejected },
+        [VenueStatus.Approved] = new() { VenueStatus.Suspended },
+        [VenueStatus.Rejected] = new(),                         // không thể chuyển từ Rejected
+        [VenueStatus.Suspended] = new() { VenueStatus.Approved },     // restore
     };
 
     public AdminVenueService(PlayCourtDbContext dbContext)
