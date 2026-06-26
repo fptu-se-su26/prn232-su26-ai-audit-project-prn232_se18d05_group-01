@@ -637,7 +637,7 @@ namespace PlayCourt.Infrastructure.Services
                     UserProfileId = favorite.UserProfileId,
                     VenueId = favorite.VenueId,
                     CreatedAt = favorite.CreatedAt,
-                Venue = MapToResponse(venue),
+                    Venue = MapToResponse(venue),
                 },
                 "Venue added to favorites.");
         }
