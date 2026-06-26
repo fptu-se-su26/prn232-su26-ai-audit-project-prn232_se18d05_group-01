@@ -1,5 +1,6 @@
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Venues;
+using PlayCourt.Domain.Enums;
 
 namespace PlayCourt.Application.Interfaces;
 
@@ -27,8 +28,18 @@ public interface IVenueService
 
     Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId);
 
+    // Admin
+    Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
+        VenueStatus? status = null);
+
+    Task<ApiResponse<VenueResponseDto>> GetVenueForAdminByIdAsync(int venueId);
+
+    Task<ApiResponse<VenueResponseDto>> UpdateVenueStatusAsync(
+        int venueId,
+        UpdateVenueStatusRequestDto request);
+
     // Images
-    Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, string imageUrl, bool isCover);
+    Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, AddVenueImageRequestDto request);
     Task<ApiResponse<object>> DeleteImageAsync(int userId, int venueId, int imageId);
     Task<ApiResponse<VenueImageDto>> SetCoverImageAsync(int userId, int venueId, int imageId);
 

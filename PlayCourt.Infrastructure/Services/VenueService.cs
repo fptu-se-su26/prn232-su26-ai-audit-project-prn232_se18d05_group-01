@@ -5,13 +5,20 @@ using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
 using PlayCourt.Infrastructure.Data;
-using PlayCourt.Infrastructure.Helpers;
 
 namespace PlayCourt.Infrastructure.Services
 {
     public sealed class VenueService : IVenueService
     {
         private readonly PlayCourtDbContext _dbContext;
+
+        private static readonly Dictionary<VenueStatus, HashSet<VenueStatus>> _allowedTransitions = new()
+        {
+            [VenueStatus.Pending] = new() { VenueStatus.Approved, VenueStatus.Rejected },
+            [VenueStatus.Approved] = new() { VenueStatus.Suspended },
+            [VenueStatus.Rejected] = new(),
+            [VenueStatus.Suspended] = new() { VenueStatus.Approved },
+        };
 
         public VenueService(PlayCourtDbContext dbContext)
         {
@@ -67,7 +74,7 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<VenueResponseDto>.Ok(
-                VenueMapper.MapToResponse(venue),
+                MapToResponse(venue),
                 "Venue created successfully.");
         }
 
@@ -90,7 +97,7 @@ namespace PlayCourt.Infrastructure.Services
                 .ToListAsync();
 
             return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(
-                venues.Select(VenueMapper.MapToResponse).ToList(),
+                venues.Select(MapToResponse).ToList(),
                 "Venues retrieved successfully.");
         }
 
@@ -120,7 +127,7 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             return ApiResponse<VenueResponseDto>.Ok(
-                VenueMapper.MapToResponse(venue),
+                MapToResponse(venue),
                 "Venue retrieved successfully.");
         }
 
@@ -172,7 +179,7 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<VenueResponseDto>.Ok(
-                VenueMapper.MapToResponse(venue),
+                MapToResponse(venue),
                 "Venue updated successfully.");
         }
 
@@ -242,7 +249,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            var result = venues.Select(VenueMapper.MapToResponse).ToList();
+            var result = venues.Select(MapToResponse).ToList();
 
             return PagedResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(
                 result,
@@ -265,10 +272,109 @@ namespace PlayCourt.Infrastructure.Services
             if (venue is null)
                 return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
 
-            return ApiResponse<VenueResponseDto>.Ok(VenueMapper.MapToResponse(venue), "Venue retrieved successfully.");
+            return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
         }
 
-        public async Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, string imageUrl, bool isCover)
+        public async Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
+            VenueStatus? status = null)
+        {
+            if (status.HasValue && !Enum.IsDefined(status.Value))
+            {
+                return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Fail("Venue status is invalid.");
+            }
+
+            var query = _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .AsQueryable();
+
+            if (status.HasValue)
+            {
+                query = query.Where(v => v.Status == status.Value);
+            }
+
+            var venues = await query
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+
+            return ApiResponse<IReadOnlyCollection<VenueResponseDto>>.Ok(
+                venues.Select(MapToResponse).ToList(),
+                "Venues retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueResponseDto>> GetVenueForAdminByIdAsync(int venueId)
+        {
+            if (venueId <= 0)
+            {
+                return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
+            }
+
+            var venue = await _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId);
+
+            if (venue is null)
+            {
+                return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
+            }
+
+            return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueResponseDto>> UpdateVenueStatusAsync(
+            int venueId,
+            UpdateVenueStatusRequestDto request)
+        {
+            if (venueId <= 0)
+            {
+                return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
+            }
+
+            if (!Enum.IsDefined(request.Status))
+            {
+                return ApiResponse<VenueResponseDto>.Fail("Venue status is invalid.");
+            }
+
+            var venue = await _dbContext.Venues
+                .Include(v => v.Images)
+                .Include(v => v.VenueAmenities)
+                    .ThenInclude(va => va.Amenity)
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId);
+
+            if (venue is null)
+            {
+                return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
+            }
+
+            if (!_allowedTransitions.TryGetValue(venue.Status, out var allowed) ||
+                !allowed.Contains(request.Status))
+            {
+                var allowedStatusList = allowed != null
+                    ? string.Join(", ", allowed)
+                    : "none";
+                return ApiResponse<VenueResponseDto>.Fail(
+                    $"Cannot transition venue from '{venue.Status}' to '{request.Status}'. " +
+                    $"Allowed transitions from '{venue.Status}': [{allowedStatusList}].");
+            }
+
+            venue.Status = request.Status;
+            venue.UpdatedAt = DateTimeOffset.Now;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<VenueResponseDto>.Ok(
+                MapToResponse(venue),
+                $"Venue status changed to '{request.Status}' successfully.");
+        }
+
+        public async Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, AddVenueImageRequestDto request)
         {
             var ownerProfile = await FindCourtOwnerProfileAsync(userId);
             if (ownerProfile is null) return ApiResponse<VenueImageDto>.Fail("Court owner profile not found.");
@@ -276,13 +382,19 @@ namespace PlayCourt.Infrastructure.Services
             var venue = await _dbContext.Venues.FirstOrDefaultAsync(v => v.Id == venueId && v.CourtOwnerProfileId == ownerProfile.Id);
             if (venue is null) return ApiResponse<VenueImageDto>.Fail("Venue not found.");
 
-            if (isCover)
+            var imageUrl = NormalizeOptional(request.ImageUrl);
+            if (imageUrl is null)
+            {
+                return ApiResponse<VenueImageDto>.Fail("ImageUrl is required.");
+            }
+
+            if (request.IsCover)
             {
                 var existingCover = await _dbContext.VenueImages.FirstOrDefaultAsync(i => i.VenueId == venueId && i.IsCover);
                 if (existingCover != null) existingCover.IsCover = false;
             }
 
-            var image = new VenueImage { VenueId = venueId, ImageUrl = imageUrl, IsCover = isCover };
+            var image = new VenueImage { VenueId = venueId, ImageUrl = imageUrl, IsCover = request.IsCover };
             _dbContext.VenueImages.Add(image);
             await _dbContext.SaveChangesAsync();
 
@@ -525,7 +637,7 @@ namespace PlayCourt.Infrastructure.Services
                     UserProfileId = favorite.UserProfileId,
                     VenueId = favorite.VenueId,
                     CreatedAt = favorite.CreatedAt,
-                    Venue = VenueMapper.MapToResponse(venue),
+                Venue = MapToResponse(venue),
                 },
                 "Venue added to favorites.");
         }
@@ -582,7 +694,7 @@ namespace PlayCourt.Infrastructure.Services
                 UserProfileId = f.UserProfileId,
                 VenueId = f.VenueId,
                 CreatedAt = f.CreatedAt,
-                Venue = VenueMapper.MapToResponse(f.Venue),
+                Venue = MapToResponse(f.Venue),
             }).ToList();
 
             return ApiResponse<IReadOnlyCollection<FavoriteVenueResponseDto>>.Ok(
@@ -598,6 +710,48 @@ namespace PlayCourt.Infrastructure.Services
                 .FirstOrDefaultAsync(profile =>
                     profile.UserProfile.UserId == userId &&
                     profile.UserProfile.User.Role == UserRole.CourtOwner);
+        }
+
+        private static VenueResponseDto MapToResponse(Venue venue)
+        {
+            return new VenueResponseDto
+            {
+                Id = venue.Id,
+                CourtOwnerProfileId = venue.CourtOwnerProfileId,
+                Name = venue.Name,
+                Description = venue.Description,
+                Address = venue.Address,
+                Latitude = venue.Latitude,
+                Longitude = venue.Longitude,
+                Phone = venue.Phone,
+                OpenTime = venue.OpenTime,
+                CloseTime = venue.CloseTime,
+                Status = venue.Status.ToString(),
+                CreatedAt = venue.CreatedAt,
+                UpdatedAt = venue.UpdatedAt,
+                Images = venue.Images?.Select(i => new VenueImageDto
+                {
+                    Id = i.Id,
+                    VenueId = i.VenueId,
+                    ImageUrl = i.ImageUrl,
+                    IsCover = i.IsCover,
+                    CreatedAt = i.CreatedAt
+                }).ToList() ?? [],
+                Amenities = venue.VenueAmenities?.Select(va => new PlayCourt.Application.DTOs.Amenities.AmenityDto
+                {
+                    Id = va.Amenity.Id,
+                    Name = va.Amenity.Name
+                }).ToList() ?? [],
+                OpeningHours = venue.OpeningHours?.Select(oh => new VenueOpeningHourDto
+                {
+                    Id = oh.Id,
+                    VenueId = oh.VenueId,
+                    DayOfWeek = oh.DayOfWeek,
+                    OpenTime = oh.OpenTime,
+                    CloseTime = oh.CloseTime,
+                    IsClosed = oh.IsClosed
+                }).ToList() ?? []
+            };
         }
 
         private static List<string> ValidateVenueRequest(

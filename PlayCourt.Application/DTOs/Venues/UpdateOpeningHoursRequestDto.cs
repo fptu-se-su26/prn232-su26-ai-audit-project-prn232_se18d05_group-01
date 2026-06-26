@@ -5,5 +5,5 @@ namespace PlayCourt.Application.DTOs.Venues;
 public sealed class UpdateOpeningHoursRequestDto
 {
     [Required]
-    public List<VenueOpeningHourDto> OpeningHours { get; set; } = new();
+    public List<OpeningHourRequestDto> OpeningHours { get; set; } = new();
 }

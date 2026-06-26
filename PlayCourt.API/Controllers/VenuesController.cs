@@ -5,6 +5,7 @@ using PlayCourt.API.Authorization;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Venues;
 using PlayCourt.Application.Interfaces;
+using PlayCourt.Domain.Enums;
 
 namespace PlayCourt.API.Controllers
 {
@@ -33,6 +34,34 @@ namespace PlayCourt.API.Controllers
         {
             var response = await _venueService.GetPublicVenueByIdAsync(id);
             if (!response.Success) return NotFound(response);
+            return Ok(response);
+        }
+
+        [HttpGet("admin")]
+        [Authorize(Policy = ApiPolicies.Admin)]
+        public async Task<IActionResult> GetAllForAdmin([FromQuery] VenueStatus? status = null)
+        {
+            var response = await _venueService.GetAllVenuesForAdminAsync(status);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpGet("admin/{id:int}")]
+        [Authorize(Policy = ApiPolicies.Admin)]
+        public async Task<IActionResult> GetByIdForAdmin(int id)
+        {
+            var response = await _venueService.GetVenueForAdminByIdAsync(id);
+            if (!response.Success) return NotFound(response);
+            return Ok(response);
+        }
+
+        [HttpPatch("{id:int}/status")]
+        [Authorize(Policy = ApiPolicies.Admin)]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateVenueStatusRequestDto request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<VenueResponseDto>.Fail("Validation failed", GetModelStateErrors()));
+            var response = await _venueService.UpdateVenueStatusAsync(id, request);
+            if (!response.Success) return HandleVenueStatusError(response);
             return Ok(response);
         }
 
@@ -83,12 +112,11 @@ namespace PlayCourt.API.Controllers
 
         [HttpPost("{id:int}/images")]
         [Authorize(Policy = ApiPolicies.CourtOwner)]
-        public async Task<IActionResult> AddImage(int id, [FromQuery] string imageUrl, [FromQuery] bool isCover = false)
+        public async Task<IActionResult> AddImage(int id, [FromBody] AddVenueImageRequestDto request)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                return BadRequest(ApiResponse<object>.Fail("imageUrl không được để trống."));
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<VenueImageDto>.Fail("Validation failed", GetModelStateErrors()));
             if (!TryGetCurrentUserId(out var userId)) return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
-            var response = await _venueService.AddImageAsync(userId, id, imageUrl.Trim(), isCover);
+            var response = await _venueService.AddImageAsync(userId, id, request);
             if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
@@ -228,6 +256,17 @@ namespace PlayCourt.API.Controllers
             return ModelState.Values
                 .SelectMany(value => value.Errors)
                 .Select(error => error.ErrorMessage);
+        }
+
+        private IActionResult HandleVenueStatusError(ApiResponse<VenueResponseDto> response)
+        {
+            if (response.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(response);
+
+            if (response.Message.Contains("Cannot transition", StringComparison.OrdinalIgnoreCase))
+                return Conflict(response);
+
+            return BadRequest(response);
         }
     }
 }
