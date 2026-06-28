@@ -287,7 +287,7 @@ namespace PlayCourt.Infrastructure.Services
                     "Maximum participants cannot be lower than the current participant count.");
             }
 
-            var validationError = await ValidateMatchRequestAsync(profile, request);
+            var validationError = await ValidateMatchRequestAsync(profile, request, match.Id);
             if (validationError is not null)
             {
                 return ApiResponse<MatchResponseDto>.Fail(validationError);
@@ -336,6 +336,12 @@ namespace PlayCourt.Infrastructure.Services
             if (match.Status is MatchStatus.Cancelled or MatchStatus.Completed)
             {
                 return ApiResponse<MatchResponseDto>.Fail("This match can no longer be cancelled.");
+            }
+
+            if (match.StartAt <= DateTimeOffset.UtcNow)
+            {
+                return ApiResponse<MatchResponseDto>.Fail(
+                    "A match cannot be cancelled after it has started.");
             }
 
             match.Status = MatchStatus.Cancelled;
@@ -529,6 +535,35 @@ namespace PlayCourt.Infrastructure.Services
                     return ApiResponse<MatchJoinRequestDto>.Fail("The match is no longer available.");
                 }
 
+                var player = await _context.UserProfiles
+                    .Include(item => item.User)
+                    .Include(item => item.PlayerSports)
+                    .FirstOrDefaultAsync(item => item.Id == joinRequest.PlayerId);
+                if (player is null ||
+                    player.User.Role != UserRole.Player ||
+                    player.User.Status != UserStatus.Active)
+                {
+                    return ApiResponse<MatchJoinRequestDto>.Fail(
+                        "The player is no longer active.");
+                }
+
+                var playerSport = player.PlayerSports
+                    .FirstOrDefault(item => item.SportId == match.SportId);
+                if (playerSport is null)
+                {
+                    return ApiResponse<MatchJoinRequestDto>.Fail(
+                        "The player no longer has this sport in their profile.");
+                }
+
+                if (!IsSkillCompatible(
+                        playerSport.SkillLevel,
+                        match.RequiredSkillLevelMin,
+                        match.RequiredSkillLevelMax))
+                {
+                    return ApiResponse<MatchJoinRequestDto>.Fail(
+                        "The player's skill level no longer meets this match's requirements.");
+                }
+
                 match.Participants.Add(new MatchParticipant
                 {
                     PlayerId = joinRequest.PlayerId,
@@ -571,6 +606,18 @@ namespace PlayCourt.Infrastructure.Services
             {
                 return ApiResponse<MatchResponseDto>.Fail(
                     "The host cannot leave the match; cancel it instead.");
+            }
+
+            if (match.Status is not (MatchStatus.Open or MatchStatus.Full))
+            {
+                return ApiResponse<MatchResponseDto>.Fail(
+                    "Participants cannot leave a cancelled or completed match.");
+            }
+
+            if (match.StartAt <= DateTimeOffset.UtcNow)
+            {
+                return ApiResponse<MatchResponseDto>.Fail(
+                    "Participants cannot leave after the match has started.");
             }
 
             var participant = match.Participants.FirstOrDefault(item => item.PlayerId == profile.Id);
@@ -881,7 +928,8 @@ namespace PlayCourt.Infrastructure.Services
 
         private async Task<string?> ValidateMatchRequestAsync(
             UserProfile profile,
-            CreateMatchRequestDto request)
+            CreateMatchRequestDto request,
+            int? excludedMatchId = null)
         {
             if (request.MaxParticipants is < 2 or > 100)
             {
@@ -936,6 +984,38 @@ namespace PlayCourt.Infrastructure.Services
                 if (!validCourt)
                 {
                     return "The selected court is unavailable or does not support this sport.";
+                }
+
+                var overlapsBooking = await _context.Bookings.AnyAsync(item =>
+                    item.CourtId == request.CourtId.Value &&
+                    (item.Status == BookingStatus.Pending ||
+                     item.Status == BookingStatus.Confirmed) &&
+                    item.StartAt < request.EndAt &&
+                    item.EndAt > request.StartAt);
+                if (overlapsBooking)
+                {
+                    return "The selected court already has an active booking during this time.";
+                }
+
+                var overlapsSchedule = await _context.CourtSchedules.AnyAsync(item =>
+                    item.CourtId == request.CourtId.Value &&
+                    item.StartAt < request.EndAt &&
+                    item.EndAt > request.StartAt);
+                if (overlapsSchedule)
+                {
+                    return "The selected court is blocked during this time.";
+                }
+
+                var overlapsMatch = await _context.Matches.AnyAsync(item =>
+                    (!excludedMatchId.HasValue || item.Id != excludedMatchId.Value) &&
+                    item.CourtId == request.CourtId.Value &&
+                    (item.Status == MatchStatus.Open ||
+                     item.Status == MatchStatus.Full) &&
+                    item.StartAt < request.EndAt &&
+                    item.EndAt > request.StartAt);
+                if (overlapsMatch)
+                {
+                    return "The selected court already has another match during this time.";
                 }
             }
             else if (string.IsNullOrWhiteSpace(request.LocationDescription))

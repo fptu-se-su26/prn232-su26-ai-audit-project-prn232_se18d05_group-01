@@ -216,6 +216,262 @@ public sealed class MatchServiceTests
         Assert.DoesNotContain(context.MatchParticipants, item => item.PlayerId == player.Id);
     }
 
+    [Fact]
+    public async Task CreateAsync_WhenCourtOverlapsActiveBooking_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var court = AddAvailableCourt(context, sport);
+        await context.SaveChangesAsync();
+        var request = CreateRequest(sport.Id);
+        request.CourtId = court.Id;
+        request.LocationDescription = null;
+        context.Bookings.Add(new Booking
+        {
+            UserProfileId = host.Id,
+            CourtId = court.Id,
+            StartAt = request.StartAt.AddMinutes(30),
+            EndAt = request.EndAt.AddMinutes(30),
+            TotalPrice = 100_000,
+            PlatformFee = 10_000,
+            OwnerEarnings = 90_000,
+            Status = BookingStatus.Confirmed
+        });
+        await context.SaveChangesAsync();
+
+        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+
+        Assert.False(response.Success);
+        Assert.Contains("active booking", response.Message);
+        Assert.Empty(context.Matches);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenCourtOverlapsBlockedSchedule_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var court = AddAvailableCourt(context, sport);
+        await context.SaveChangesAsync();
+        var request = CreateRequest(sport.Id);
+        request.CourtId = court.Id;
+        request.LocationDescription = null;
+        context.CourtSchedules.Add(new CourtSchedule
+        {
+            CourtId = court.Id,
+            StartAt = request.StartAt.AddMinutes(30),
+            EndAt = request.EndAt.AddMinutes(30),
+            Reason = "Maintenance"
+        });
+        await context.SaveChangesAsync();
+
+        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+
+        Assert.False(response.Success);
+        Assert.Contains("blocked", response.Message);
+        Assert.Empty(context.Matches);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenCourtOverlapsAnotherActiveMatch_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var otherHost = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var court = AddAvailableCourt(context, sport);
+        var existingMatch = AddMatch(context, otherHost, sport, "Da Nang");
+        existingMatch.Court = court;
+        await context.SaveChangesAsync();
+        var request = CreateRequest(sport.Id);
+        request.CourtId = court.Id;
+        request.LocationDescription = null;
+
+        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+
+        Assert.False(response.Success);
+        Assert.Contains("another match", response.Message);
+        Assert.Single(context.Matches);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCourtAndTimeAreUnchanged_DoesNotConflictWithItself()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var court = AddAvailableCourt(context, sport);
+        var match = AddMatch(context, host, sport, "Da Nang");
+        match.Court = court;
+        await context.SaveChangesAsync();
+        var request = new UpdateMatchRequestDto
+        {
+            SportId = sport.Id,
+            CourtId = court.Id,
+            StartAt = match.StartAt,
+            EndAt = match.EndAt,
+            RequiredSkillLevelMin = 0,
+            RequiredSkillLevelMax = 2,
+            MaxParticipants = match.MaxParticipants,
+            Description = "Updated"
+        };
+
+        var response = await new MatchService(context).UpdateAsync(host.UserId, match.Id, request);
+
+        Assert.True(response.Success);
+        Assert.Equal("Updated", response.Data!.Description);
+    }
+
+    [Fact]
+    public async Task ApproveJoinRequest_WhenPlayerBecameInactive_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        await context.SaveChangesAsync();
+        var service = new MatchService(context);
+        var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
+        player.User.Status = UserStatus.Inactive;
+        await context.SaveChangesAsync();
+
+        var response = await service.RespondToJoinRequestAsync(
+            host.UserId,
+            match.Id,
+            joinResponse.Data!.Id,
+            new RespondJoinRequestDto { Status = "Approved" });
+
+        Assert.False(response.Success);
+        Assert.Contains("no longer active", response.Message);
+        Assert.DoesNotContain(context.MatchParticipants, item => item.PlayerId == player.Id);
+    }
+
+    [Fact]
+    public async Task ApproveJoinRequest_WhenPlayerRemovedSport_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        await context.SaveChangesAsync();
+        var service = new MatchService(context);
+        var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
+        context.PlayerSports.Remove(player.PlayerSports.Single());
+        await context.SaveChangesAsync();
+
+        var response = await service.RespondToJoinRequestAsync(
+            host.UserId,
+            match.Id,
+            joinResponse.Data!.Id,
+            new RespondJoinRequestDto { Status = "Approved" });
+
+        Assert.False(response.Success);
+        Assert.Contains("no longer has this sport", response.Message);
+        Assert.DoesNotContain(context.MatchParticipants, item => item.PlayerId == player.Id);
+    }
+
+    [Fact]
+    public async Task ApproveJoinRequest_WhenPlayerSkillChangedOutsideRange_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Advanced, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(
+            context,
+            host,
+            sport,
+            "Da Nang",
+            SkillLevel.Intermediate,
+            SkillLevel.Advanced);
+        await context.SaveChangesAsync();
+        var service = new MatchService(context);
+        var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
+        player.PlayerSports.Single().SkillLevel = SkillLevel.Beginner;
+        await context.SaveChangesAsync();
+
+        var response = await service.RespondToJoinRequestAsync(
+            host.UserId,
+            match.Id,
+            joinResponse.Data!.Id,
+            new RespondJoinRequestDto { Status = "Approved" });
+
+        Assert.False(response.Success);
+        Assert.Contains("skill level no longer meets", response.Message);
+        Assert.DoesNotContain(context.MatchParticipants, item => item.PlayerId == player.Id);
+    }
+
+    [Theory]
+    [InlineData(MatchStatus.Cancelled)]
+    [InlineData(MatchStatus.Completed)]
+    public async Task LeaveAsync_WhenMatchIsClosed_ReturnsFailure(MatchStatus status)
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        match.Participants.Add(new MatchParticipant
+        {
+            Player = player,
+            JoinedAt = DateTimeOffset.UtcNow
+        });
+        match.Status = status;
+        await context.SaveChangesAsync();
+
+        var response = await new MatchService(context).LeaveAsync(player.UserId, match.Id);
+
+        Assert.False(response.Success);
+        Assert.Contains("cannot leave", response.Message);
+        Assert.Contains(context.MatchParticipants, item => item.PlayerId == player.Id);
+    }
+
+    [Fact]
+    public async Task LeaveAsync_AfterMatchStarted_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        match.StartAt = DateTimeOffset.UtcNow.AddHours(-1);
+        match.EndAt = DateTimeOffset.UtcNow.AddHours(1);
+        match.Participants.Add(new MatchParticipant
+        {
+            Player = player,
+            JoinedAt = DateTimeOffset.UtcNow.AddDays(-1)
+        });
+        await context.SaveChangesAsync();
+
+        var response = await new MatchService(context).LeaveAsync(player.UserId, match.Id);
+
+        Assert.False(response.Success);
+        Assert.Contains("after the match has started", response.Message);
+        Assert.Contains(context.MatchParticipants, item => item.PlayerId == player.Id);
+    }
+
+    [Fact]
+    public async Task CancelAsync_AfterMatchStarted_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        match.StartAt = DateTimeOffset.UtcNow.AddHours(-1);
+        match.EndAt = DateTimeOffset.UtcNow.AddHours(1);
+        await context.SaveChangesAsync();
+
+        var response = await new MatchService(context).CancelAsync(host.UserId, match.Id);
+
+        Assert.False(response.Success);
+        Assert.Contains("after it has started", response.Message);
+        Assert.Equal(MatchStatus.Open, match.Status);
+    }
+
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()
@@ -296,6 +552,43 @@ public sealed class MatchServiceTests
         });
         context.Matches.Add(match);
         return match;
+    }
+
+    private static Court AddAvailableCourt(PlayCourtDbContext context, Sport sport)
+    {
+        var ownerProfile = new UserProfile
+        {
+            User = new User
+            {
+                Email = $"{Guid.NewGuid():N}@example.com",
+                PasswordHash = "hash",
+                Role = UserRole.CourtOwner,
+                Status = UserStatus.Active
+            },
+            FullName = "Court Owner"
+        };
+        var courtOwner = new CourtOwnerProfile
+        {
+            UserProfile = ownerProfile,
+            BusinessName = "Test Venue Owner",
+            VerificationStatus = CourtOwnerVerificationStatus.Approved
+        };
+        var venue = new Venue
+        {
+            CourtOwnerProfile = courtOwner,
+            Name = "Test Venue",
+            Address = "Da Nang",
+            Status = VenueStatus.Approved
+        };
+        var court = new Court
+        {
+            Venue = venue,
+            Sport = sport,
+            Name = "Court 1",
+            Status = CourtStatus.Available
+        };
+        context.Courts.Add(court);
+        return court;
     }
 
     private static CreateMatchRequestDto CreateRequest(int sportId, short maxParticipants = 4)
