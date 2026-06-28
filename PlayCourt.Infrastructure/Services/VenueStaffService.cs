@@ -5,7 +5,6 @@ using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
 using PlayCourt.Infrastructure.Data;
-using PlayCourt.Infrastructure.Helpers;
 
 namespace PlayCourt.Infrastructure.Services
 {
@@ -78,7 +77,7 @@ namespace PlayCourt.Infrastructure.Services
                             .ThenInclude(u => u.UserProfile)
                         .FirstOrDefaultAsync(vs => vs.Id == existingStaff.Id);
 
-                    return ApiResponse<VenueStaffResponseDto>.Ok(VenueStaffMapper.MapToResponse(reactivatedStaff!), "Venue staff reactivated successfully.");
+                    return ApiResponse<VenueStaffResponseDto>.Ok(MapToResponse(reactivatedStaff!), "Venue staff reactivated successfully.");
                 }
             }
 
@@ -102,7 +101,7 @@ namespace PlayCourt.Infrastructure.Services
                     .ThenInclude(u => u.UserProfile)
                 .FirstOrDefaultAsync(vs => vs.Id == newStaff.Id);
 
-            return ApiResponse<VenueStaffResponseDto>.Ok(VenueStaffMapper.MapToResponse(savedStaff!), "Venue staff added successfully.");
+            return ApiResponse<VenueStaffResponseDto>.Ok(MapToResponse(savedStaff!), "Venue staff added successfully.");
         }
 
         public async Task<ApiResponse<IReadOnlyCollection<VenueStaffResponseDto>>> GetVenueStaffAsync(int userId, int venueId)
@@ -136,7 +135,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Where(vs => vs.VenueId == venueId && vs.IsActive)
                 .ToListAsync();
 
-            var dtos = staffs.Select(VenueStaffMapper.MapToResponse).ToList();
+            var dtos = staffs.Select(MapToResponse).ToList();
             return ApiResponse<IReadOnlyCollection<VenueStaffResponseDto>>.Ok(dtos, "Venue staff retrieved successfully.");
         }
 
@@ -170,6 +169,22 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<object>.Ok(null, "Staff member removed successfully.");
+        }
+
+        private static VenueStaffResponseDto MapToResponse(VenueStaff staff)
+        {
+            return new VenueStaffResponseDto
+            {
+                Id = staff.Id,
+                VenueId = staff.VenueId,
+                VenueName = staff.Venue?.Name ?? string.Empty,
+                UserId = staff.UserId,
+                FullName = staff.User?.UserProfile?.FullName ?? string.Empty,
+                Email = staff.User?.Email ?? string.Empty,
+                Role = staff.Role.ToString(),
+                IsActive = staff.IsActive,
+                CreatedAt = staff.CreatedAt
+            };
         }
     }
 }

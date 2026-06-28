@@ -5,7 +5,6 @@ using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
 using PlayCourt.Infrastructure.Data;
-using PlayCourt.Infrastructure.Helpers;
 
 namespace PlayCourt.Infrastructure.Services
 {
@@ -101,7 +100,7 @@ namespace PlayCourt.Infrastructure.Services
                         .ThenInclude(c => c.Venue)
                 .FirstOrDefaultAsync(r => r.Id == review.Id);
 
-            return ApiResponse<ReviewResponseDto>.Ok(ReviewMapper.MapToResponse(savedReview!), "Review created successfully.");
+            return ApiResponse<ReviewResponseDto>.Ok(MapToResponse(savedReview!), "Review created successfully.");
         }
 
         public async Task<PagedResponse<IReadOnlyCollection<ReviewResponseDto>>> GetVenueReviewsAsync(int venueId, int page, int pageSize)
@@ -122,7 +121,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            var dtos = reviews.Select(ReviewMapper.MapToResponse).ToList();
+            var dtos = reviews.Select(MapToResponse).ToList();
             return PagedResponse<IReadOnlyCollection<ReviewResponseDto>>.Ok(dtos, totalCount, page, pageSize, "Reviews retrieved successfully.");
         }
 
@@ -144,7 +143,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            var dtos = reviews.Select(ReviewMapper.MapToResponse).ToList();
+            var dtos = reviews.Select(MapToResponse).ToList();
             return PagedResponse<IReadOnlyCollection<ReviewResponseDto>>.Ok(dtos, totalCount, page, pageSize, "Reviews retrieved successfully.");
         }
 
@@ -191,7 +190,7 @@ namespace PlayCourt.Infrastructure.Services
             review.UpdatedAt = DateTimeOffset.Now;
 
             await _dbContext.SaveChangesAsync();
-            return ApiResponse<ReviewResponseDto>.Ok(ReviewMapper.MapToResponse(review), "Review updated successfully.");
+            return ApiResponse<ReviewResponseDto>.Ok(MapToResponse(review), "Review updated successfully.");
         }
 
         public async Task<ApiResponse<object>> DeleteReviewAsync(int userId, int reviewId)
@@ -279,7 +278,7 @@ namespace PlayCourt.Infrastructure.Services
             review.UpdatedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
 
-            return ApiResponse<ReviewResponseDto>.Ok(ReviewMapper.MapToResponse(review), "Review moderated successfully.");
+            return ApiResponse<ReviewResponseDto>.Ok(MapToResponse(review), "Review moderated successfully.");
         }
 
         public async Task<ApiResponse<ReviewImageDto>> AddReviewImageAsync(int userId, int reviewId, string imageUrl, short displayOrder)
@@ -467,8 +466,37 @@ namespace PlayCourt.Infrastructure.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            var dtos = reviews.Select(ReviewMapper.MapToResponse).ToList();
+            var dtos = reviews.Select(MapToResponse).ToList();
             return PagedResponse<IReadOnlyCollection<ReviewResponseDto>>.Ok(dtos, totalCount, page, pageSize, "Reviews retrieved successfully.");
+        }
+
+        private static ReviewResponseDto MapToResponse(Review review)
+        {
+            return new ReviewResponseDto
+            {
+                Id = review.Id,
+                PlayerId = review.PlayerId,
+                PlayerName = review.Player?.FullName ?? string.Empty,
+                PlayerAvatar = review.Player?.AvatarUrl,
+                BookingId = review.BookingId,
+                VenueId = review.Booking?.Court?.VenueId ?? 0,
+                VenueName = review.Booking?.Court?.Venue?.Name ?? string.Empty,
+                CourtId = review.Booking?.CourtId ?? 0,
+                CourtName = review.Booking?.Court?.Name ?? string.Empty,
+                Rating = review.Rating,
+                ReviewText = review.ReviewText,
+                Status = review.Status.ToString(),
+                CreatedAt = review.CreatedAt,
+                UpdatedAt = review.UpdatedAt,
+                Images = review.Images?.Select(i => new ReviewImageDto
+                {
+                    Id = i.Id,
+                    ReviewId = i.ReviewId,
+                    ImageUrl = i.ImageUrl,
+                    DisplayOrder = i.DisplayOrder,
+                    CreatedAt = i.CreatedAt
+                }).ToList() ?? []
+            };
         }
     }
 }
