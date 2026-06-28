@@ -34,6 +34,8 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<ICourtScheduleService, CourtScheduleService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IVenueStaffService, VenueStaffService>();
             services.Configure<EmailSettings>(settings =>
             {
                 var emailSection = configuration.GetSection("EmailSettings");
