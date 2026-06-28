@@ -19,6 +19,11 @@ namespace PlayCourt.Infrastructure.Services
 
         public async Task<ApiResponse<VenueStaffResponseDto>> AddStaffAsync(int ownerUserId, int venueId, AddVenueStaffRequestDto request)
         {
+            if (!Enum.IsDefined(typeof(VenueStaffRole), request.Role))
+            {
+                return ApiResponse<VenueStaffResponseDto>.Fail("Role value is invalid.");
+            }
+
             // Find venue and check owner
             var venue = await _dbContext.Venues
                 .Include(v => v.CourtOwnerProfile)
@@ -36,9 +41,10 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             // Find user to add as staff
+            var normalizedEmail = request.Email.Trim().ToLower();
             var staffUser = await _dbContext.Users
                 .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && !u.IsDeleted);
 
             if (staffUser == null)
             {

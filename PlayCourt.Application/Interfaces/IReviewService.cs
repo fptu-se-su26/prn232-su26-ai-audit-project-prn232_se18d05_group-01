@@ -13,7 +13,7 @@ namespace PlayCourt.Application.Interfaces
         Task<ApiResponse<object>> DeleteReviewAsync(int userId, int reviewId);
         Task<ApiResponse<object>> ReportReviewAsync(int userId, int reviewId);
         Task<ApiResponse<ReviewResponseDto>> ModerateReviewAsync(int reviewId, ReviewStatus status);
-        Task<ApiResponse<ReviewImageDto>> AddReviewImageAsync(int userId, int reviewId, string imageUrl, short displayOrder);
+        Task<ApiResponse<ReviewImageDto>> AddReviewImageAsync(int userId, int reviewId, AddReviewImageRequestDto request);
         Task<ApiResponse<object>> DeleteReviewImageAsync(int userId, int reviewId, int imageId);
         Task<ApiResponse<ReviewStatsDto>> GetVenueStatsAsync(int venueId);
         Task<ApiResponse<ReviewStatsDto>> GetCourtStatsAsync(int courtId);

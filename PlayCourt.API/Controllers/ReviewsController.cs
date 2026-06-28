@@ -91,7 +91,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpPost("{id:int}/report")]
-        [Authorize(Policy = ApiPolicies.Player)]
+        [Authorize]
         public async Task<IActionResult> Report(int id)
         {
             if (!TryGetCurrentUserId(out var userId))
@@ -117,15 +117,15 @@ namespace PlayCourt.API.Controllers
 
         [HttpPost("{id:int}/images")]
         [Authorize(Policy = ApiPolicies.Player)]
-        public async Task<IActionResult> AddImage(int id, [FromQuery] string imageUrl, [FromQuery] short displayOrder = 0)
+        public async Task<IActionResult> AddImage(int id, [FromBody] AddReviewImageRequestDto request)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                return BadRequest(ApiResponse<object>.Fail("imageUrl không được để trống."));
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", GetModelStateErrors()));
 
             if (!TryGetCurrentUserId(out var userId))
                 return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
 
-            var response = await _reviewService.AddReviewImageAsync(userId, id, imageUrl.Trim(), displayOrder);
+            var response = await _reviewService.AddReviewImageAsync(userId, id, request);
             if (!response.Success)
                 return BadRequest(response);
 

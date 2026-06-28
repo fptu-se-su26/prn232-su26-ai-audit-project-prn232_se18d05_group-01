@@ -89,7 +89,14 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             _dbContext.Reviews.Add(review);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return ApiResponse<ReviewResponseDto>.Fail("Người dùng đã đánh giá sân này.");
+            }
 
             // Load navigations for mapper
             var savedReview = await _dbContext.Reviews
@@ -106,7 +113,7 @@ namespace PlayCourt.Infrastructure.Services
         public async Task<PagedResponse<IReadOnlyCollection<ReviewResponseDto>>> GetVenueReviewsAsync(int venueId, int page, int pageSize)
         {
             var query = _dbContext.Reviews
-                .Where(r => r.Booking.Court.VenueId == venueId && r.Status == ReviewStatus.Visible && !r.IsDeleted);
+                .Where(r => r.Booking.Court.VenueId == venueId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
             var totalCount = await query.CountAsync();
 
@@ -128,7 +135,7 @@ namespace PlayCourt.Infrastructure.Services
         public async Task<PagedResponse<IReadOnlyCollection<ReviewResponseDto>>> GetCourtReviewsAsync(int courtId, int page, int pageSize)
         {
             var query = _dbContext.Reviews
-                .Where(r => r.Booking.CourtId == courtId && r.Status == ReviewStatus.Visible && !r.IsDeleted);
+                .Where(r => r.Booking.CourtId == courtId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
             var totalCount = await query.CountAsync();
 
@@ -261,6 +268,11 @@ namespace PlayCourt.Infrastructure.Services
 
         public async Task<ApiResponse<ReviewResponseDto>> ModerateReviewAsync(int reviewId, ReviewStatus status)
         {
+            if (!Enum.IsDefined(typeof(ReviewStatus), status))
+            {
+                return ApiResponse<ReviewResponseDto>.Fail("Invalid review status value.");
+            }
+
             var review = await _dbContext.Reviews
                 .Include(r => r.Player)
                 .Include(r => r.Images)
@@ -281,7 +293,7 @@ namespace PlayCourt.Infrastructure.Services
             return ApiResponse<ReviewResponseDto>.Ok(MapToResponse(review), "Review moderated successfully.");
         }
 
-        public async Task<ApiResponse<ReviewImageDto>> AddReviewImageAsync(int userId, int reviewId, string imageUrl, short displayOrder)
+        public async Task<ApiResponse<ReviewImageDto>> AddReviewImageAsync(int userId, int reviewId, AddReviewImageRequestDto request)
         {
             var playerProfile = await _dbContext.UserProfiles
                 .FirstOrDefaultAsync(up => up.UserId == userId);
@@ -305,6 +317,11 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<ReviewImageDto>.Fail("You are not authorized to add images to this review.");
             }
 
+            if (review.Status != ReviewStatus.Visible)
+            {
+                return ApiResponse<ReviewImageDto>.Fail("Cannot edit a review that is reported or hidden.");
+            }
+
             if (review.Images.Count >= 5)
             {
                 return ApiResponse<ReviewImageDto>.Fail("You can upload at most 5 images.");
@@ -313,8 +330,8 @@ namespace PlayCourt.Infrastructure.Services
             var image = new ReviewImage
             {
                 ReviewId = reviewId,
-                ImageUrl = imageUrl.Trim(),
-                DisplayOrder = displayOrder,
+                ImageUrl = request.ImageUrl.Trim(),
+                DisplayOrder = request.DisplayOrder,
                 CreatedAt = DateTimeOffset.Now
             };
 
@@ -357,6 +374,11 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<object>.Fail("You are not authorized to delete this image.");
             }
 
+            if (image.Review.Status != ReviewStatus.Visible)
+            {
+                return ApiResponse<object>.Fail("Cannot edit a review that is reported or hidden.");
+            }
+
             _dbContext.ReviewImages.Remove(image);
             await _dbContext.SaveChangesAsync();
 
@@ -365,13 +387,16 @@ namespace PlayCourt.Infrastructure.Services
 
         public async Task<ApiResponse<ReviewStatsDto>> GetVenueStatsAsync(int venueId)
         {
-            var reviews = await _dbContext.Reviews
-                .Where(r => r.Booking.Court.VenueId == venueId && r.Status == ReviewStatus.Visible && !r.IsDeleted)
-                .Select(r => r.Rating)
-                .ToListAsync();
+            var query = _dbContext.Reviews
+                .Where(r => r.Booking.Court.VenueId == venueId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
-            var totalCount = reviews.Count;
-            var averageRating = totalCount > 0 ? reviews.Average() : 0.0m;
+            var totalCount = await query.CountAsync();
+            var averageRating = totalCount > 0 ? (decimal)await query.AverageAsync(r => (double)r.Rating) : 0.0m;
+
+            var distributionGroups = await query
+                .GroupBy(r => r.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .ToListAsync();
 
             var distribution = new Dictionary<decimal, int>
             {
@@ -386,11 +411,11 @@ namespace PlayCourt.Infrastructure.Services
                 [5.0m] = 0
             };
 
-            foreach (var rating in reviews)
+            foreach (var group in distributionGroups)
             {
-                if (distribution.ContainsKey(rating))
+                if (distribution.ContainsKey(group.Rating))
                 {
-                    distribution[rating]++;
+                    distribution[group.Rating] = group.Count;
                 }
             }
 
@@ -404,13 +429,16 @@ namespace PlayCourt.Infrastructure.Services
 
         public async Task<ApiResponse<ReviewStatsDto>> GetCourtStatsAsync(int courtId)
         {
-            var reviews = await _dbContext.Reviews
-                .Where(r => r.Booking.CourtId == courtId && r.Status == ReviewStatus.Visible && !r.IsDeleted)
-                .Select(r => r.Rating)
-                .ToListAsync();
+            var query = _dbContext.Reviews
+                .Where(r => r.Booking.CourtId == courtId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
-            var totalCount = reviews.Count;
-            var averageRating = totalCount > 0 ? reviews.Average() : 0.0m;
+            var totalCount = await query.CountAsync();
+            var averageRating = totalCount > 0 ? (decimal)await query.AverageAsync(r => (double)r.Rating) : 0.0m;
+
+            var distributionGroups = await query
+                .GroupBy(r => r.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .ToListAsync();
 
             var distribution = new Dictionary<decimal, int>
             {
@@ -425,11 +453,11 @@ namespace PlayCourt.Infrastructure.Services
                 [5.0m] = 0
             };
 
-            foreach (var rating in reviews)
+            foreach (var group in distributionGroups)
             {
-                if (distribution.ContainsKey(rating))
+                if (distribution.ContainsKey(group.Rating))
                 {
-                    distribution[rating]++;
+                    distribution[group.Rating] = group.Count;
                 }
             }
 

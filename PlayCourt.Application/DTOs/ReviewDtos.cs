@@ -25,6 +25,16 @@ namespace PlayCourt.Application.DTOs
         public string? ReviewText { get; set; }
     }
 
+    public class AddReviewImageRequestDto
+    {
+        [Required]
+        [Url]
+        public string ImageUrl { get; set; } = string.Empty;
+
+        [Range(0, 100)]
+        public short DisplayOrder { get; set; }
+    }
+
     public class ReviewResponseDto
     {
         public int Id { get; set; }
