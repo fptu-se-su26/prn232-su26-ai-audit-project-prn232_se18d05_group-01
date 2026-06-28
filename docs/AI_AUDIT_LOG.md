@@ -1076,3 +1076,16 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nguyen Phan Huy | 03/06/2026 |
+
+---
+
+## DE190946 - Player Matching (28/06/2026)
+
+| Item | Detail |
+|---|---|
+| Student | Trinh Viet Hoang (DE190946) |
+| Branch | `feature/DE190946-player-matching` |
+| AI support | Read the existing architecture, propose the matching workflow, implement DTO/service/controller code, and generate tests |
+| Human verification | Reviewed authorization and EF relationships; ran `dotnet build` and the full automated test suite |
+| Important correction | Reused a rejected join-request row instead of inserting a duplicate that would violate the SQL Server unique index |
+| Verification result | Build succeeded with 0 warnings; 75/75 tests passed |

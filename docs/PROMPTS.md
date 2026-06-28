@@ -1299,3 +1299,26 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nguyen Phan Huy | 03/06/2026 |
+
+---
+
+## Prompt record - Player Matching (DE190946, 28/06/2026)
+
+### Original request
+
+```text
+Read the README for setup guidance, create branch
+feature/DE190946-player-matching, then implement player matching.
+```
+
+### Context and constraints applied
+
+- ASP.NET Core Web API on .NET 8, EF Core, SQL Server, and the existing layered architecture.
+- Reused `Match`, `MatchParticipant`, `MatchJoinRequest`, `MatchInvitation`, and `PlayerSport`.
+- Used the authenticated user claim instead of accepting host identity from the request.
+- Required build and full regression-test verification.
+
+### Result review
+
+The generated implementation was reviewed against EF Core indexes and corrected so a rejected
+join request is reset to pending rather than inserted as a duplicate `(MatchId, PlayerId)` row.
