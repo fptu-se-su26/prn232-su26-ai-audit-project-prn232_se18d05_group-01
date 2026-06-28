@@ -497,3 +497,22 @@ Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các t
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nguyen Phan Huy | 03/06/2026 |
+
+---
+
+## 28/06/2026 - Player Matching API (DE190946)
+
+### Added
+
+- Match discovery with sport, skill, location, time, status, and pagination filters.
+- Personalized match recommendations based on player sports, skill compatibility, and city.
+- Match creation, detail, update, cancellation, and participant leave flows.
+- Join-request submission, cancellation, host review, approval, and rejection.
+- Candidate-player ranking and invitation send/list/accept/decline flows.
+- Player-only authorization and server-side ownership, capacity, time, court, sport, and skill validation.
+- Nine matching service tests, including the SQL unique-index re-request scenario.
+
+### Verification
+
+- `dotnet build PlayCourt.sln --no-restore`: succeeded with 0 warnings and 0 errors.
+- `dotnet test PlayCourt.sln --no-build --no-restore`: 75/75 tests passed.

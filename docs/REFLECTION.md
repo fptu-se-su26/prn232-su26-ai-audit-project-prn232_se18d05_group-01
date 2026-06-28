@@ -387,3 +387,16 @@ Sinh viên/nhóm hiểu rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |
+
+---
+
+## DE190946 - Player Matching Reflection (28/06/2026)
+
+AI helped turn the broad phrase "player matching" into concrete API workflows while preserving
+the entities and layer boundaries already present in the project. The most important manual
+review was checking behavior that EF Core InMemory cannot reproduce: SQL Server unique indexes.
+That review found and fixed the repeated join-request case before delivery.
+
+The feature was verified through compilation, nine focused service tests, and the complete
+75-test regression suite. The main lesson is that green in-memory tests are necessary but not
+sufficient; database constraints and authorization boundaries still require explicit review.
