@@ -32,6 +32,7 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<ICourtService, CourtService>();
             services.AddScoped<IPricingRuleService, PricingRuleService>();
             services.AddScoped<ICourtScheduleService, CourtScheduleService>();
+            services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
             services.AddScoped<IReviewService, ReviewService>();
