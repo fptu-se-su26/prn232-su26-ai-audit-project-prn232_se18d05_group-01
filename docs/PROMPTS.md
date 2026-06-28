@@ -1129,6 +1129,72 @@ Phạm vi branch: Admin lấy danh sách/chi tiết CourtOwner, approve/reject c
 
 ---
 
+### Prompt số 17
+ 
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 28/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Review & VenueStaff Module |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Phân tích nghiệp vụ |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Phạm vi branch: feature/de180310-review-venue-staff. Scope: Review Module (12 APIs) và VenueStaff Module (3 APIs). Giữ cấu trúc API/Application/Infrastructure/Domain hiện có. Không được thêm thư mục mới, chỉ tạo file cho feature.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Cần triển khai 15 endpoints cho Module 3 bao gồm Review và VenueStaff, đảm bảo bảo vệ logic nghiệp vụ (rating increments, moderate edit locks, self-report prevention, unique booking review soft-delete release và reactivation logic cho VenueStaff).
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất kế hoạch triển khai chi tiết cấu trúc DTOs, Service Interfaces, Services, Mappers và Controllers. Triển khai hoàn thiện toàn bộ mã nguồn đáp ứng đầy đủ yêu cầu nghiệp vụ.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng toàn bộ mã nguồn tạo mới DTOs, Services, Mappers và Controllers. Cấu hình định tuyến Swagger live kiểm thử thành công.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm yêu cầu AI tự động chạy build và test nhanh qua API HTTP Get (Invoke-RestMethod) để xác nhận code sinh ra không phá hỏng luồng chạy chung của toàn solution.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `ReviewsController.cs`, `VenueStaffsController.cs`, `ReviewService.cs`, `VenueStaffService.cs`, `ReviewDtos.cs`, `VenueStaffDtos.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln` passed 66/66; live Swagger endpoints 200 OK |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Tất cả các tính năng đã hoạt động ổn định. |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt đã hướng dẫn AI giải quyết hoàn chỉnh bài toán nghiệp vụ phức tạp của module Review.
+```
+
+---
 
 ## 6. Prompt quan trọng nhất
 

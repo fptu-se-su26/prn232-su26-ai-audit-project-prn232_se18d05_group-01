@@ -261,6 +261,7 @@ Thiết kế được giữ đơn giản để phù hợp phạm vi môn học.
 | 23 | Thêm CRUD PlayerSport cho hồ sơ người dùng hiện tại | Phan Thanh Vuong | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs` | Sẽ cập nhật sau khi commit |
 | 24 | Thêm Admin quản lý xác minh CourtOwner và chặn owner chưa duyệt tạo Venue | Nguyen Phan Huy | `CourtOwnersController.cs`, `CourtOwnerService.cs`, `DTOs/CourtOwners/`, migration `AddCourtOwnerRejectionReason`, `VenueService.cs` | Sẽ cập nhật sau khi commit |
 | 25 | Hoàn thiện toàn bộ tính năng Venue Module (Public Search, Admin Approve, Images, Amenities, Opening Hours) | DE180310 | `VenuesController.cs`, `AdminVenuesController.cs`, `AmenitiesController.cs`, `VenueService.cs`, `AdminVenueService.cs`, `AmenityService.cs` | Sẽ cập nhật sau khi commit |
+| 26 | Thiết kế và hoàn thiện toàn bộ tính năng Review & VenueStaff Module (15 APIs mới) | Phan Quoc Khanh | `PlayCourt.API/Controllers/ReviewsController.cs`, `PlayCourt.API/Controllers/VenueStaffsController.cs`, `PlayCourt.Infrastructure/Services/ReviewService.cs`, `PlayCourt.Infrastructure/Services/VenueStaffService.cs`, `PlayCourt.Application/DTOs/ReviewDtos.cs`, `PlayCourt.Application/DTOs/VenueStaffDtos.cs` | Sẽ cập nhật sau khi commit |
 
 ## AI có hỗ trợ không?
 
@@ -340,6 +341,7 @@ Thay đổi này gồm backend foundation, Register/Login API, Email OTP, Verify
 | 8 | Thêm test User Profile controller | Nguyen Phan Huy | `PlayCourt.ApiTests/UsersControllerTests.cs` | 26/26 tests passed |
 | 9 | Thêm test Sport Management controller và service | Nguyen Phan Huy | `PlayCourt.ApiTests/SportsControllerTests.cs`, `PlayCourt.ApiTests/SportServiceTests.cs` | 39/39 tests passed |
 | 10 | Thêm test CRUD PlayerSport ở controller và service | Phan Thanh Vuong | `PlayCourt.ApiTests/UsersControllerTests.cs`, `PlayCourt.ApiTests/UserServicePlayerSportTests.cs` | 66/66 tests passed; build 0 warning, 0 error |
+| 11 | Khởi chạy live test và kiểm thử Swagger JSON endpoints cho Review và VenueStaff | Phan Quoc Khanh | `PlayCourt.API/Controllers/ReviewsController.cs`, `PlayCourt.API/Controllers/VenueStaffsController.cs` | Server live output 200 OK |
 
 ## AI có hỗ trợ không?
 
@@ -443,6 +445,7 @@ Chưa ghi nhận nội dung cho phase này.
 | 15 | PlayerSport CRUD | Completed | `UsersController`, `IUserService`, `UserService`, `UserServicePlayerSportTests` | DE180405 — GET/POST/PUT/DELETE `/api/users/me/sports` |
 | 16 | CourtOwner Approval | Completed | `CourtOwnersController`, `CourtOwnerService`, migration | Admin list/detail/approve/reject; chỉ owner Approved tạo Venue |
 | 17 | Hoàn thiện Venue Module | Completed | `VenuesController`, `AdminVenuesController`, `AmenitiesController`, `VenueService`... | DE180310 — Public Discovery, Admin Approval, Images, Amenities, Opening Hours |
+| 18 | Review & VenueStaff Module | Completed | `ReviewsController`, `VenueStaffsController`, `ReviewService`, `VenueStaffService` | DE180310 — 15 APIs mới hỗ trợ đánh giá sân và quản lý nhân viên sân |
 
 ---
 

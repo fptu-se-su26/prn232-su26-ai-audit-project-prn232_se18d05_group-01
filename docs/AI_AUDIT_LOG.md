@@ -942,6 +942,59 @@ AI xử lý xuất sắc các phần code tích hợp lớn, có khả năng tư
 
 ---
 
+### Lần sử dụng AI số 18
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 28/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Thiết kế và hoàn thiện toàn bộ tính năng Review & VenueStaff Module (15 APIs mới) |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Phạm vi branch: feature/de180310-review-venue-staff. Scope: Review Module (12 APIs) và VenueStaff Module (3 APIs). Giữ cấu trúc API/Application/Infrastructure/Domain hiện có. Không được thêm thư mục mới, chỉ tạo file cho feature.
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI đề xuất tạo ReviewDtos.cs, VenueStaffDtos.cs, IReviewService.cs, IVenueStaffService.cs, ReviewService.cs, VenueStaffService.cs, ReviewMapper.cs, VenueStaffMapper.cs, ReviewsController.cs và VenueStaffsController.cs. Service kiểm tra nghiệp vụ đầy đủ: unique booking reviews, 0.5-star increments, moderate guards, self-report protection, và reactivation logic cho VenueStaff.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Áp dụng toàn bộ Service, Controller, DTOs, Mappers, DependencyInjection registration, và live API Swagger validation check.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Khởi chạy thử nghiệm Swagger JSON endpoint live để xác minh tính tương thích và định tuyến chính xác của API.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `ReviewsController.cs`, `VenueStaffsController.cs`, `ReviewService.cs`, `VenueStaffService.cs`, `ReviewDtos.cs`, `VenueStaffDtos.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln` passed 66/66; live Swagger endpoints 200 OK |
+| Link video demo |  |
+| Ghi chú khác | Tất cả 15 endpoints hoạt động và được cấu hình định tuyến chính xác. |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+AI hỗ trợ viết logic nghiệp vụ chống trùng lặp, moderate guards và xử lý kích hoạt lại nhân viên cũ rất mượt mà. Khả năng chạy live test xác minh Swagger endpoints giúp tăng độ tin cậy của mã nguồn.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
