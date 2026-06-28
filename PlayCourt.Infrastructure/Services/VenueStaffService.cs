@@ -57,6 +57,12 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<VenueStaffResponseDto>.Fail("Cannot add an Admin as staff.");
             }
 
+            // Cannot add owner as staff
+            if (staffUser.Id == ownerUserId)
+            {
+                return ApiResponse<VenueStaffResponseDto>.Fail("Cannot add the venue owner as staff.");
+            }
+
             // Check existing staff association
             var existingStaff = await _dbContext.VenueStaffs
                 .IgnoreQueryFilters() // check both active/inactive
@@ -64,16 +70,15 @@ namespace PlayCourt.Infrastructure.Services
 
             if (existingStaff != null)
             {
-                if (existingStaff.IsActive)
+                if (existingStaff.IsActive && existingStaff.Role == request.Role)
                 {
-                    return ApiResponse<VenueStaffResponseDto>.Fail("User is already a staff member at this venue.");
+                    return ApiResponse<VenueStaffResponseDto>.Fail("User is already a staff member with this role.");
                 }
                 else
                 {
-                    // Reactivate inactive staff
+                    // Reactivate inactive staff or update role
                     existingStaff.IsActive = true;
                     existingStaff.Role = request.Role;
-                    existingStaff.CreatedAt = DateTimeOffset.Now;
                     await _dbContext.SaveChangesAsync();
 
                     // Load relations for mapper
@@ -129,7 +134,10 @@ namespace PlayCourt.Infrastructure.Services
             bool isStaff = await _dbContext.VenueStaffs
                 .AnyAsync(vs => vs.VenueId == venueId && vs.UserId == userId && vs.IsActive);
 
-            if (!isOwner && !isStaff)
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            bool isAdmin = user?.Role == UserRole.Admin;
+
+            if (!isOwner && !isStaff && !isAdmin)
             {
                 return ApiResponse<IReadOnlyCollection<VenueStaffResponseDto>>.Fail("You are not authorized to view the staff list for this venue.");
             }

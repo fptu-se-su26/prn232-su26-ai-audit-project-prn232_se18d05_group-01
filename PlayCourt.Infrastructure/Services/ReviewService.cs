@@ -40,6 +40,11 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<ReviewResponseDto>.Fail("You can only review completed bookings.");
             }
 
+            if (booking.Court.IsDeleted || booking.Court.Venue.IsDeleted)
+            {
+                return ApiResponse<ReviewResponseDto>.Fail("Cannot review a booking for a deleted court or venue.");
+            }
+
             // Enforce rating ranges and 0.5 star step increments
             if (request.Rating < 1.0m || request.Rating > 5.0m || (request.Rating * 10) % 5 != 0)
             {
@@ -322,6 +327,16 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<ReviewImageDto>.Fail("Cannot edit a review that is reported or hidden.");
             }
 
+            if (string.IsNullOrWhiteSpace(request.ImageUrl))
+            {
+                return ApiResponse<ReviewImageDto>.Fail("Image URL cannot be empty.");
+            }
+
+            if (request.DisplayOrder < 0)
+            {
+                return ApiResponse<ReviewImageDto>.Fail("Display order cannot be negative.");
+            }
+
             if (review.Images.Count >= 5)
             {
                 return ApiResponse<ReviewImageDto>.Fail("You can upload at most 5 images.");
@@ -391,7 +406,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Where(r => r.Booking.Court.VenueId == venueId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
             var totalCount = await query.CountAsync();
-            var averageRating = totalCount > 0 ? (decimal)await query.AverageAsync(r => (double)r.Rating) : 0.0m;
+            var averageRating = totalCount > 0 ? Math.Round((decimal)await query.AverageAsync(r => (double)r.Rating), 1) : 0.0m;
 
             var distributionGroups = await query
                 .GroupBy(r => r.Rating)
@@ -433,7 +448,7 @@ namespace PlayCourt.Infrastructure.Services
                 .Where(r => r.Booking.CourtId == courtId && r.Status != ReviewStatus.Hidden && !r.IsDeleted);
 
             var totalCount = await query.CountAsync();
-            var averageRating = totalCount > 0 ? (decimal)await query.AverageAsync(r => (double)r.Rating) : 0.0m;
+            var averageRating = totalCount > 0 ? Math.Round((decimal)await query.AverageAsync(r => (double)r.Rating), 1) : 0.0m;
 
             var distributionGroups = await query
                 .GroupBy(r => r.Rating)
@@ -516,7 +531,7 @@ namespace PlayCourt.Infrastructure.Services
                 Status = review.Status.ToString(),
                 CreatedAt = review.CreatedAt,
                 UpdatedAt = review.UpdatedAt,
-                Images = review.Images?.Select(i => new ReviewImageDto
+                Images = review.Images?.OrderBy(i => i.DisplayOrder).Select(i => new ReviewImageDto
                 {
                     Id = i.Id,
                     ReviewId = i.ReviewId,
