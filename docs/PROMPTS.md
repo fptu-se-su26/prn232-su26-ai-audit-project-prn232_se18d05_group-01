@@ -1388,3 +1388,53 @@ feature/DE190946-player-matching, then implement player matching.
 
 The generated implementation was reviewed against EF Core indexes and corrected so a rejected
 join request is reset to pending rather than inserted as a duplicate `(MatchId, PlayerId)` row.
+
+---
+
+### Prompt so 18
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 28/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Booking Management API |
+| Phan viec lien quan | Backend / Booking / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi khong can test, nhanh hien tai chi lam Booking hay len plan roi lam cho toi, as pass 123456789 neu can thiet. nho sua cac file trong docs ngoai tru file reflection. lam xong goi y message commit
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Branch `feature/de180405-booking-management` can tap trung vao Booking Management, khong lam Payment/MatchInvitation trong dot nay. Project da co san entity Booking, BookingStatusHistory, Court, CourtSchedule va PricingRule.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI tao DTO, service interface, service implementation va controller cho Booking. Cac API gom tao booking, xem chi tiet, danh sach booking cua player, danh sach booking theo venue/court cho owner, check availability va cap nhat trang thai booking.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Ap dung code vao cac layer hien co cua PlayCourt API. BookingService dung EF Core de kiem tra player profile, ownership cua court owner, overlap voi booking/court schedule/match, tinh gia theo PricingRule va ghi BookingStatusHistory.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu scope chi Booking, khong dung password database vi appsettings dang dung Trusted_Connection. Khong tao test moi theo yeu cau, nhung co chay build toan solution de xac nhan compile.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.Application/DTOs/Bookings/BookingDtos.cs`, `PlayCourt.Application/Interfaces/IBookingService.cs`, `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Ket qua chay/test | `dotnet build PlayCourt.sln --no-restore` passed, 0 warning, 0 error |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md` |

@@ -1142,3 +1142,47 @@ Sinh viên/nhóm cam kết rằng:
 | Human verification | Reviewed authorization and EF relationships; ran `dotnet build` and the full automated test suite |
 | Important correction | Reused a rejected join-request row instead of inserting a duplicate that would violate the SQL Server unique index |
 | Verification result | Build succeeded with 0 warnings; 75/75 tests passed |
+
+---
+
+### Lan su dung AI so 19
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 28/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va trien khai Booking Management API cho DE180405 |
+| Phan viec lien quan | Backend / Booking / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Toi khong can test, nhanh hien tai chi lam Booking hay len plan roi lam cho toi, as pass 123456789 neu can thiet. Nho sua cac file trong docs ngoai tru file reflection. Lam xong goi y message commit.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI de xuat giu scope chi Booking, khong lam Payment/MatchInvitation, bam theo kien truc hien co: Controller o PlayCourt.API, DTO va interface o PlayCourt.Application, service EF Core o PlayCourt.Infrastructure, dung ApiResponse/PagedResponse va authorization policy san co.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them Booking DTO, IBookingService, BookingService, BookingsController va dang ky DI. Service xu ly tao booking, xem booking, liet ke booking cua player/owner, check availability, cancel/confirm/reject/complete va ghi BookingStatusHistory.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Giu Booking la module rieng, khong tao migration vi entity/schema Booking da co san. Khong sua REFLECTION.md theo yeu cau. Khong them test moi theo yeu cau cua thanh vien phu trach; van chay build de kiem tra compile.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `BookingsController.cs`, `BookingDtos.cs`, `IBookingService.cs`, `BookingService.cs`, `DependencyInjection.cs` |
+| Ket qua chay/test | `dotnet build PlayCourt.sln --no-restore` passed, 0 warning, 0 error |
+| Ghi chu khac | Password `123456789` khong duoc dung vi connection string hien tai dang dung `Trusted_Connection=True` |

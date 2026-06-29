@@ -516,3 +516,34 @@ Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các t
 
 - `dotnet build PlayCourt.sln --no-restore`: succeeded with 0 warnings and 0 errors.
 - `dotnet test PlayCourt.sln --no-build --no-restore`: 75/75 tests passed.
+
+---
+
+## Cap nhat ngay 28/06/2026 - DE180405 Booking Management
+
+### Da hoan thanh
+
+- [x] Them Booking Management API cho branch `feature/de180405-booking-management`.
+- [x] Them DTO, service interface, service implementation va controller cho Booking.
+- [x] Them logic tao booking, xem chi tiet, xem booking cua player, xem booking theo venue/court cho owner, check availability, cancel/confirm/reject/complete.
+- [x] Ghi `BookingStatusHistory` khi tao booking va khi doi trang thai.
+- [x] Tinh gia booking tu `PricingRule`, platform fee 5%, owner earnings bang phan con lai.
+- [x] Kiem tra trung lich voi booking dang active, court schedule va match dang open/full.
+
+### File lien quan
+
+```text
+PlayCourt.API/Controllers/BookingsController.cs
+PlayCourt.Application/DTOs/Bookings/BookingDtos.cs
+PlayCourt.Application/Interfaces/IBookingService.cs
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.Infrastructure/DependencyInjection.cs
+```
+
+### Kiem chung
+
+```text
+dotnet build PlayCourt.sln --no-restore
+Ket qua: Build succeeded, 0 warning, 0 error.
+Ghi chu: Khong viet/chay test moi theo yeu cau cua thanh vien phu trach.
+```
