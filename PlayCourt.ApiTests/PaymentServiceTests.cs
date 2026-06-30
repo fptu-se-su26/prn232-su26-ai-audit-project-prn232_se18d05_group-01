@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using PlayCourt.Application.DTOs.Payments;
 using PlayCourt.Application.Interfaces;
@@ -176,13 +177,15 @@ public sealed class PaymentServiceTests
                 ChecksumKey = "test-checksum-key",
                 ReturnUrl = "http://localhost:5173/payment/result",
                 CancelUrl = "http://localhost:5173/payment/cancel"
-            }));
+            }),
+            new NotificationWriter(context));
     }
 
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         return new PlayCourtDbContext(options);
     }

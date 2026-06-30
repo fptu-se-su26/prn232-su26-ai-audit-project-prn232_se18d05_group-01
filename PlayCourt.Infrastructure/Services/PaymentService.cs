@@ -416,6 +416,11 @@ namespace PlayCourt.Infrastructure.Services
 
         private async Task AcquirePaymentSuccessNotificationLockAsync(int paymentId)
         {
+            if (!_dbContext.Database.IsRelational())
+            {
+                return;
+            }
+
             var currentTransaction = _dbContext.Database.CurrentTransaction
                 ?? throw new InvalidOperationException("Payment success notification lock requires an active transaction.");
 
