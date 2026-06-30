@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.CourtOwners;
+using PlayCourt.Application.DTOs.Notifications;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
@@ -11,10 +12,12 @@ namespace PlayCourt.Infrastructure.Services
     public sealed class CourtOwnerService : ICourtOwnerService
     {
         private readonly PlayCourtDbContext _dbContext;
+        private readonly INotificationWriter _notificationWriter;
 
-        public CourtOwnerService(PlayCourtDbContext dbContext)
+        public CourtOwnerService(PlayCourtDbContext dbContext, INotificationWriter notificationWriter)
         {
             _dbContext = dbContext;
+            _notificationWriter = notificationWriter;
         }
 
         public async Task<ApiResponse<List<CourtOwnerListItemDto>>> GetAllAsync(
@@ -89,6 +92,33 @@ namespace PlayCourt.Infrastructure.Services
                 ? NormalizeOptional(request.RejectionReason)
                 : null;
             profile.UpdatedAt = DateTimeOffset.Now;
+
+            // Notify court owner about KYC verification result
+            var recipientUserId = profile.UserProfile.UserId;
+            if (recipientUserId > 0)
+            {
+                var content = verificationStatus == CourtOwnerVerificationStatus.Approved
+                    ? "Hồ sơ đăng ký chủ sân của bạn đã được quản trị viên phê duyệt."
+                    : "Hồ sơ đăng ký chủ sân của bạn đã bị quản trị viên từ chối.";
+
+                if (verificationStatus == CourtOwnerVerificationStatus.Rejected
+                    && !string.IsNullOrWhiteSpace(profile.RejectionReason))
+                {
+                    content += $" Lý do: {profile.RejectionReason}";
+                }
+
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = recipientUserId,
+                    Title = verificationStatus == CourtOwnerVerificationStatus.Approved
+                        ? "Hồ sơ chủ sân đã được phê duyệt"
+                        : "Hồ sơ chủ sân đã bị từ chối",
+                    Content = content,
+                    Type = NotificationType.System,
+                    ReferenceType = null,
+                    ReferenceId = null
+                });
+            }
 
             await _dbContext.SaveChangesAsync();
 

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Bookings;
+using PlayCourt.Application.DTOs.Notifications;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
@@ -12,10 +13,12 @@ namespace PlayCourt.Infrastructure.Services
     {
         private const decimal PlatformFeeRate = 0.05m;
         private readonly PlayCourtDbContext _dbContext;
+        private readonly INotificationWriter _notificationWriter;
 
-        public BookingService(PlayCourtDbContext dbContext)
+        public BookingService(PlayCourtDbContext dbContext, INotificationWriter notificationWriter)
         {
             _dbContext = dbContext;
+            _notificationWriter = notificationWriter;
         }
 
         public async Task<ApiResponse<BookingResponseDto>> CreateAsync(int userId, CreateBookingRequestDto request)
@@ -53,17 +56,49 @@ namespace PlayCourt.Infrastructure.Services
                 CreatedAt = DateTimeOffset.Now
             };
 
-            _dbContext.Bookings.Add(booking);
-            _dbContext.BookingStatusHistories.Add(new BookingStatusHistory
+            var ownerUserId = await _dbContext.Courts
+                .Where(c => c.Id == request.CourtId)
+                .Select(c => c.Venue.CourtOwnerProfile.UserProfile.UserId)
+                .FirstOrDefaultAsync();
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
             {
-                Booking = booking,
-                OldStatus = null,
-                NewStatus = BookingStatus.Pending,
-                ChangedByUserId = userId,
-                Reason = "Booking created.",
-                CreatedAt = DateTimeOffset.Now
-            });
-            await _dbContext.SaveChangesAsync();
+                _dbContext.Bookings.Add(booking);
+                _dbContext.BookingStatusHistories.Add(new BookingStatusHistory
+                {
+                    Booking = booking,
+                    OldStatus = null,
+                    NewStatus = BookingStatus.Pending,
+                    ChangedByUserId = userId,
+                    Reason = "Booking created.",
+                    CreatedAt = DateTimeOffset.Now
+                });
+
+                await _dbContext.SaveChangesAsync();
+
+                // Notify court owner about new booking
+                if (ownerUserId > 0)
+                {
+                    _notificationWriter.Add(new CreateNotificationRequest
+                    {
+                        UserId = ownerUserId,
+                        Title = "Có đơn đặt sân mới",
+                        Content = "Bạn vừa nhận được một yêu cầu đặt sân mới.",
+                        Type = NotificationType.Booking,
+                        ReferenceType = NotificationReferenceType.Booking,
+                        ReferenceId = booking.Id
+                    });
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
             var savedBooking = await BookingQuery()
                 .AsNoTracking()
@@ -182,6 +217,21 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<BookingResponseDto>.Fail("Only pending or confirmed bookings can be cancelled by player.");
             }
 
+            // Notify court owner player cancelled booking
+            var ownerUserId = booking.Court?.Venue?.CourtOwnerProfile?.UserProfile?.UserId ?? 0;
+            if (ownerUserId > 0 && ownerUserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = ownerUserId,
+                    Title = "Khách hàng đã hủy đặt sân",
+                    Content = "Một đơn đặt sân tại cơ sở của bạn đã được khách hàng hủy.",
+                    Type = NotificationType.Booking,
+                    ReferenceType = NotificationReferenceType.Booking,
+                    ReferenceId = booking.Id
+                });
+            }
+
             return await ChangeStatusAsync(booking, BookingStatus.CancelledByUser, userId, request.Reason, "Booking cancelled successfully.");
         }
 
@@ -201,6 +251,20 @@ namespace PlayCourt.Infrastructure.Services
             if (booking.Status != BookingStatus.Pending)
             {
                 return ApiResponse<BookingResponseDto>.Fail("Only pending bookings can be confirmed.");
+            }
+
+            // Notify player booking confirmed
+            if (booking.UserProfile.UserId > 0 && booking.UserProfile.UserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = booking.UserProfile.UserId,
+                    Title = "Đặt sân đã được xác nhận",
+                    Content = "Yêu cầu đặt sân của bạn đã được chủ sân xác nhận.",
+                    Type = NotificationType.Booking,
+                    ReferenceType = NotificationReferenceType.Booking,
+                    ReferenceId = booking.Id
+                });
             }
 
             return await ChangeStatusAsync(booking, BookingStatus.Confirmed, userId, request.Reason, "Booking confirmed successfully.");
@@ -224,6 +288,26 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<BookingResponseDto>.Fail("Only pending bookings can be rejected.");
             }
 
+            // Notify player booking rejected
+            if (booking.UserProfile.UserId > 0 && booking.UserProfile.UserId != userId)
+            {
+                var content = "Yêu cầu đặt sân của bạn đã bị chủ sân từ chối.";
+                if (!string.IsNullOrWhiteSpace(request.Reason))
+                {
+                    content += $" Lý do: {request.Reason.Trim()}";
+                }
+
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = booking.UserProfile.UserId,
+                    Title = "Đặt sân đã bị từ chối",
+                    Content = content,
+                    Type = NotificationType.Booking,
+                    ReferenceType = NotificationReferenceType.Booking,
+                    ReferenceId = booking.Id
+                });
+            }
+
             return await ChangeStatusAsync(booking, BookingStatus.CancelledByOwner, userId, request.Reason, "Booking rejected successfully.");
         }
 
@@ -243,6 +327,20 @@ namespace PlayCourt.Infrastructure.Services
             if (booking.Status != BookingStatus.Confirmed)
             {
                 return ApiResponse<BookingResponseDto>.Fail("Only confirmed bookings can be completed.");
+            }
+
+            // Notify player booking completed
+            if (booking.UserProfile.UserId > 0 && booking.UserProfile.UserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = booking.UserProfile.UserId,
+                    Title = "Buổi đặt sân đã hoàn tất",
+                    Content = "Buổi đặt sân của bạn đã được đánh dấu hoàn tất.",
+                    Type = NotificationType.Booking,
+                    ReferenceType = NotificationReferenceType.Booking,
+                    ReferenceId = booking.Id
+                });
             }
 
             return await ChangeStatusAsync(booking, BookingStatus.Completed, userId, request.Reason, "Booking completed successfully.");

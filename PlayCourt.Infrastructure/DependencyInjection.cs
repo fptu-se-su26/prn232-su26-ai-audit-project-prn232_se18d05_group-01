@@ -40,6 +40,8 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IVenueStaffService, VenueStaffService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPayOsGateway, PayOsGateway>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationWriter, NotificationWriter>();
             services.Configure<EmailSettings>(settings =>
             {
                 var emailSection = configuration.GetSection("EmailSettings");

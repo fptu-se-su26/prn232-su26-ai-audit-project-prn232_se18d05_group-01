@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Matches;
+using PlayCourt.Application.DTOs.Notifications;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
 using PlayCourt.Domain.Enums;
@@ -11,10 +12,12 @@ namespace PlayCourt.Infrastructure.Services
     public sealed class MatchService : IMatchService
     {
         private readonly PlayCourtDbContext _context;
+        private readonly INotificationWriter _notificationWriter;
 
-        public MatchService(PlayCourtDbContext context)
+        public MatchService(PlayCourtDbContext context, INotificationWriter notificationWriter)
         {
             _context = context;
+            _notificationWriter = notificationWriter;
         }
 
         public async Task<PagedResponse<List<MatchResponseDto>>> SearchAsync(
@@ -406,6 +409,21 @@ namespace PlayCourt.Infrastructure.Services
             joinRequest.Status = MatchJoinRequestStatus.Pending;
             joinRequest.RequestedAt = DateTimeOffset.UtcNow;
             joinRequest.RespondedAt = null;
+
+            // Notify match host about join request
+            if (match.Host.UserId > 0 && match.Host.UserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = match.Host.UserId,
+                    Title = "Có yêu cầu tham gia trận mới",
+                    Content = "Một người chơi vừa gửi yêu cầu tham gia trận của bạn.",
+                    Type = NotificationType.Match,
+                    ReferenceType = NotificationReferenceType.Match,
+                    ReferenceId = match.Id
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             joinRequest.Player = profile;
@@ -582,6 +600,26 @@ namespace PlayCourt.Infrastructure.Services
 
             joinRequest.RespondedAt = DateTimeOffset.UtcNow;
             match.UpdatedAt = DateTimeOffset.UtcNow;
+
+            // Notify player about join request response
+            var joinPlayerUserId = joinRequest.Player.UserId;
+            if (joinPlayerUserId > 0 && joinPlayerUserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = joinPlayerUserId,
+                    Title = approved
+                        ? "Yêu cầu tham gia đã được chấp nhận"
+                        : "Yêu cầu tham gia đã bị từ chối",
+                    Content = approved
+                        ? "Yêu cầu tham gia trận của bạn đã được chủ trận chấp nhận."
+                        : "Yêu cầu tham gia trận của bạn đã bị chủ trận từ chối.",
+                    Type = NotificationType.Match,
+                    ReferenceType = NotificationReferenceType.Match,
+                    ReferenceId = match.Id
+                });
+            }
+
             await _context.SaveChangesAsync();
             return ApiResponse<MatchJoinRequestDto>.Ok(
                 MapJoinRequest(joinRequest, match.SportId),
@@ -796,6 +834,21 @@ namespace PlayCourt.Infrastructure.Services
             invitation.Message = Normalize(request.Message);
             invitation.InvitedAt = DateTimeOffset.UtcNow;
             invitation.RespondedAt = null;
+
+            // Notify invitee about invitation
+            if (invitee.UserId > 0 && invitee.UserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = invitee.UserId,
+                    Title = "Bạn nhận được lời mời tham gia trận",
+                    Content = "Một người chơi đã mời bạn tham gia trận.",
+                    Type = NotificationType.Match,
+                    ReferenceType = NotificationReferenceType.Match,
+                    ReferenceId = match.Id
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             invitation.Match = match;
@@ -893,6 +946,29 @@ namespace PlayCourt.Infrastructure.Services
 
             invitation.RespondedAt = DateTimeOffset.UtcNow;
             invitation.Match.UpdatedAt = DateTimeOffset.UtcNow;
+
+            // Notify match host about invitation response
+            var hostUserId = invitation.Match.Host?.UserId ?? await _context.UserProfiles
+                .Where(up => up.Id == invitation.Match.HostId)
+                .Select(up => up.UserId)
+                .FirstOrDefaultAsync();
+            if (hostUserId > 0 && hostUserId != userId)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = hostUserId,
+                    Title = accepted
+                        ? "Lời mời tham gia trận đã được chấp nhận"
+                        : "Lời mời tham gia trận đã bị từ chối",
+                    Content = accepted
+                        ? "Người chơi được mời đã chấp nhận tham gia trận của bạn."
+                        : "Người chơi được mời đã từ chối tham gia trận của bạn.",
+                    Type = NotificationType.Match,
+                    ReferenceType = NotificationReferenceType.Match,
+                    ReferenceId = invitation.MatchId
+                });
+            }
+
             await _context.SaveChangesAsync();
             return ApiResponse<MatchInvitationDto>.Ok(
                 MapInvitation(invitation),
