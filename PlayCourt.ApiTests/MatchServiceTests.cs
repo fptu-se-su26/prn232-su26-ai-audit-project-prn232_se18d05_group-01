@@ -17,7 +17,7 @@ public sealed class MatchServiceTests
         var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).CreateAsync(
+        var response = await CreateService(context).CreateAsync(
             host.UserId,
             CreateRequest(sport.Id, maxParticipants: 4));
 
@@ -38,7 +38,7 @@ public sealed class MatchServiceTests
         var host = AddPlayer(context, sport: null, SkillLevel.Beginner, "Da Nang");
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).CreateAsync(
+        var response = await CreateService(context).CreateAsync(
             host.UserId,
             CreateRequest(sport.Id));
 
@@ -61,7 +61,7 @@ public sealed class MatchServiceTests
         AddMatch(context, advancedHost, sport, "Da Nang", SkillLevel.Advanced, SkillLevel.Advanced);
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).GetRecommendedAsync(player.UserId);
+        var response = await CreateService(context).GetRecommendedAsync(player.UserId);
 
         Assert.True(response.Success);
         Assert.Equal(2, response.Data!.Count);
@@ -85,7 +85,7 @@ public sealed class MatchServiceTests
             SkillLevel.Advanced);
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).RequestToJoinAsync(
+        var response = await CreateService(context).RequestToJoinAsync(
             beginner.UserId,
             match.Id);
 
@@ -111,7 +111,7 @@ public sealed class MatchServiceTests
         });
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).RequestToJoinAsync(player.UserId, match.Id);
+        var response = await CreateService(context).RequestToJoinAsync(player.UserId, match.Id);
 
         Assert.True(response.Success);
         Assert.Equal("Pending", response.Data!.Status);
@@ -128,7 +128,7 @@ public sealed class MatchServiceTests
         var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
         var match = AddMatch(context, host, sport, "Da Nang", maxParticipants: 2);
         await context.SaveChangesAsync();
-        var service = new MatchService(context);
+        var service = CreateService(context);
         var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
 
         var response = await service.RespondToJoinRequestAsync(
@@ -160,7 +160,7 @@ public sealed class MatchServiceTests
         });
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).GetCandidatesAsync(host.UserId, match.Id);
+        var response = await CreateService(context).GetCandidatesAsync(host.UserId, match.Id);
 
         Assert.True(response.Success);
         Assert.Equal(localCandidate.Id, response.Data![0].ProfileId);
@@ -177,7 +177,7 @@ public sealed class MatchServiceTests
         var invitee = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
         var match = AddMatch(context, host, sport, "Da Nang");
         await context.SaveChangesAsync();
-        var service = new MatchService(context);
+        var service = CreateService(context);
         var inviteResponse = await service.InviteAsync(
             host.UserId,
             match.Id,
@@ -209,7 +209,7 @@ public sealed class MatchServiceTests
         match.Status = MatchStatus.Full;
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).LeaveAsync(player.UserId, match.Id);
+        var response = await CreateService(context).LeaveAsync(player.UserId, match.Id);
 
         Assert.True(response.Success);
         Assert.Equal("Open", response.Data!.Status);
@@ -240,7 +240,7 @@ public sealed class MatchServiceTests
         });
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+        var response = await CreateService(context).CreateAsync(host.UserId, request);
 
         Assert.False(response.Success);
         Assert.Contains("active booking", response.Message);
@@ -267,7 +267,7 @@ public sealed class MatchServiceTests
         });
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+        var response = await CreateService(context).CreateAsync(host.UserId, request);
 
         Assert.False(response.Success);
         Assert.Contains("blocked", response.Message);
@@ -289,7 +289,7 @@ public sealed class MatchServiceTests
         request.CourtId = court.Id;
         request.LocationDescription = null;
 
-        var response = await new MatchService(context).CreateAsync(host.UserId, request);
+        var response = await CreateService(context).CreateAsync(host.UserId, request);
 
         Assert.False(response.Success);
         Assert.Contains("another match", response.Message);
@@ -318,7 +318,7 @@ public sealed class MatchServiceTests
             Description = "Updated"
         };
 
-        var response = await new MatchService(context).UpdateAsync(host.UserId, match.Id, request);
+        var response = await CreateService(context).UpdateAsync(host.UserId, match.Id, request);
 
         Assert.True(response.Success);
         Assert.Equal("Updated", response.Data!.Description);
@@ -333,7 +333,7 @@ public sealed class MatchServiceTests
         var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
         var match = AddMatch(context, host, sport, "Da Nang");
         await context.SaveChangesAsync();
-        var service = new MatchService(context);
+        var service = CreateService(context);
         var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
         player.User.Status = UserStatus.Inactive;
         await context.SaveChangesAsync();
@@ -358,7 +358,7 @@ public sealed class MatchServiceTests
         var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
         var match = AddMatch(context, host, sport, "Da Nang");
         await context.SaveChangesAsync();
-        var service = new MatchService(context);
+        var service = CreateService(context);
         var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
         context.PlayerSports.Remove(player.PlayerSports.Single());
         await context.SaveChangesAsync();
@@ -389,7 +389,7 @@ public sealed class MatchServiceTests
             SkillLevel.Intermediate,
             SkillLevel.Advanced);
         await context.SaveChangesAsync();
-        var service = new MatchService(context);
+        var service = CreateService(context);
         var joinResponse = await service.RequestToJoinAsync(player.UserId, match.Id);
         player.PlayerSports.Single().SkillLevel = SkillLevel.Beginner;
         await context.SaveChangesAsync();
@@ -423,7 +423,7 @@ public sealed class MatchServiceTests
         match.Status = status;
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).LeaveAsync(player.UserId, match.Id);
+        var response = await CreateService(context).LeaveAsync(player.UserId, match.Id);
 
         Assert.False(response.Success);
         Assert.Contains("cannot leave", response.Message);
@@ -447,7 +447,7 @@ public sealed class MatchServiceTests
         });
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).LeaveAsync(player.UserId, match.Id);
+        var response = await CreateService(context).LeaveAsync(player.UserId, match.Id);
 
         Assert.False(response.Success);
         Assert.Contains("after the match has started", response.Message);
@@ -465,7 +465,7 @@ public sealed class MatchServiceTests
         match.EndAt = DateTimeOffset.UtcNow.AddHours(1);
         await context.SaveChangesAsync();
 
-        var response = await new MatchService(context).CancelAsync(host.UserId, match.Id);
+        var response = await CreateService(context).CancelAsync(host.UserId, match.Id);
 
         Assert.False(response.Success);
         Assert.Contains("after it has started", response.Message);
@@ -478,6 +478,11 @@ public sealed class MatchServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         return new PlayCourtDbContext(options);
+    }
+
+    private static MatchService CreateService(PlayCourtDbContext context)
+    {
+        return new MatchService(context, new NotificationWriter(context));
     }
 
     private static Sport AddSport(PlayCourtDbContext context)

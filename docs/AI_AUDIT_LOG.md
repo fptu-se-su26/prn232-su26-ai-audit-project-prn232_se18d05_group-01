@@ -1230,3 +1230,48 @@ Khong tao bang moi vi entity Payment va DbSet Payments da co san. Dung Transacti
 | File lien quan | `PaymentsController.cs`, `PaymentDtos.cs`, `IPaymentService.cs`, `IPayOsGateway.cs`, `PayOsSettings.cs`, `PaymentService.cs`, `PayOsGateway.cs`, `PaymentServiceTests.cs` |
 | Ket qua chay/test | `dotnet test PlayCourt.sln` passed, 92/92 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khi manual test booking tren DB local can apply migration `20260624090422_AddCourtOwnerRejectionReason` neu database cu chua co cot `RejectionReason` |
+
+---
+
+### Lan su dung AI so 21
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va trien khai Notification API cho DE180519 |
+| Phan viec lien quan | Backend / Notification / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Can them notification module cho PlayCourt. Lam theo flow hien co, tao API de user xem danh sach thong bao, unread count, mark read, mark all read va delete. Dong thoi tich hop tao notification vao Booking, Payment, Match va CourtOwner approval. Khong sua file reflection.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI de xuat tach hai phan: NotificationService phuc vu API doc/cap nhat thong bao cua user dang dang nhap, va NotificationWriter noi bo de cac service nghiep vu tao thong bao trong cung DbContext transaction.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them NotificationsController, DTOs, service interfaces, NotificationService, NotificationWriter va DI registration. Cac service Booking, Payment, Match va CourtOwnerService duoc bo sung tao notification cho cac su kien quan trong nhu booking status, payment success, match request/invitation va owner approval/rejection.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Gioi han moi truy van theo userId lay tu JWT de tranh doc thong bao cua user khac. NotificationWriter khong tu SaveChangesAsync de tranh tach transaction. Flow payment success co check ton tai notification theo paymentId de xu ly idempotent khi sync/webhook bi goi lai.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| Link commit | `fe5da07` |
+| File lien quan | `PlayCourt.API/Controllers/NotificationsController.cs`, `PlayCourt.Application/DTOs/Notifications/NotificationDtos.cs`, `PlayCourt.Application/Interfaces/INotificationService.cs`, `PlayCourt.Application/Interfaces/INotificationWriter.cs`, `PlayCourt.Infrastructure/Services/NotificationService.cs`, `PlayCourt.Infrastructure/Services/NotificationWriter.cs`, `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.Infrastructure/Services/PaymentService.cs`, `PlayCourt.Infrastructure/Services/MatchService.cs`, `PlayCourt.Infrastructure/Services/CourtOwnerService.cs` |
+| Ket qua chay/test | Feature da build/test truoc khi commit notification; docs duoc cap nhat sau commit |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md` |

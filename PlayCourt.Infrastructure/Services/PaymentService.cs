@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using PlayCourt.Application.Common.Responses;
+using PlayCourt.Application.DTOs.Notifications;
 using PlayCourt.Application.DTOs.Payments;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Application.Settings;
@@ -17,15 +19,18 @@ namespace PlayCourt.Infrastructure.Services
         private readonly PlayCourtDbContext _dbContext;
         private readonly IPayOsGateway _payOsGateway;
         private readonly PayOsSettings _settings;
+        private readonly INotificationWriter _notificationWriter;
 
         public PaymentService(
             PlayCourtDbContext dbContext,
             IPayOsGateway payOsGateway,
-            IOptions<PayOsSettings> settings)
+            IOptions<PayOsSettings> settings,
+            INotificationWriter notificationWriter)
         {
             _dbContext = dbContext;
             _payOsGateway = payOsGateway;
             _settings = settings.Value;
+            _notificationWriter = notificationWriter;
         }
 
         public async Task<ApiResponse<CreatePayOsPaymentResponseDto>> CreatePayOsPaymentLinkAsync(
@@ -151,8 +156,22 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             var status = await _payOsGateway.GetPaymentLinkInformationAsync(orderCode);
-            ApplyPayOsStatus(payment, status.Status, status.Reference, status.PaymentLinkId, status.RawPayload);
-            await _dbContext.SaveChangesAsync();
+            await using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var previousStatus = payment.Status;
+                    ApplyPayOsStatus(payment, status.Status, status.Reference, status.PaymentLinkId, status.RawPayload);
+                    await AddPaymentSuccessNotificationAsync(payment, previousStatus);
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
 
             return ApiResponse<PaymentResponseDto>.Ok(MapToDto(payment), "Payment synced successfully.");
         }
@@ -201,8 +220,22 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             var status = webhook.Success ? "PAID" : "FAILED";
-            ApplyPayOsStatus(payment, status, webhook.Reference, webhook.PaymentLinkId, webhook.RawPayload);
-            await _dbContext.SaveChangesAsync();
+            await using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var previousStatus = payment.Status;
+                    ApplyPayOsStatus(payment, status, webhook.Reference, webhook.PaymentLinkId, webhook.RawPayload);
+                    await AddPaymentSuccessNotificationAsync(payment, previousStatus);
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
 
             return ApiResponse<PaymentResponseDto>.Ok(MapToDto(payment), "PayOS webhook processed successfully.");
         }
@@ -346,6 +379,76 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             return parts.Count == 0 ? null : string.Join("; ", parts);
+        }
+
+        /// <summary>
+        /// Adds a payment success notification only when the payment transitions
+        /// to Success from a non-Success state and no duplicate notification exists.
+        /// </summary>
+        private async Task AddPaymentSuccessNotificationAsync(Payment payment, PaymentStatus previousStatus)
+        {
+            if (previousStatus == PaymentStatus.Success || payment.Status != PaymentStatus.Success)
+            {
+                return;
+            }
+
+            await AcquirePaymentSuccessNotificationLockAsync(payment.Id);
+
+            var exists = await _dbContext.Notifications.AnyAsync(n =>
+                n.UserId == payment.UserId &&
+                n.Type == NotificationType.Payment &&
+                n.ReferenceType == NotificationReferenceType.Payment &&
+                n.ReferenceId == payment.Id);
+
+            if (!exists)
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = payment.UserId,
+                    Title = "Thanh toán thành công",
+                    Content = "Thanh toán cho đơn đặt sân của bạn đã được xác nhận thành công.",
+                    Type = NotificationType.Payment,
+                    ReferenceType = NotificationReferenceType.Payment,
+                    ReferenceId = payment.Id
+                });
+            }
+        }
+
+        private async Task AcquirePaymentSuccessNotificationLockAsync(int paymentId)
+        {
+            if (!_dbContext.Database.IsRelational())
+            {
+                return;
+            }
+
+            var currentTransaction = _dbContext.Database.CurrentTransaction
+                ?? throw new InvalidOperationException("Payment success notification lock requires an active transaction.");
+
+            var connection = _dbContext.Database.GetDbConnection();
+            await using var command = connection.CreateCommand();
+            command.Transaction = currentTransaction.GetDbTransaction();
+            command.CommandText = """
+                DECLARE @result int;
+                EXEC @result = sp_getapplock
+                    @Resource = @resource,
+                    @LockMode = 'Exclusive',
+                    @LockOwner = 'Transaction',
+                    @LockTimeout = 10000;
+                SELECT @result;
+                """;
+
+            var resourceParameter = command.CreateParameter();
+            resourceParameter.ParameterName = "@resource";
+            resourceParameter.Value = $"payment-success-notification:{paymentId}";
+            command.Parameters.Add(resourceParameter);
+
+            var result = (int)(await command.ExecuteScalarAsync()
+                ?? throw new InvalidOperationException("Could not acquire payment success notification lock."));
+
+            if (result < 0)
+            {
+                throw new InvalidOperationException("Could not acquire payment success notification lock.");
+            }
         }
 
         private static PaymentResponseDto MapToDto(Payment payment)

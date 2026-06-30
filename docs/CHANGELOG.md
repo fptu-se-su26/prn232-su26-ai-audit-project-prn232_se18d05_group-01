@@ -446,6 +446,7 @@ Chưa ghi nhận nội dung cho phase này.
 | 16 | CourtOwner Approval | Completed | `CourtOwnersController`, `CourtOwnerService`, migration | Admin list/detail/approve/reject; chỉ owner Approved tạo Venue |
 | 17 | Hoàn thiện Venue Module | Completed | `VenuesController`, `AdminVenuesController`, `AmenitiesController`, `VenueService`... | DE180310 — Public Discovery, Admin Approval, Images, Amenities, Opening Hours |
 | 18 | Review & VenueStaff Module | Completed | `ReviewsController`, `VenueStaffsController`, `ReviewService`, `VenueStaffService` | DE180310 — 15 APIs mới hỗ trợ đánh giá sân và quản lý nhân viên sân |
+| 19 | Notification API | Completed | `NotificationsController`, `NotificationService`, `NotificationWriter` | DE180519 — User notification inbox và tích hợp thông báo vào Booking/Payment/Match/CourtOwner |
 
 ---
 
@@ -585,4 +586,39 @@ PlayCourt.API/appsettings.Development.example.json
 dotnet test PlayCourt.sln
 Ket qua: Passed, 92/92 tests.
 Ghi chu: Local database can apply migration AddCourtOwnerRejectionReason before manual booking test neu gap loi cot RejectionReason.
+```
+
+---
+
+## Cap nhat ngay 30/06/2026 - DE180519 Notification API
+
+### Da hoan thanh
+
+- [x] Them Notification API cho branch `feature/de180519-notification`.
+- [x] Them DTO, service interface, writer noi bo, service implementation va controller cho Notification.
+- [x] Ho tro user xem danh sach thong bao co paging/filter, xem unread count, mark read, mark all read va delete.
+- [x] Tich hop tao notification vao Booking, Payment, Match va CourtOwner approval/rejection.
+- [x] Giu notification theo dung user dang dang nhap, khong expose endpoint tao notification cong khai.
+- [x] Payment success notification co check idempotent de tranh tao trung khi sync/webhook lap lai.
+
+### File lien quan
+
+```text
+PlayCourt.API/Controllers/NotificationsController.cs
+PlayCourt.Application/DTOs/Notifications/NotificationDtos.cs
+PlayCourt.Application/Interfaces/INotificationService.cs
+PlayCourt.Application/Interfaces/INotificationWriter.cs
+PlayCourt.Infrastructure/Services/NotificationService.cs
+PlayCourt.Infrastructure/Services/NotificationWriter.cs
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.Infrastructure/Services/PaymentService.cs
+PlayCourt.Infrastructure/Services/MatchService.cs
+PlayCourt.Infrastructure/Services/CourtOwnerService.cs
+PlayCourt.Infrastructure/DependencyInjection.cs
+```
+
+### Kiem chung
+
+```text
+Commit fe5da07 da ghi nhan feature notification. Docs cap nhat bo sung sau commit va khong sua docs/REFLECTION.md.
 ```

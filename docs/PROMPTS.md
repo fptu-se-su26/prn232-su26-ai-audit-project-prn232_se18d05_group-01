@@ -1494,3 +1494,54 @@ Giu schema hien co cua bang Payments, khong them migration Payment moi. Khi debu
 | File lien quan | `PlayCourt.API/Controllers/PaymentsController.cs`, `PlayCourt.Application/DTOs/Payments/PaymentDtos.cs`, `PlayCourt.Application/Interfaces/IPaymentService.cs`, `PlayCourt.Application/Interfaces/IPayOsGateway.cs`, `PlayCourt.Infrastructure/Services/PaymentService.cs`, `PlayCourt.Infrastructure/Services/PayOsGateway.cs`, `PlayCourt.ApiTests/PaymentServiceTests.cs` |
 | Ket qua chay/test | `dotnet test PlayCourt.sln` passed, 92/92 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret chi nen dien vao `appsettings.Development.json` local, khong commit secret that |
+
+---
+
+### Prompt so 20
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Notification API va tich hop thong bao vao cac nghiep vu chinh |
+| Phan viec lien quan | Backend / Notification / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi can lam chuc nang notification cho project PlayCourt. Hay doc flow hien co roi lam ngan gon theo kien truc cu, co API xem thong bao, unread count, mark read, mark all read, delete. Tich hop tao notification vao booking, payment, match va court owner approval neu hop ly. Khong sua file reflection.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co entity Notification va cac module Booking, Payment, Match, CourtOwner. Can bo sung API cho user tu quan ly thong bao va writer noi bo de cac service tao notification trong cung transaction.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat tao NotificationsController, Notification DTOs, INotificationService, INotificationWriter, NotificationService va NotificationWriter. Flow tao thong bao duoc chen vao cac service nghiep vu thay vi expose endpoint tao notification cong khai.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da them API GET /api/notifications, GET /api/notifications/unread-count, PATCH /api/notifications/{id}/read, PATCH /api/notifications/read-all va DELETE /api/notifications/{id}. Booking, Payment, Match va CourtOwner approval tao notification cho user lien quan.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu NotificationWriter chi add entity vao DbContext va de service goi SaveChangesAsync, dam bao notification nam trong cung unit of work voi thay doi nghiep vu. Payment success co kiem tra idempotent de tranh tao trung thong bao khi sync/webhook lap lai.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| Link commit | `fe5da07` |
+| File lien quan | `NotificationsController.cs`, `NotificationDtos.cs`, `INotificationService.cs`, `INotificationWriter.cs`, `NotificationService.cs`, `NotificationWriter.cs`, `BookingService.cs`, `PaymentService.cs`, `MatchService.cs`, `CourtOwnerService.cs` |
+| Ket qua chay/test | Build/test duoc kiem tra trong qua trinh merge feature; khong sua `docs/REFLECTION.md` |
+| Ghi chu khac | Notification chi doc/sua/xoa theo user dang dang nhap, khong tra notification cua user khac |
