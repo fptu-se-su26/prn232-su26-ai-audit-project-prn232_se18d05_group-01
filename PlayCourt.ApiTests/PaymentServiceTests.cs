@@ -91,6 +91,12 @@ public sealed class PaymentServiceTests
         Assert.Equal("Success", response.Data!.Status);
         Assert.Equal(987654321, gateway.StatusOrderCode);
         Assert.Equal(PaymentStatus.Success, payment.Status);
+        Assert.Equal(BookingStatus.Confirmed, booking.Status);
+        var history = Assert.Single(context.BookingStatusHistories, item =>
+            item.BookingId == booking.Id &&
+            item.OldStatus == BookingStatus.Pending &&
+            item.NewStatus == BookingStatus.Confirmed);
+        Assert.Equal(player.UserId, history.ChangedByUserId);
         Assert.Equal("987654321", payment.TransactionCode);
         Assert.Contains("TF230204212323", payment.Note);
         Assert.NotNull(payment.PaidAt);
@@ -161,6 +167,12 @@ public sealed class PaymentServiceTests
         Assert.True(response.Success);
         Assert.Equal("Success", response.Data!.Status);
         Assert.Equal(PaymentStatus.Success, payment.Status);
+        Assert.Equal(BookingStatus.Confirmed, booking.Status);
+        Assert.Contains(context.BookingStatusHistories, item =>
+            item.BookingId == booking.Id &&
+            item.OldStatus == BookingStatus.Pending &&
+            item.NewStatus == BookingStatus.Confirmed &&
+            item.ChangedByUserId == player.UserId);
         Assert.NotNull(payment.PaidAt);
         Assert.Equal("""{"success":true}""", payment.ProviderPayload);
     }

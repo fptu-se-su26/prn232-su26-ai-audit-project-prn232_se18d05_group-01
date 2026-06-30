@@ -3,6 +3,7 @@ using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.CourtSchedules;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Domain.Entities;
+using PlayCourt.Domain.Enums;
 using PlayCourt.Infrastructure.Data;
 
 namespace PlayCourt.Infrastructure.Services
@@ -81,6 +82,17 @@ namespace PlayCourt.Infrastructure.Services
             if (hasOverlap)
             {
                 return ApiResponse<CourtScheduleDto>.Fail("Tạo lịch khóa sân thất bại.", ["Khoảng thời gian này bị trùng với một lịch khóa sân khác."]);
+            }
+
+            var hasActiveBookingOverlap = await _dbContext.Bookings
+                .AnyAsync(b => b.CourtId == courtId
+                            && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+                            && b.StartAt < request.EndAt
+                            && b.EndAt > request.StartAt);
+
+            if (hasActiveBookingOverlap)
+            {
+                return ApiResponse<CourtScheduleDto>.Fail("Tạo lịch khóa sân thất bại.", ["Khoảng thời gian này bị trùng với một đơn đặt sân đang hoạt động. Vui lòng xử lý đơn đặt sân trước khi khóa sân."]);
             }
 
             var schedule = new CourtSchedule
