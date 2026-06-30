@@ -547,3 +547,42 @@ dotnet build PlayCourt.sln --no-restore
 Ket qua: Build succeeded, 0 warning, 0 error.
 Ghi chu: Khong viet/chay test moi theo yeu cau cua thanh vien phu trach.
 ```
+
+---
+
+## Cap nhat ngay 30/06/2026 - DE180405 PayOS Payment
+
+### Da hoan thanh
+
+- [x] Them Payment API cho branch `feature/de180405-payment`.
+- [x] Them DTO, service interface, PayOS gateway adapter, service implementation va controller cho Payment.
+- [x] Tich hop package `payOS` de tao payment link, doc trang thai payment link va verify webhook.
+- [x] Ho tro local development bang flow `returnUrl` + endpoint `sync-payos`, vi PayOS khong goi duoc webhook vao localhost.
+- [x] Van giu endpoint webhook `POST /api/payments/payos/webhook` cho moi truong deploy/production.
+- [x] Luu giao dich vao bang `Payments` co san voi provider `payOS`, orderCode trong `TransactionCode`, raw payload trong `ProviderPayload`.
+- [x] Them unit tests cho tao payment link, chan user khac thanh toan booking, sync thanh cong, idempotent sync, xem lich su payment va webhook success.
+
+### File lien quan
+
+```text
+PlayCourt.API/Controllers/PaymentsController.cs
+PlayCourt.Application/DTOs/Payments/PaymentDtos.cs
+PlayCourt.Application/Interfaces/IPaymentService.cs
+PlayCourt.Application/Interfaces/IPayOsGateway.cs
+PlayCourt.Application/Settings/PayOsSettings.cs
+PlayCourt.Infrastructure/Services/PaymentService.cs
+PlayCourt.Infrastructure/Services/PayOsGateway.cs
+PlayCourt.Infrastructure/DependencyInjection.cs
+PlayCourt.Infrastructure/PlayCourt.Infrastructure.csproj
+PlayCourt.ApiTests/PaymentServiceTests.cs
+PlayCourt.API/appsettings.json
+PlayCourt.API/appsettings.Development.example.json
+```
+
+### Kiem chung
+
+```text
+dotnet test PlayCourt.sln
+Ket qua: Passed, 92/92 tests.
+Ghi chu: Local database can apply migration AddCourtOwnerRejectionReason before manual booking test neu gap loi cot RejectionReason.
+```
