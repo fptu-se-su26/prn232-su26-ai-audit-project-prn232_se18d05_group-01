@@ -1438,3 +1438,59 @@ Giu scope chi Booking, khong dung password database vi appsettings dang dung Tru
 | File lien quan | `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.Application/DTOs/Bookings/BookingDtos.cs`, `PlayCourt.Application/Interfaces/IBookingService.cs`, `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
 | Ket qua chay/test | `dotnet build PlayCourt.sln --no-restore` passed, 0 warning, 0 error |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md` |
+
+---
+
+### Prompt so 19
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Payment API dung PayOS |
+| Phan viec lien quan | Backend / Payment / PayOS / Testing / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi debug / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi can lam chuc nang payment dung payos, doc du an truoc roi len plan cho toi xem, uu tien lam theo flow da lam voi cac chuc nang truoc
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Hien tai web dang chay local, PayOS khong the goi webhook duoc. Giai thich cach returnUrl + sync-payos va trien khai cho toi, khong commit.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Du an PlayCourt dang dung ASP.NET Core Web API, EF Core, SQL Server va chia layer API/Application/Domain/Infrastructure. Module Booking da co san va entity Payment da co trong Domain/DbContext nhung chua co Payment service/controller.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI phan tich BookingService hien co, entity Payment va cau hinh DI. Giai phap duoc chon la tao payment link PayOS sau khi booking Pending, dung returnUrl ve localhost de frontend goi sync-payos, va giu webhook de dung khi deploy production.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Ap dung code vao cac layer hien co: PaymentsController o API, Payment DTOs va interfaces o Application, PaymentService/PayOsGateway o Infrastructure, PayOsSettings trong Application Settings, dang ky DI va them package payOS. Them PaymentServiceTests cho cac flow quan trong.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu schema hien co cua bang Payments, khong them migration Payment moi. Khi debug manual booking bi loi 500, xac dinh root cause la DB local chua apply migration AddCourtOwnerRejectionReason va apply migration cho database local truoc khi test tiep.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/PaymentsController.cs`, `PlayCourt.Application/DTOs/Payments/PaymentDtos.cs`, `PlayCourt.Application/Interfaces/IPaymentService.cs`, `PlayCourt.Application/Interfaces/IPayOsGateway.cs`, `PlayCourt.Infrastructure/Services/PaymentService.cs`, `PlayCourt.Infrastructure/Services/PayOsGateway.cs`, `PlayCourt.ApiTests/PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret chi nen dien vao `appsettings.Development.json` local, khong commit secret that |

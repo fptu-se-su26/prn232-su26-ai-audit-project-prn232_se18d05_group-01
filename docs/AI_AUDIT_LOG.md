@@ -1186,3 +1186,47 @@ Giu Booking la module rieng, khong tao migration vi entity/schema Booking da co 
 | File lien quan | `BookingsController.cs`, `BookingDtos.cs`, `IBookingService.cs`, `BookingService.cs`, `DependencyInjection.cs` |
 | Ket qua chay/test | `dotnet build PlayCourt.sln --no-restore` passed, 0 warning, 0 error |
 | Ghi chu khac | Password `123456789` khong duoc dung vi connection string hien tai dang dung `Trusted_Connection=True` |
+
+---
+
+### Lan su dung AI so 20
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va trien khai Payment API dung PayOS cho DE180405 |
+| Phan viec lien quan | Backend / Payment / PayOS / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Toi can lam chuc nang payment dung PayOS, doc du an truoc roi len plan cho toi xem, uu tien lam theo flow da lam voi cac chuc nang truoc. Web dang chay local nen PayOS khong goi duoc webhook; trien khai theo cach returnUrl + sync-payos + webhook production. Khong commit.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI de xuat flow hybrid: player tao booking Pending, tao PayOS checkout link, PayOS redirect ve returnUrl local, frontend goi sync-payos de backend hoi PayOS lay trang thai that, va van giu webhook cho production.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them PaymentsController, IPaymentService, IPayOsGateway, PayOsSettings, PaymentService, PayOsGateway va Payment DTOs. Service kiem tra booking thuoc player, booking con Pending, chua co payment Success, tao payment link PayOS, luu pending payment va sync trang thai thanh Success/Failed.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Khong tao bang moi vi entity Payment va DbSet Payments da co san. Dung TransactionCode de luu orderCode cho viec sync/webhook idempotent, luu raw payload vao ProviderPayload. Description PayOS duoc rut gon thanh Booking {id} de tranh vuot gioi han noi dung.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PaymentsController.cs`, `PaymentDtos.cs`, `IPaymentService.cs`, `IPayOsGateway.cs`, `PayOsSettings.cs`, `PaymentService.cs`, `PayOsGateway.cs`, `PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khi manual test booking tren DB local can apply migration `20260624090422_AddCourtOwnerRejectionReason` neu database cu chua co cot `RejectionReason` |
