@@ -38,6 +38,8 @@ namespace PlayCourt.Infrastructure
             services.AddScoped<IVerificationTokenService, VerificationTokenService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IVenueStaffService, VenueStaffService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPayOsGateway, PayOsGateway>();
             services.Configure<EmailSettings>(settings =>
             {
                 var emailSection = configuration.GetSection("EmailSettings");
@@ -48,6 +50,15 @@ namespace PlayCourt.Infrastructure
                 settings.FromEmail = emailSection["FromEmail"] ?? string.Empty;
                 settings.FromName = emailSection["FromName"] ?? "PlayCourt";
                 settings.EnableSsl = !bool.TryParse(emailSection["EnableSsl"], out var enableSsl) || enableSsl;
+            });
+            services.Configure<PayOsSettings>(settings =>
+            {
+                var payOsSection = configuration.GetSection("PayOs");
+                settings.ClientId = payOsSection["ClientId"] ?? string.Empty;
+                settings.ApiKey = payOsSection["ApiKey"] ?? string.Empty;
+                settings.ChecksumKey = payOsSection["ChecksumKey"] ?? string.Empty;
+                settings.ReturnUrl = payOsSection["ReturnUrl"] ?? string.Empty;
+                settings.CancelUrl = payOsSection["CancelUrl"] ?? string.Empty;
             });
             services.AddScoped<IEmailService, SmtpEmailService>();
 
