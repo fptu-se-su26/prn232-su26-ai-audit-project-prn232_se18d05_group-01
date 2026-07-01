@@ -26,6 +26,7 @@ namespace PlayCourt.Infrastructure.Data
         public DbSet<CourtOwnerProfile> CourtOwnerProfiles => Set<CourtOwnerProfile>();
         public DbSet<UserFavoriteVenue> UserFavoriteVenues => Set<UserFavoriteVenue>();
         public DbSet<VerificationToken> VerificationTokens => Set<VerificationToken>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         // Sports
         public DbSet<Sport> Sports => Set<Sport>();
@@ -68,6 +69,7 @@ namespace PlayCourt.Infrastructure.Data
             ConfigureUserProfiles(modelBuilder);
             ConfigureCourtOwnerProfiles(modelBuilder);
             ConfigureVerificationTokens(modelBuilder);
+            ConfigureRefreshTokens(modelBuilder);
             ConfigureSports(modelBuilder);
             ConfigurePlayerSports(modelBuilder);
             ConfigureVenues(modelBuilder);
@@ -219,6 +221,39 @@ namespace PlayCourt.Infrastructure.Data
                 {
                     t.HasCheckConstraint("CHK_VerificationTokens_Purpose", "[Purpose] IN (0,1)");
                     t.HasCheckConstraint("CHK_VerificationTokens_FailedAttempts", "[FailedAttempts] >= 0");
+                });
+            });
+        }
+
+        private static void ConfigureRefreshTokens(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.TokenHash).HasMaxLength(64).IsRequired();
+                entity.Property(e => e.ReplacedByTokenHash).HasMaxLength(64);
+                entity.Property(e => e.ExpiresAt).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false).IsRequired();
+
+                entity.HasQueryFilter(e => !e.IsDeleted && !e.User.IsDeleted);
+
+                entity.HasIndex(e => e.TokenHash)
+                    .IsUnique()
+                    .HasDatabaseName("UX_RefreshTokens_TokenHash");
+
+                entity.HasIndex(e => new { e.UserId, e.ExpiresAt })
+                    .HasDatabaseName("IX_RefreshTokens_User_ExpiresAt");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.RefreshTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CHK_RefreshTokens_ExpiresAt", "[ExpiresAt] > [CreatedAt]");
                 });
             });
         }
