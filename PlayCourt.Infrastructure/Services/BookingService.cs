@@ -486,16 +486,6 @@ namespace PlayCourt.Infrastructure.Services
                 return (false, "Court is blocked by a schedule in this time range.");
             }
 
-            var hasMatchOverlap = await _dbContext.Matches.AnyAsync(m =>
-                m.CourtId == courtId &&
-                (m.Status == MatchStatus.Open || m.Status == MatchStatus.Full) &&
-                m.StartAt < endAt &&
-                m.EndAt > startAt);
-            if (hasMatchOverlap)
-            {
-                return (false, "Court already has a match in this time range.");
-            }
-
             return (true, null);
         }
 
@@ -509,25 +499,38 @@ namespace PlayCourt.Infrastructure.Services
             var endTime = endAt.TimeOfDay;
             var bookingDate = startAt.Date;
 
-            var rule = await _dbContext.PricingRules
+            var rules = await _dbContext.PricingRules
                 .Where(r =>
                     r.CourtId == courtId &&
                     r.DayOfWeek == dayOfWeek &&
                     r.EffectiveFrom <= bookingDate &&
                     (r.EffectiveTo == null || r.EffectiveTo >= bookingDate) &&
-                    r.StartTime <= startTime &&
-                    r.EndTime >= endTime)
-                .OrderByDescending(r => r.EffectiveFrom)
-                .ThenBy(r => r.StartTime)
-                .FirstOrDefaultAsync();
+                    r.StartTime < endTime &&
+                    r.EndTime > startTime)
+                .ToListAsync();
 
-            if (rule is null)
+            var cursor = startTime;
+            var totalPrice = 0m;
+            while (cursor < endTime)
             {
-                return (false, 0m, "No pricing rule covers this booking time.");
+                var rule = rules
+                    .Where(r => r.StartTime <= cursor && r.EndTime > cursor)
+                    .OrderByDescending(r => r.EffectiveFrom)
+                    .ThenByDescending(r => r.StartTime)
+                    .FirstOrDefault();
+
+                if (rule is null)
+                {
+                    return (false, 0m, "No pricing rule covers this booking time.");
+                }
+
+                var segmentEnd = rule.EndTime < endTime ? rule.EndTime : endTime;
+                var hours = (decimal)(segmentEnd - cursor).TotalHours;
+                totalPrice += hours * rule.PricePerHour;
+                cursor = segmentEnd;
             }
 
-            var hours = (decimal)(endAt - startAt).TotalHours;
-            var totalPrice = Math.Round(hours * rule.PricePerHour, 2);
+            totalPrice = Math.Round(totalPrice, 2);
             if (totalPrice <= 0)
             {
                 return (false, 0m, "Calculated booking price is invalid.");

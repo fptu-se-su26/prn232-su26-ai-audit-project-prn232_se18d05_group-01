@@ -147,6 +147,8 @@ namespace PlayCourt.Infrastructure.Services
             var payment = paymentResult.Payment!;
             if (payment.Status == PaymentStatus.Success)
             {
+                await ConfirmBookingAfterSuccessfulPaymentAsync(payment);
+                await _dbContext.SaveChangesAsync();
                 return ApiResponse<PaymentResponseDto>.Ok(MapToDto(payment), "Payment is already successful.");
             }
 
@@ -162,6 +164,7 @@ namespace PlayCourt.Infrastructure.Services
                 {
                     var previousStatus = payment.Status;
                     ApplyPayOsStatus(payment, status.Status, status.Reference, status.PaymentLinkId, status.RawPayload);
+                    await ConfirmBookingAfterSuccessfulPaymentAsync(payment);
                     await AddPaymentSuccessNotificationAsync(payment, previousStatus);
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
@@ -210,6 +213,7 @@ namespace PlayCourt.Infrastructure.Services
             var webhook = await _payOsGateway.VerifyWebhookAsync(rawBody);
             var orderCode = webhook.OrderCode.ToString();
             var payment = await _dbContext.Payments
+                .Include(p => p.Booking)
                 .FirstOrDefaultAsync(p =>
                     p.Provider == PayOsProvider &&
                     p.Type == PaymentType.BookingPayment &&
@@ -226,6 +230,7 @@ namespace PlayCourt.Infrastructure.Services
                 {
                     var previousStatus = payment.Status;
                     ApplyPayOsStatus(payment, status, webhook.Reference, webhook.PaymentLinkId, webhook.RawPayload);
+                    await ConfirmBookingAfterSuccessfulPaymentAsync(payment);
                     await AddPaymentSuccessNotificationAsync(payment, previousStatus);
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
@@ -320,6 +325,36 @@ namespace PlayCourt.Infrastructure.Services
             {
                 payment.Status = PaymentStatus.Failed;
             }
+        }
+
+        private async Task ConfirmBookingAfterSuccessfulPaymentAsync(Payment payment)
+        {
+            if (payment.Status != PaymentStatus.Success ||
+                payment.Type != PaymentType.BookingPayment ||
+                !payment.BookingId.HasValue)
+            {
+                return;
+            }
+
+            var booking = payment.Booking
+                ?? await _dbContext.Bookings.FirstOrDefaultAsync(b => b.Id == payment.BookingId.Value);
+            if (booking is null || booking.Status != BookingStatus.Pending)
+            {
+                return;
+            }
+
+            var oldStatus = booking.Status;
+            booking.Status = BookingStatus.Confirmed;
+            booking.UpdatedAt = DateTimeOffset.Now;
+            _dbContext.BookingStatusHistories.Add(new BookingStatusHistory
+            {
+                BookingId = booking.Id,
+                OldStatus = oldStatus,
+                NewStatus = BookingStatus.Confirmed,
+                ChangedByUserId = payment.UserId,
+                Reason = "Booking confirmed after successful payment.",
+                CreatedAt = DateTimeOffset.Now
+            });
         }
 
         private bool IsConfigured()
