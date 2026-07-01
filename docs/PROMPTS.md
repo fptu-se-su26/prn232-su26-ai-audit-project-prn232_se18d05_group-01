@@ -1657,3 +1657,59 @@ Khong doi controller response mapping de tranh anh huong cac flow Booking khac. 
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | Targeted test failed truoc fix va passed sau fix; `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 89/89 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file `.codegraph` vao commit |
+
+---
+
+### Prompt so 23
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug double booking khi tao Booking dong thoi |
+| Phan viec lien quan | Backend / Booking / Concurrency / SQL Server Locking / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+Hai request dat cung Court va cung khung gio co the cung thanh cong neu duoc gui gan nhu dong thoi. BookingService goi ValidateSlotAsync truoc khi mo transaction. Viec kiem tra trung lich bang AnyAsync su dung isolation mac dinh va khong co locking, khien ca hai request deu co the thay slot dang trong truoc khi du lieu duoc insert.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Len plan fix loi nay cho toi. Sau do tao nhanh moi bugfix/de180405-<ten bug> tu dev va dem thay doi hien tai sang nhanh moi, trien khai luon, update cac file log ngoai tru reflection theo template cua cac commit truoc, chi commit file can thiet va tao PR vao dev voi description day du.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService.ValidateSlotAsync kiem tra Court, Venue, Booking overlap, Match overlap va CourtSchedule overlap. Tuy nhien CreateAsync goi ValidateSlotAsync truoc BeginTransactionAsync, nen check-and-insert khong nam trong cung critical section.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat dung SQL Server sp_getapplock voi LockOwner Transaction theo CourtId, sau do rerun ValidateSlotAsync trong transaction truoc khi insert Booking. Ly do la unique index theo StartAt/EndAt khong ngan duoc cac khoang thoi gian giao nhau khac exact value.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService.CreateAsync de mo transaction, lay application lock theo CourtId, validate slot lai trong transaction roi moi insert Booking va BookingStatusHistory. BookingsController.Create tra 409 Conflict cho cac loi slot conflict.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu lock helper no-op khi DbContext khong dung relational provider de tranh pha vo unit test InMemory. Them regression test active booking overlap va ghi chu manual verification cho SQL Server concurrency. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | Targeted active booking overlap test passed 1/1; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 90/90 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Bookings;
 using PlayCourt.Application.DTOs.Notifications;
@@ -27,12 +28,6 @@ namespace PlayCourt.Infrastructure.Services
             if (playerProfile is null)
             {
                 return ApiResponse<BookingResponseDto>.Fail("Player profile not found.");
-            }
-
-            var validation = await ValidateSlotAsync(request.CourtId, request.StartAt, request.EndAt);
-            if (!validation.IsAvailable)
-            {
-                return ApiResponse<BookingResponseDto>.Fail(validation.Reason ?? "Court slot is not available.");
             }
 
             var priceResult = await CalculatePriceAsync(request.CourtId, request.StartAt, request.EndAt);
@@ -64,6 +59,15 @@ namespace PlayCourt.Infrastructure.Services
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                await AcquireBookingSlotLockAsync(request.CourtId);
+
+                var validation = await ValidateSlotAsync(request.CourtId, request.StartAt, request.EndAt);
+                if (!validation.IsAvailable)
+                {
+                    await transaction.RollbackAsync();
+                    return ApiResponse<BookingResponseDto>.Fail(validation.Reason ?? "Court slot is not available.");
+                }
+
                 _dbContext.Bookings.Add(booking);
                 _dbContext.BookingStatusHistories.Add(new BookingStatusHistory
                 {
@@ -197,6 +201,43 @@ namespace PlayCourt.Infrastructure.Services
             }
 
             return ApiResponse<BookingAvailabilityResponseDto>.Ok(response, "Availability checked successfully.");
+        }
+
+        private async Task AcquireBookingSlotLockAsync(int courtId)
+        {
+            if (!_dbContext.Database.IsRelational())
+            {
+                return;
+            }
+
+            var currentTransaction = _dbContext.Database.CurrentTransaction
+                ?? throw new InvalidOperationException("Booking slot lock requires an active transaction.");
+
+            var connection = _dbContext.Database.GetDbConnection();
+            await using var command = connection.CreateCommand();
+            command.Transaction = currentTransaction.GetDbTransaction();
+            command.CommandText = """
+                DECLARE @result int;
+                EXEC @result = sp_getapplock
+                    @Resource = @resource,
+                    @LockMode = 'Exclusive',
+                    @LockOwner = 'Transaction',
+                    @LockTimeout = 10000;
+                SELECT @result;
+                """;
+
+            var resourceParameter = command.CreateParameter();
+            resourceParameter.ParameterName = "@resource";
+            resourceParameter.Value = $"booking-slot:court:{courtId}";
+            command.Parameters.Add(resourceParameter);
+
+            var result = (int)(await command.ExecuteScalarAsync()
+                ?? throw new InvalidOperationException("Could not acquire booking slot lock."));
+
+            if (result < 0)
+            {
+                throw new InvalidOperationException("Could not acquire booking slot lock.");
+            }
         }
 
         public async Task<ApiResponse<BookingResponseDto>> CancelByPlayerAsync(int userId, int bookingId, UpdateBookingStatusRequestDto request)
