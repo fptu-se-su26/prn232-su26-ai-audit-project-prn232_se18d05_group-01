@@ -19,6 +19,13 @@ namespace PlayCourt.API
                     options.SuppressModelStateInvalidFilter = true;
                 });
             services.AddEndpointsApiExplorer();
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+            });
             services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -101,6 +108,7 @@ namespace PlayCourt.API
 
             // Bổ sung middleware mới ở đây theo đúng thứ tự pipeline của ASP.NET Core.
             app.UseHttpsRedirection();
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
