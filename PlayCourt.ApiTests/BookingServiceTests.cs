@@ -146,6 +146,60 @@ public sealed class BookingServiceTests
         Assert.Single(context.Bookings.Where(item => item.CourtId == court.Id));
     }
 
+    [Fact]
+    public async Task CreateAsync_WhenVenueIsClosedOnBookingDay_RejectsBooking()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var endAt = startAt.AddHours(2);
+        AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(20, 0, 0), 100_000m);
+        AddOpeningHour(context, court, startAt, null, null, isClosed: true);
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).CreateAsync(
+            player.UserId,
+            new CreateBookingRequestDto
+            {
+                CourtId = court.Id,
+                StartAt = startAt,
+                EndAt = endAt
+            });
+
+        Assert.False(response.Success);
+        Assert.Equal("Venue is closed on this day.", response.Message);
+        Assert.Empty(context.Bookings);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenBookingIsOutsideVenueOpeningHours_RejectsBooking()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2030, 7, 1, 6, 0, 0, TimeSpan.Zero);
+        var endAt = startAt.AddHours(1);
+        AddPricingRule(context, court, startAt, new TimeSpan(0, 0, 0), new TimeSpan(23, 0, 0), 100_000m);
+        AddOpeningHour(context, court, startAt, new TimeSpan(8, 0, 0), new TimeSpan(22, 0, 0));
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).CreateAsync(
+            player.UserId,
+            new CreateBookingRequestDto
+            {
+                CourtId = court.Id,
+                StartAt = startAt,
+                EndAt = endAt
+            });
+
+        Assert.False(response.Success);
+        Assert.Equal("Booking time is outside venue opening hours.", response.Message);
+        Assert.Empty(context.Bookings);
+    }
+
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()
@@ -242,6 +296,24 @@ public sealed class BookingServiceTests
             EndTime = endTime,
             PricePerHour = pricePerHour,
             EffectiveFrom = bookingDate.Date
+        });
+    }
+
+    private static void AddOpeningHour(
+        PlayCourtDbContext context,
+        Court court,
+        DateTimeOffset bookingDate,
+        TimeSpan? openTime,
+        TimeSpan? closeTime,
+        bool isClosed = false)
+    {
+        context.VenueOpeningHours.Add(new VenueOpeningHour
+        {
+            Venue = court.Venue,
+            DayOfWeek = bookingDate.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)bookingDate.DayOfWeek,
+            OpenTime = openTime,
+            CloseTime = closeTime,
+            IsClosed = isClosed
         });
     }
 

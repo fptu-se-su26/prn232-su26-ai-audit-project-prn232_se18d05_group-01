@@ -1407,3 +1407,47 @@ Dung lock resource theo CourtId thay vi theo StartAt/EndAt de chan ca cac khung 
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | Targeted active booking overlap test passed 1/1; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 90/90 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; manual SQL Server concurrency verification can gui hai POST /api/bookings dong thoi cung CourtId/StartAt/EndAt va ky vong chi 1 active booking duoc tao |
+
+---
+
+### Lan su dung AI so 25
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va sua bug Booking ngoai gio hoat dong Venue cho DE180405 |
+| Phan viec lien quan | Backend / Booking / VenueOpeningHours / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+He thong cho phep nguoi dung dat san ngoai gio hoat dong cua Venue hoac vao ngay Venue duoc cau hinh dong cua. BookingService.ValidateSlotAsync hien chua truy van VenueOpeningHours de xac thuc thoi gian bat dau va ket thuc cua Booking. Hay check loi nay, sau do tao nhanh, len plan va trien khai nhu cac bugfix truoc.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI xac nhan bug hop le vi BookingService.ValidateSlotAsync chi kiem tra Court/Venue status, Booking overlap, Match overlap va CourtSchedule overlap, nhung khong truy van VenueOpeningHours theo VenueId va DayOfWeek.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them validation VenueOpeningHours trong BookingService.ValidateSlotAsync. Service tu choi Booking khi Venue IsClosed trong ngay dat, khi OpenTime/CloseTime cua ngay do thieu cau hinh, hoac khi StartAt/EndAt nam ngoai khoang OpenTime-CloseTime.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Dung helper ToPricingDayOfWeek hien co de thong nhat quy uoc Monday=1 den Sunday=7. Neu Venue chua co row VenueOpeningHours cho ngay do thi tam thoi xem nhu khong co gio gioi han de tranh pha vo du lieu cu va cac test hien co. Them RED/GREEN tests cho ngay dong cua va ngoai gio mo cua.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2 vi Booking van tao thanh cong; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit `PlayCourt.API/appsettings.json` local ngoai scope |

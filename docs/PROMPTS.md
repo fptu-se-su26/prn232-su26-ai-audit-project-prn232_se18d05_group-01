@@ -1713,3 +1713,59 @@ Giu lock helper no-op khi DbContext khong dung relational provider de tranh pha 
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | Targeted active booking overlap test passed 1/1; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 90/90 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |
+
+---
+
+### Prompt so 24
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug Booking ngoai gio hoat dong Venue |
+| Phan viec lien quan | Backend / Booking / VenueOpeningHours / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+He thong cho phep nguoi dung dat san ngoai gio hoat dong cua Venue hoac vao ngay Venue duoc cau hinh dong cua. BookingService.ValidateSlotAsync hien chua truy van VenueOpeningHours de xac thuc thoi gian bat dau va ket thuc cua Booking.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tiep tuc tao nhanh, len plan roi trien khai nhu o da lam: tao branch bugfix moi tu dev, cap nhat log ngoai tru reflection, chi commit file can thiet va tao PR vao dev.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co entity VenueOpeningHour, DbSet VenueOpeningHours, unique index theo VenueId/DayOfWeek va API cap nhat opening hours trong VenueService. Tuy nhien BookingService.ValidateSlotAsync chua dung du lieu nay khi tao Booking hoac check availability.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression tests truoc cho Venue IsClosed va booking ngoai OpenTime-CloseTime, sau do them helper ValidateVenueOpeningHoursAsync trong BookingService de query VenueOpeningHours theo VenueId va DayOfWeek.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService.ValidateSlotAsync de tu choi Booking khi Venue dong cua trong ngay dat, khi cau hinh opening hour cua ngay do khong day du, hoac khi thoi gian dat nam ngoai khoang OpenTime-CloseTime. CheckAvailabilityAsync cung huong loi tu fix nay vi dung chung ValidateSlotAsync.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu missing VenueOpeningHours row la khong restrict de tranh pha vo du lieu cu va unit tests hien co. Them RED/GREEN tests cho hai case chinh. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |

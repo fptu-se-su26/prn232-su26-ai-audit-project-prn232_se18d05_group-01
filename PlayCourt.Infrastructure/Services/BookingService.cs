@@ -508,6 +508,12 @@ namespace PlayCourt.Infrastructure.Services
                 return (false, "Venue is not approved for booking.");
             }
 
+            var openingHourValidation = await ValidateVenueOpeningHoursAsync(court.VenueId, startAt, endAt);
+            if (!openingHourValidation.IsAvailable)
+            {
+                return openingHourValidation;
+            }
+
             var hasBookingOverlap = await _dbContext.Bookings.AnyAsync(b =>
                 b.CourtId == courtId &&
                 (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
@@ -535,6 +541,40 @@ namespace PlayCourt.Infrastructure.Services
             if (hasScheduleOverlap)
             {
                 return (false, "Court is blocked by a schedule in this time range.");
+            }
+
+            return (true, null);
+        }
+
+        private async Task<(bool IsAvailable, string? Reason)> ValidateVenueOpeningHoursAsync(
+            int venueId,
+            DateTimeOffset startAt,
+            DateTimeOffset endAt)
+        {
+            var dayOfWeek = ToPricingDayOfWeek(startAt);
+            var openingHour = await _dbContext.VenueOpeningHours
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.VenueId == venueId && h.DayOfWeek == dayOfWeek);
+
+            if (openingHour is null)
+            {
+                return (true, null);
+            }
+
+            if (openingHour.IsClosed)
+            {
+                return (false, "Venue is closed on this day.");
+            }
+
+            if (!openingHour.OpenTime.HasValue || !openingHour.CloseTime.HasValue)
+            {
+                return (false, "Venue opening hours are not configured for this day.");
+            }
+
+            if (startAt.TimeOfDay < openingHour.OpenTime.Value ||
+                endAt.TimeOfDay > openingHour.CloseTime.Value)
+            {
+                return (false, "Booking time is outside venue opening hours.");
             }
 
             return (true, null);

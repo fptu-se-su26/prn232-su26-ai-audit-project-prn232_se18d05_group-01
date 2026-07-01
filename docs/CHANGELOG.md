@@ -762,3 +762,49 @@ Gui hai POST /api/bookings dong thoi voi cung CourtId, StartAt va EndAt. Ky vong
 
 Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpowers/plans hoac appsettings local ngoai scope.
 ```
+
+---
+
+## Cap nhat ngay 01/07/2026 - DE180405 Venue Opening Hours Booking Bugfix
+
+### Da hoan thanh
+
+- [x] Xac nhan bug BookingService chua kiem tra `VenueOpeningHours` khi tao Booking va check availability.
+- [x] Them RED tests cho Booking vao ngay Venue dong cua va Booking ngoai khoang gio mo cua.
+- [x] Them validation trong `ValidateSlotAsync` theo `VenueId`, `DayOfWeek`, `IsClosed`, `OpenTime` va `CloseTime`.
+- [x] Tu choi Booking khi Venue dong cua trong ngay dat.
+- [x] Tu choi Booking khi StartAt som hon OpenTime hoac EndAt muon hon CloseTime.
+- [x] Giu hanh vi tuong thich: Venue chua co row `VenueOpeningHours` cho ngay dat se khong bi restrict de tranh pha vo du lieu cu.
+
+### File lien quan
+
+```text
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.ApiTests/BookingServiceTests.cs
+docs/AI_AUDIT_LOG.md
+docs/PROMPTS.md
+docs/CHANGELOG.md
+```
+
+### Kiem chung
+
+```text
+Targeted RED tests:
+dotnet test PlayCourt.ApiTests/PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.CreateAsync_WhenVenueIsClosedOnBookingDay_RejectsBooking|FullyQualifiedName~BookingServiceTests.CreateAsync_WhenBookingIsOutsideVenueOpeningHours_RejectsBooking"
+Ket qua truoc fix: Failed 2/2 vi Booking van tao thanh cong.
+
+Targeted GREEN tests:
+dotnet test PlayCourt.ApiTests/PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.CreateAsync_WhenVenueIsClosedOnBookingDay_RejectsBooking|FullyQualifiedName~BookingServiceTests.CreateAsync_WhenBookingIsOutsideVenueOpeningHours_RejectsBooking"
+Ket qua sau fix: Passed 2/2.
+
+dotnet format PlayCourt.sln --verify-no-changes
+Ket qua: Passed.
+
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded, 0 warning, 0 error.
+
+dotnet test PlayCourt.sln
+Ket qua: Passed, 92/92 tests.
+
+Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpowers/plans hoac appsettings local ngoai scope.
+```
