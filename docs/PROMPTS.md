@@ -1601,3 +1601,59 @@ Them conditional update trong expiration service de tranh race condition voi web
 | File lien quan | `BookingExpirationSettings.cs`, `IBookingExpirationService.cs`, `BookingExpirationService.cs`, `BookingExpirationWorker.cs`, `DomainEnums.cs`, `PlayCourtDbContext.cs`, `BookingExpirationServiceTests.cs`, `BookingServiceTests.cs`, `PaymentServiceTests.cs` |
 | Ket qua chay/test | `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 88/88 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret van khong commit vao repository |
+
+---
+
+### Prompt so 22
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug Booking trung lich voi Match dang hoat dong |
+| Phan viec lien quan | Backend / Booking / Match / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+Nguoi dung co the tao Booking truc tiep tren mot Court va khung gio dang duoc mot Match su dung. BookingService chi kiem tra Booking overlap nhung khong kiem tra bang Matches, dan den hai nghiep vu cung chiem mot Court trong cung thoi gian.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Len plan fix bug nay cho toi, sau do trien khai, xong thi sua cac file log ngoai tru reflection theo template cua cac commit truoc, roi chi commit cac file can thiet voi message theo template.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService.ValidateSlotAsync de kiem tra Court, Venue, Booking overlap va CourtSchedule overlap. MatchService khi tao/sua Match da chan overlap voi Booking, CourtSchedule va Match Open/Full, nhung chieu tao Booking chua co check voi Matches.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression test truoc, xac nhan RED khi Booking van tao thanh cong tren slot co Match Open/Full, sau do them query Matches vao ValidateSlotAsync voi cung logic overlap dang dung o MatchService.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService de reject slot co Match Open hoac Full trung CourtId va giao thoi gian. Da cap nhat BookingServiceTests de bao ve case Match Open/Full overlap va giu cac moc booking test o nam 2030.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Khong doi controller response mapping de tranh anh huong cac flow Booking khac. Khong sua docs/REFLECTION.md. Chi stage cac file source, test va 3 file log lien quan.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | Targeted test failed truoc fix va passed sau fix; `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 89/89 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file `.codegraph` vao commit |

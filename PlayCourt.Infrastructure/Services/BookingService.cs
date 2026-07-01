@@ -477,6 +477,16 @@ namespace PlayCourt.Infrastructure.Services
                 return (false, "Court already has an active booking in this time range.");
             }
 
+            var hasMatchOverlap = await _dbContext.Matches.AnyAsync(m =>
+                m.CourtId == courtId &&
+                (m.Status == MatchStatus.Open || m.Status == MatchStatus.Full) &&
+                m.StartAt < endAt &&
+                m.EndAt > startAt);
+            if (hasMatchOverlap)
+            {
+                return (false, "Court already has an active match in this time range.");
+            }
+
             var hasScheduleOverlap = await _dbContext.CourtSchedules.AnyAsync(s =>
                 s.CourtId == courtId &&
                 s.StartAt < endAt &&
