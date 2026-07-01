@@ -61,5 +61,7 @@ namespace PlayCourt.Domain.Entities
         public ICollection<BookingStatusHistory> BookingStatusHistories { get; set; } = [];
 
         public ICollection<VerificationToken> VerificationTokens { get; set; } = [];
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
     }
 }

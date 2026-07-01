@@ -1,5 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using PlayCourt.Application.Common.Responses;
 using PlayCourt.Application.DTOs.Auth;
 using PlayCourt.Application.Interfaces;
@@ -16,24 +20,35 @@ namespace PlayCourt.Infrastructure.Services
         private const string InvalidLoginError = "Invalid email/phone or password";
         private const int VerifyEmailOtpExpiryMinutes = 10;
         private const int PasswordResetOtpExpiryMinutes = 10;
+        private const int DefaultRefreshTokenExpiryDays = 30;
+        private const int RefreshTokenBytes = 64;
+        private const int RefreshTokenReuseGraceSeconds = 2;
+        private const int RefreshTokenCleanupRetentionDays = 7;
         private const int ResendCooldownSeconds = 60;
         private const int MaxOtpFailedAttempts = 5;
+        private const string InvalidRefreshTokenError = "Invalid refresh token.";
         private const string PasswordResetSentMessage = "If this email exists, a password reset code has been sent.";
         private readonly PlayCourtDbContext _dbContext;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IVerificationTokenService _verificationTokenService;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IMemoryCache _memoryCache;
 
         public AuthService(
             PlayCourtDbContext dbContext,
             IJwtTokenService jwtTokenService,
             IVerificationTokenService verificationTokenService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration? configuration = null,
+            IMemoryCache? memoryCache = null)
         {
             _dbContext = dbContext;
             _jwtTokenService = jwtTokenService;
             _verificationTokenService = verificationTokenService;
             _emailService = emailService;
+            _configuration = configuration ?? new ConfigurationBuilder().Build();
+            _memoryCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
         }
 
         public async Task<ApiResponse<RegisterResponseDto>> RegisterAsync(RegisterRequestDto request)
@@ -155,23 +170,142 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<LoginResponseDto>.Fail("Login failed", ["User account is not active"]);
             }
 
+            await CleanupOldRefreshTokensAsync(DateTimeOffset.UtcNow);
+
             var token = _jwtTokenService.GenerateAccessToken(user, user.UserProfile);
+            var refreshToken = CreateRefreshToken(user.Id);
+            _dbContext.RefreshTokens.Add(refreshToken.Entity);
+            await _dbContext.SaveChangesAsync();
 
             return ApiResponse<LoginResponseDto>.Ok(new LoginResponseDto
             {
                 AccessToken = token.AccessToken,
+                RefreshToken = refreshToken.Value,
                 ExpiresAt = token.ExpiresAt,
-                User = new LoginUserDto
-                {
-                    Id = user.Id,
-                    FullName = user.UserProfile?.FullName ?? string.Empty,
-                    Email = user.Email,
-                    PhoneNumber = user.Phone ?? string.Empty,
-                    Role = user.Role.ToString(),
-                    Status = user.Status.ToString(),
-                    IsEmailVerified = user.IsEmailVerified
-                }
+                RefreshTokenExpiresAt = refreshToken.Entity.ExpiresAt,
+                User = BuildLoginUserDto(user)
             }, "Login successfully");
+        }
+
+        public async Task<ApiResponse<RefreshTokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var errors = ValidateRefreshTokenRequest(request.RefreshToken);
+            if (errors.Count > 0)
+            {
+                return ApiResponse<RefreshTokenResponseDto>.Fail("Validation failed", errors);
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            await CleanupOldRefreshTokensAsync(now);
+
+            var refreshTokenValue = request.RefreshToken.Trim();
+            var tokenHash = HashRefreshToken(refreshTokenValue);
+            var storedToken = await _dbContext.RefreshTokens
+                .Include(token => token.User)
+                .ThenInclude(user => user.UserProfile)
+                .FirstOrDefaultAsync(token => token.TokenHash == tokenHash);
+
+            if (storedToken is null)
+            {
+                return ApiResponse<RefreshTokenResponseDto>.Fail(InvalidRefreshTokenError);
+            }
+
+            if (storedToken.RevokedAt is not null)
+            {
+                if (CanUseRotatedTokenInGracePeriod(storedToken, now))
+                {
+                    var cacheKey = GetRefreshTokenGraceCacheKey(storedToken.TokenHash);
+                    if (_memoryCache.TryGetValue(cacheKey, out RefreshTokenResponseDto? cachedResponse)
+                        && cachedResponse is not null)
+                    {
+                        return ApiResponse<RefreshTokenResponseDto>.Ok(
+                            cachedResponse,
+                            "Token refreshed successfully.");
+                    }
+
+                    return ApiResponse<RefreshTokenResponseDto>.Fail(InvalidRefreshTokenError);
+                }
+
+                if (!string.IsNullOrWhiteSpace(storedToken.ReplacedByTokenHash))
+                {
+                    await RevokeActiveRefreshTokensAsync(storedToken.UserId, now);
+                }
+
+                return ApiResponse<RefreshTokenResponseDto>.Fail(InvalidRefreshTokenError);
+            }
+
+            if (storedToken.ExpiresAt <= now)
+            {
+                storedToken.RevokedAt = now;
+                storedToken.UpdatedAt = now;
+                await _dbContext.SaveChangesAsync();
+
+                return ApiResponse<RefreshTokenResponseDto>.Fail(InvalidRefreshTokenError);
+            }
+
+            if (storedToken.User.Status != UserStatus.Active)
+            {
+                return ApiResponse<RefreshTokenResponseDto>.Fail("User account is not active");
+            }
+
+            return await RotateRefreshTokenAsync(storedToken, now);
+        }
+
+        private async Task<ApiResponse<RefreshTokenResponseDto>> RotateRefreshTokenAsync(
+            RefreshToken storedToken,
+            DateTimeOffset now)
+        {
+            var accessToken = _jwtTokenService.GenerateAccessToken(storedToken.User, storedToken.User.UserProfile);
+            var newRefreshToken = CreateRefreshToken(storedToken.UserId, now);
+            storedToken.RevokedAt = now;
+            storedToken.ReplacedByTokenHash = newRefreshToken.Entity.TokenHash;
+            storedToken.UpdatedAt = now;
+
+            _dbContext.RefreshTokens.Add(newRefreshToken.Entity);
+            await _dbContext.SaveChangesAsync();
+
+            var response = new RefreshTokenResponseDto
+            {
+                AccessToken = accessToken.AccessToken,
+                RefreshToken = newRefreshToken.Value,
+                ExpiresAt = accessToken.ExpiresAt,
+                RefreshTokenExpiresAt = newRefreshToken.Entity.ExpiresAt
+            };
+
+            _memoryCache.Set(
+                GetRefreshTokenGraceCacheKey(storedToken.TokenHash),
+                response,
+                TimeSpan.FromSeconds(RefreshTokenReuseGraceSeconds));
+
+            return ApiResponse<RefreshTokenResponseDto>.Ok(response, "Token refreshed successfully.");
+        }
+
+        public async Task<ApiResponse<object>> LogoutAsync(LogoutRequestDto request)
+        {
+            var errors = ValidateRefreshTokenRequest(request.RefreshToken);
+            if (errors.Count > 0)
+            {
+                return ApiResponse<object>.Fail("Validation failed", errors);
+            }
+
+            var tokenHash = HashRefreshToken(request.RefreshToken.Trim());
+            var storedToken = await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(token => token.TokenHash == tokenHash);
+
+            if (storedToken is null)
+            {
+                return ApiResponse<object>.Fail(InvalidRefreshTokenError);
+            }
+
+            if (storedToken.RevokedAt is null)
+            {
+                var now = DateTimeOffset.UtcNow;
+                storedToken.RevokedAt = now;
+                storedToken.UpdatedAt = now;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return ApiResponse<object>.Ok(null, "Logout successfully.");
         }
 
         public async Task<ApiResponse<object>> VerifyEmailAsync(VerifyEmailRequestDto request)
@@ -404,6 +538,118 @@ namespace PlayCourt.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<object>.Ok(null, "Password changed successfully.");
+        }
+
+        private async Task RevokeActiveRefreshTokensAsync(int userId, DateTimeOffset now)
+        {
+            var activeTokens = await _dbContext.RefreshTokens
+                .Where(token => token.UserId == userId
+                    && token.RevokedAt == null
+                    && token.ExpiresAt > now)
+                .ToListAsync();
+
+            foreach (var token in activeTokens)
+            {
+                token.RevokedAt = now;
+                token.UpdatedAt = now;
+            }
+
+            if (activeTokens.Count > 0)
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        private async Task CleanupOldRefreshTokensAsync(DateTimeOffset now)
+        {
+            var cutoff = now.AddDays(-RefreshTokenCleanupRetentionDays);
+            var oldTokens = await _dbContext.RefreshTokens
+                .Where(token => token.ExpiresAt <= cutoff
+                    || (token.RevokedAt != null && token.RevokedAt <= cutoff))
+                .ToListAsync();
+
+            if (oldTokens.Count == 0)
+            {
+                return;
+            }
+
+            _dbContext.RefreshTokens.RemoveRange(oldTokens);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private static bool CanUseRotatedTokenInGracePeriod(RefreshToken token, DateTimeOffset now)
+        {
+            return token.RevokedAt is not null
+                && !string.IsNullOrWhiteSpace(token.ReplacedByTokenHash)
+                && token.RevokedAt.Value.AddSeconds(RefreshTokenReuseGraceSeconds) >= now;
+        }
+
+        private static string GetRefreshTokenGraceCacheKey(string tokenHash)
+        {
+            return $"refresh-token-grace:{tokenHash}";
+        }
+
+        private (string Value, RefreshToken Entity) CreateRefreshToken(int userId, DateTimeOffset? createdAt = null)
+        {
+            var value = GenerateSecureRefreshToken();
+            var now = createdAt ?? DateTimeOffset.UtcNow;
+            var entity = new RefreshToken
+            {
+                UserId = userId,
+                TokenHash = HashRefreshToken(value),
+                ExpiresAt = now.AddDays(GetRefreshTokenExpiryDays()),
+                CreatedAt = now,
+                IsDeleted = false
+            };
+
+            return (value, entity);
+        }
+
+        private int GetRefreshTokenExpiryDays()
+        {
+            var jwtSection = _configuration.GetSection("Jwt");
+
+            return int.TryParse(jwtSection["RefreshTokenExpiresInDays"], out var days) && days > 0
+                ? days
+                : DefaultRefreshTokenExpiryDays;
+        }
+
+        private static string GenerateSecureRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(RefreshTokenBytes));
+        }
+
+        private static string HashRefreshToken(string refreshToken)
+        {
+            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
+
+            return Convert.ToHexString(hash);
+        }
+
+        private static LoginUserDto BuildLoginUserDto(User user)
+        {
+            return new LoginUserDto
+            {
+                Id = user.Id,
+                FullName = user.UserProfile?.FullName ?? string.Empty,
+                Email = user.Email,
+                PhoneNumber = user.Phone ?? string.Empty,
+                Role = user.Role.ToString(),
+                Status = user.Status.ToString(),
+                IsEmailVerified = user.IsEmailVerified
+            };
+        }
+
+        private static List<string> ValidateRefreshTokenRequest(string? refreshToken)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                errors.Add("RefreshToken is required");
+            }
+
+            return errors;
         }
 
         private static List<string> ValidateRequest(RegisterRequestDto request)

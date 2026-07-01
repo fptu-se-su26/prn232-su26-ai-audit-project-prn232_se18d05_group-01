@@ -18,6 +18,7 @@ namespace PlayCourt.Infrastructure
             // Ví dụ sau này có repository: services.AddScoped<ISportRepository, SportRepository>();
             services.AddDbContext<PlayCourtDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddMemoryCache();
 
             // Dang ky service implementation o tang Infrastructure.
             // Interface nam o Application, class Service nam o Infrastructure.

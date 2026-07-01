@@ -12,5 +12,7 @@ namespace PlayCourt.Application.Interfaces
         Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordRequestDto request);
         Task<ApiResponse<object>> ResetPasswordAsync(ResetPasswordRequestDto request);
         Task<ApiResponse<object>> ChangePasswordAsync(int userId, ChangePasswordRequestDto request);
+        Task<ApiResponse<RefreshTokenResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request);
+        Task<ApiResponse<object>> LogoutAsync(LogoutRequestDto request);
     }
 }

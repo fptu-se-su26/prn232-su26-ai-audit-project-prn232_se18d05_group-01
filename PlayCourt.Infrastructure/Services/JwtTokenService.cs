@@ -11,6 +11,7 @@ namespace PlayCourt.Infrastructure.Services
 {
     public sealed class JwtTokenService : IJwtTokenService
     {
+        private const int DefaultAccessTokenExpiryMinutes = 60;
         private readonly IConfiguration _configuration;
 
         public JwtTokenService(IConfiguration configuration)
@@ -26,7 +27,7 @@ namespace PlayCourt.Infrastructure.Services
             var audience = jwtSection["Audience"] ?? "PlayCourtClient";
             var expiresInMinutes = int.TryParse(jwtSection["ExpiresInMinutes"], out var minutes)
                 ? minutes
-                : 60;
+                : DefaultAccessTokenExpiryMinutes;
 
             var expiresAt = DateTime.UtcNow.AddMinutes(expiresInMinutes);
             var claims = new List<Claim>

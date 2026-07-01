@@ -62,6 +62,50 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<RefreshTokenResponseDto>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.RefreshTokenAsync(request);
+
+            if (!response.Success)
+            {
+                return Unauthorized(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage);
+
+                return BadRequest(ApiResponse<object>.Fail("Validation failed", errors));
+            }
+
+            var response = await _authService.LogoutAsync(request);
+
+            if (!response.Success)
+            {
+                return Unauthorized(response);
+            }
+
+            return Ok(response);
+        }
+
         [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequestDto request)
         {
