@@ -1451,3 +1451,47 @@ Dung helper ToPricingDayOfWeek hien co de thong nhat quy uoc Monday=1 den Sunday
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | RED targeted tests failed 2/2 vi Booking van tao thanh cong; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 92/92 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit `PlayCourt.API/appsettings.json` local ngoai scope |
+
+---
+
+### Lan su dung AI so 26
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va sua bug lich su Booking khi Court hoac Venue bi soft delete cho DE180405 |
+| Phan viec lien quan | Backend / Booking / Soft Delete / EF Core Query Filters / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+API xem lich su dat san bi loi HTTP 500 khi Booking tham chieu den Court hoac Venue da bi soft delete. Trong BookingService.MapToDto, he thong truy cap truc tiep booking.Court.Name va booking.Court.Venue.Name. Global Query Filter cua EF Core se khong load Court hoac Venue co IsDeleted = true, khien navigation property co the null va gay NullReferenceException. Hay check bug nay, sau do len plan va lam nhu cu.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI xac nhan bug hop le, voi nuance la EF Core required navigation va global query filter co the lam Booking bien mat khoi ket qua lich su truoc khi den MapToDto. Neu navigation null thi MapToDto cung co nguy co NullReferenceException.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da cap nhat BookingQuery de dung IgnoreQueryFilters khi doc Booking lich su, sau do re-apply filter goc cho Booking chua bi delete va User chua bi delete. MapToDto duoc bo sung fallback name cho Court/Venue da bi xoa.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Giu fix trong BookingService, khong doi DTO contract. Them null-safe IsVenueOwner de cac flow owner khong bi loi neu navigation Court/Venue khong load duoc. Them RED/GREEN tests cho GetMyBookingsAsync khi Court hoac Venue bi soft delete.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2 vi Booking bi loc khoi lich su; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 94/94 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit `PlayCourt.API/appsettings.json` local ngoai scope |

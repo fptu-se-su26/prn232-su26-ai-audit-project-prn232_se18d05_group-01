@@ -1769,3 +1769,59 @@ Giu missing VenueOpeningHours row la khong restrict de tranh pha vo du lieu cu v
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 92/92 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |
+
+---
+
+### Prompt so 25
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug lich su Booking khi Court hoac Venue bi soft delete |
+| Phan viec lien quan | Backend / Booking / Soft Delete / EF Core Query Filters / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+API xem lich su dat san bi loi HTTP 500 khi Booking tham chieu den Court hoac Venue da bi soft delete. Trong BookingService.MapToDto, he thong truy cap truc tiep booking.Court.Name va booking.Court.Venue.Name. Tuy nhien, Global Query Filter cua EF Core se khong load cac Court hoac Venue co IsDeleted = true, khien navigation property co the bang null va gay NullReferenceException.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tiep tuc len plan va lam nhu cu: tao branch bugfix moi tu dev, viet test truoc, trien khai fix, cap nhat log ngoai tru reflection, chi commit file can thiet va tao PR vao dev.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project co global query filter cho Court va Venue theo IsDeleted. BookingService.BookingQuery include Court/Venue theo filter mac dinh, con MapToDto truy cap truc tiep booking.Court.Name va booking.Court.Venue.Name.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression tests cho GetMyBookingsAsync khi Court hoac Venue bi soft delete, sau do dung IgnoreQueryFilters trong BookingQuery de load historical Court/Venue, re-apply filter cho Booking/User, va map fallback name.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingQuery de doc duoc Booking lich su co Court/Venue da soft delete ma van loai Booking/User da bi delete. Da them fallback `Court has been deleted` va `Venue has been deleted` trong MapToDto.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Khong doi BookingResponseDto de tranh anh huong frontend contract. Bo sung null-safe owner check trong BookingService. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 94/94 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |

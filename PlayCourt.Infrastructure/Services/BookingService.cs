@@ -13,6 +13,8 @@ namespace PlayCourt.Infrastructure.Services
     public sealed class BookingService : IBookingService
     {
         private const decimal PlatformFeeRate = 0.05m;
+        private const string DeletedCourtName = "Court has been deleted";
+        private const string DeletedVenueName = "Venue has been deleted";
         private readonly PlayCourtDbContext _dbContext;
         private readonly INotificationWriter _notificationWriter;
 
@@ -390,6 +392,8 @@ namespace PlayCourt.Infrastructure.Services
         private IQueryable<Booking> BookingQuery()
         {
             return _dbContext.Bookings
+                .IgnoreQueryFilters()
+                .Where(b => !b.IsDeleted && !b.UserProfile.User.IsDeleted)
                 .Include(b => b.UserProfile)
                 .Include(b => b.Court)
                     .ThenInclude(c => c.Venue)
@@ -462,7 +466,7 @@ namespace PlayCourt.Infrastructure.Services
 
         private static bool IsVenueOwner(int userId, Booking booking)
         {
-            return booking.Court.Venue.CourtOwnerProfile.UserProfile.UserId == userId;
+            return booking.Court?.Venue?.CourtOwnerProfile?.UserProfile?.UserId == userId;
         }
 
         private async Task<(bool IsAvailable, string? Reason)> ValidateSlotAsync(
@@ -663,9 +667,13 @@ namespace PlayCourt.Infrastructure.Services
                 UserProfileId = booking.UserProfileId,
                 PlayerName = booking.UserProfile.FullName,
                 CourtId = booking.CourtId,
-                CourtName = booking.Court.Name,
-                VenueId = booking.Court.VenueId,
-                VenueName = booking.Court.Venue.Name,
+                CourtName = booking.Court?.IsDeleted == true
+                    ? DeletedCourtName
+                    : booking.Court?.Name ?? DeletedCourtName,
+                VenueId = booking.Court?.VenueId ?? 0,
+                VenueName = booking.Court?.Venue?.IsDeleted == true
+                    ? DeletedVenueName
+                    : booking.Court?.Venue?.Name ?? DeletedVenueName,
                 StartAt = booking.StartAt,
                 EndAt = booking.EndAt,
                 TotalPrice = booking.TotalPrice,
