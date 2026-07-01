@@ -27,6 +27,7 @@ namespace PlayCourt.Infrastructure.Services
         private const int ResendCooldownSeconds = 60;
         private const int MaxOtpFailedAttempts = 5;
         private const string InvalidRefreshTokenError = "Invalid refresh token.";
+        private const string EmailNotVerifiedError = "Email is not verified. Please verify your email before signing in";
         private const string PasswordResetSentMessage = "If this email exists, a password reset code has been sent.";
         private readonly PlayCourtDbContext _dbContext;
         private readonly IJwtTokenService _jwtTokenService;
@@ -170,6 +171,11 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<LoginResponseDto>.Fail("Login failed", ["User account is not active"]);
             }
 
+            if (!user.IsEmailVerified)
+            {
+                return ApiResponse<LoginResponseDto>.Fail("Login failed", [EmailNotVerifiedError]);
+            }
+
             await CleanupOldRefreshTokensAsync(DateTimeOffset.UtcNow);
 
             var token = _jwtTokenService.GenerateAccessToken(user, user.UserProfile);
@@ -246,6 +252,12 @@ namespace PlayCourt.Infrastructure.Services
             if (storedToken.User.Status != UserStatus.Active)
             {
                 return ApiResponse<RefreshTokenResponseDto>.Fail("User account is not active");
+            }
+
+            if (!storedToken.User.IsEmailVerified)
+            {
+                await RevokeActiveRefreshTokensAsync(storedToken.UserId, now);
+                return ApiResponse<RefreshTokenResponseDto>.Fail(EmailNotVerifiedError);
             }
 
             return await RotateRefreshTokenAsync(storedToken, now);
