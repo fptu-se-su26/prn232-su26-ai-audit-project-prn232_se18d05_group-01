@@ -10,18 +10,20 @@ namespace PlayCourt.ApiTests;
 
 public sealed class BookingServiceTests
 {
-    [Fact]
-    public async Task CreateAsync_WhenOnlyOpenMatchOverlaps_CreatesBooking()
+    [Theory]
+    [InlineData(MatchStatus.Open)]
+    [InlineData(MatchStatus.Full)]
+    public async Task CreateAsync_WhenActiveMatchOverlaps_RejectsBooking(MatchStatus matchStatus)
     {
         await using var context = CreateContext();
         var sport = AddSport(context);
         var player = AddPlayer(context);
         var host = AddPlayer(context);
         var court = AddAvailableCourt(context, sport);
-        var startAt = new DateTimeOffset(2026, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
         var endAt = startAt.AddHours(2);
         AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(20, 0, 0), 100_000m);
-        AddMatch(context, host, sport, court, startAt, endAt);
+        AddMatch(context, host, sport, court, startAt, endAt, matchStatus);
         await context.SaveChangesAsync();
 
         var response = await CreateService(context).CreateAsync(
@@ -33,9 +35,9 @@ public sealed class BookingServiceTests
                 EndAt = endAt
             });
 
-        Assert.True(response.Success);
-        Assert.Equal(200_000m, response.Data!.TotalPrice);
-        Assert.Equal(BookingStatus.Pending, context.Bookings.Single(item => item.UserProfileId == player.Id).Status);
+        Assert.False(response.Success);
+        Assert.Equal("Court already has an active match in this time range.", response.Message);
+        Assert.Empty(context.Bookings.Where(item => item.UserProfileId == player.Id));
     }
 
     [Fact]
@@ -45,7 +47,7 @@ public sealed class BookingServiceTests
         var sport = AddSport(context);
         var player = AddPlayer(context);
         var court = AddAvailableCourt(context, sport);
-        var startAt = new DateTimeOffset(2026, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
         var endAt = startAt.AddHours(2);
         AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), 100_000m);
         AddPricingRule(context, court, startAt, new TimeSpan(17, 0, 0), new TimeSpan(20, 0, 0), 150_000m);
@@ -74,7 +76,7 @@ public sealed class BookingServiceTests
         var player = AddPlayer(context);
         var existingPlayer = AddPlayer(context);
         var court = AddAvailableCourt(context, sport);
-        var startAt = new DateTimeOffset(2026, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
         var endAt = startAt.AddHours(2);
         AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(20, 0, 0), 100_000m);
         context.Bookings.Add(new Booking
@@ -210,7 +212,8 @@ public sealed class BookingServiceTests
         Sport sport,
         Court court,
         DateTimeOffset startAt,
-        DateTimeOffset endAt)
+        DateTimeOffset endAt,
+        MatchStatus status = MatchStatus.Open)
     {
         var match = new Match
         {
@@ -220,7 +223,7 @@ public sealed class BookingServiceTests
             StartAt = startAt,
             EndAt = endAt,
             MaxParticipants = 4,
-            Status = MatchStatus.Open
+            Status = status
         };
         match.Participants.Add(new MatchParticipant
         {

@@ -1319,3 +1319,47 @@ Dung conditional update voi dieu kien booking van Pending va CreatedAt da qua cu
 | File lien quan | `BookingExpirationSettings.cs`, `IBookingExpirationService.cs`, `BookingExpirationService.cs`, `BookingExpirationWorker.cs`, `DomainEnums.cs`, `Booking.cs`, `PlayCourtDbContext.cs`, migration `AddExpiredBookingStatus`, `BookingExpirationServiceTests.cs`, `BookingServiceTests.cs`, `PaymentServiceTests.cs` |
 | Ket qua chay/test | `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 88/88 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit plan trong `docs/superpowers/plans` |
+
+---
+
+### Lan su dung AI so 23
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va sua bug Booking trung lich voi Match dang hoat dong cho DE180405 |
+| Phan viec lien quan | Backend / Booking / Match / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Nguoi dung co the tao Booking truc tiep tren mot Court va khung gio dang duoc mot Match su dung. BookingService chi kiem tra Booking overlap nhung khong kiem tra bang Matches. Hay xem project co bug nay khong, sau do len plan fix bug, trien khai, cap nhat log ngoai tru reflection va commit file can thiet theo template.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI xac nhan bug hop le vi BookingService.ValidateSlotAsync chi kiem tra Bookings va CourtSchedules, trong khi MatchService da co logic chan court overlap voi Match Open/Full.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them regression test cho BookingService khi Match Open hoac Full overlap voi Court/time cua Booking. Sau do bo sung kiem tra _dbContext.Matches trong ValidateSlotAsync theo CourtId, status Open/Full va dieu kien thoi gian giao nhau.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Giu fix nho gon trong BookingService, khong doi contract API/controller. Test booking duoc chuyen sang moc nam 2030 de tranh phu thuoc ngay hien tai khi ValidateSlotAsync yeu cau start time o tuong lai.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs` |
+| Ket qua chay/test | RED: targeted BookingService test failed vi booking van tao thanh cong; GREEN: targeted test passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 89/89 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit file runtime `.codegraph` hoac appsettings local dang co thay doi ngoai scope |

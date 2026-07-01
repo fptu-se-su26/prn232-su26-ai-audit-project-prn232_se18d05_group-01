@@ -671,3 +671,48 @@ Ket qua: Passed, 88/88 tests.
 
 Ghi chu: Khong sua docs/REFLECTION.md; khong commit plan trong docs/superpowers/plans.
 ```
+
+---
+
+## Cap nhat ngay 01/07/2026 - DE180405 Booking Match Overlap Bugfix
+
+### Da hoan thanh
+
+- [x] Xac nhan bug BookingService chua kiem tra Match overlap khi tao Booking truc tiep tren Court.
+- [x] Them regression test cho Booking bi trung lich voi Match `Open` hoac `Full`.
+- [x] Them kiem tra `_dbContext.Matches` trong `ValidateSlotAsync` theo `CourtId`, status active va dieu kien thoi gian giao nhau.
+- [x] Tu choi tao Booking khi Court dang duoc Match hoat dong su dung trong cung khung gio.
+- [x] On dinh moc thoi gian trong `BookingServiceTests` sang nam 2030 de tranh test flaky theo ngay hien tai.
+
+### File lien quan
+
+```text
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.ApiTests/BookingServiceTests.cs
+docs/AI_AUDIT_LOG.md
+docs/PROMPTS.md
+docs/CHANGELOG.md
+```
+
+### Kiem chung
+
+```text
+Targeted RED test:
+dotnet test PlayCourt.ApiTests\PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.CreateAsync_WhenActiveMatchOverlaps_RejectsBooking"
+Ket qua truoc fix: Failed 2/2 vi Booking van tao thanh cong.
+
+Targeted GREEN test:
+dotnet test PlayCourt.ApiTests\PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.CreateAsync_WhenActiveMatchOverlaps_RejectsBooking"
+Ket qua sau fix: Passed 2/2.
+
+dotnet format PlayCourt.sln --verify-no-changes
+Ket qua: Passed.
+
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded, 0 warning, 0 error.
+
+dotnet test PlayCourt.sln
+Ket qua: Passed, 89/89 tests.
+
+Ghi chu: Khong sua docs/REFLECTION.md; khong commit file runtime .codegraph hoac appsettings local ngoai scope.
+```
