@@ -200,6 +200,80 @@ public sealed class BookingServiceTests
         Assert.Empty(context.Bookings);
     }
 
+    [Fact]
+    public async Task GetMyBookingsAsync_WhenCourtIsSoftDeleted_ReturnsBookingWithFallbackCourtName()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        context.Bookings.Add(new Booking
+        {
+            UserProfile = player,
+            Court = court,
+            StartAt = startAt,
+            EndAt = startAt.AddHours(2),
+            TotalPrice = 200_000m,
+            PlatformFee = 10_000m,
+            OwnerEarnings = 190_000m,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = startAt.AddDays(-1)
+        });
+        await context.SaveChangesAsync();
+
+        court.IsDeleted = true;
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).GetMyBookingsAsync(
+            player.UserId,
+            new BookingQueryDto());
+
+        Assert.True(response.Success);
+        var booking = Assert.Single(response.Data!);
+        Assert.Equal(court.Id, booking.CourtId);
+        Assert.Equal("Court has been deleted", booking.CourtName);
+        Assert.Equal(court.VenueId, booking.VenueId);
+        Assert.Equal(court.Venue.Name, booking.VenueName);
+    }
+
+    [Fact]
+    public async Task GetMyBookingsAsync_WhenVenueIsSoftDeleted_ReturnsBookingWithFallbackVenueName()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        context.Bookings.Add(new Booking
+        {
+            UserProfile = player,
+            Court = court,
+            StartAt = startAt,
+            EndAt = startAt.AddHours(2),
+            TotalPrice = 200_000m,
+            PlatformFee = 10_000m,
+            OwnerEarnings = 190_000m,
+            Status = BookingStatus.Confirmed,
+            CreatedAt = startAt.AddDays(-1)
+        });
+        await context.SaveChangesAsync();
+
+        court.Venue.IsDeleted = true;
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).GetMyBookingsAsync(
+            player.UserId,
+            new BookingQueryDto());
+
+        Assert.True(response.Success);
+        var booking = Assert.Single(response.Data!);
+        Assert.Equal(court.Id, booking.CourtId);
+        Assert.Equal(court.Name, booking.CourtName);
+        Assert.Equal(court.VenueId, booking.VenueId);
+        Assert.Equal("Venue has been deleted", booking.VenueName);
+    }
+
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()

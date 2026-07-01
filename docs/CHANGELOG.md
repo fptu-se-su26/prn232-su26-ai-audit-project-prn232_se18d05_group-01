@@ -765,6 +765,52 @@ Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpo
 
 ---
 
+## Cap nhat ngay 01/07/2026 - DE180405 Booking History Soft Delete Bugfix
+
+### Da hoan thanh
+
+- [x] Xac nhan bug lich su Booking bi anh huong khi Court hoac Venue lien quan bi soft delete.
+- [x] Them RED tests cho `GetMyBookingsAsync` khi Court bi soft delete va Venue bi soft delete.
+- [x] Cap nhat `BookingQuery` de doc historical Court/Venue bang `IgnoreQueryFilters`.
+- [x] Re-apply filter can thiet de van loai Booking da delete va User da delete.
+- [x] Them fallback name `Court has been deleted` va `Venue has been deleted` trong `MapToDto`.
+- [x] Bo sung null-safe owner check de tranh loi navigation null trong cac flow lien quan.
+
+### File lien quan
+
+```text
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.ApiTests/BookingServiceTests.cs
+docs/AI_AUDIT_LOG.md
+docs/PROMPTS.md
+docs/CHANGELOG.md
+```
+
+### Kiem chung
+
+```text
+Targeted RED tests:
+dotnet test PlayCourt.ApiTests/PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.GetMyBookingsAsync_WhenCourtIsSoftDeleted_ReturnsBookingWithFallbackCourtName|FullyQualifiedName~BookingServiceTests.GetMyBookingsAsync_WhenVenueIsSoftDeleted_ReturnsBookingWithFallbackVenueName"
+Ket qua truoc fix: Failed 2/2 vi Booking bi loc khoi lich su.
+
+Targeted GREEN tests:
+dotnet test PlayCourt.ApiTests/PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.GetMyBookingsAsync_WhenCourtIsSoftDeleted_ReturnsBookingWithFallbackCourtName|FullyQualifiedName~BookingServiceTests.GetMyBookingsAsync_WhenVenueIsSoftDeleted_ReturnsBookingWithFallbackVenueName"
+Ket qua sau fix: Passed 2/2.
+
+dotnet format PlayCourt.sln --verify-no-changes
+Ket qua: Passed.
+
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded, 0 warning, 0 error.
+
+dotnet test PlayCourt.sln
+Ket qua: Passed, 94/94 tests.
+
+Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpowers/plans hoac appsettings local ngoai scope.
+```
+
+---
+
 ## Cap nhat ngay 01/07/2026 - DE180405 Venue Opening Hours Booking Bugfix
 
 ### Da hoan thanh
