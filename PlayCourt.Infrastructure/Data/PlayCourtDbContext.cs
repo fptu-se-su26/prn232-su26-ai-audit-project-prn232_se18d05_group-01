@@ -652,7 +652,7 @@ namespace PlayCourt.Infrastructure.Data
                 entity.ToTable(t =>
                 {
                     t.HasCheckConstraint("CHK_Bookings_Time", "[StartAt] < [EndAt]");
-                    t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4)");
+                    t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4,5)");
                     t.HasCheckConstraint("CHK_Bookings_Amounts", "[TotalPrice] >= 0 AND [PlatformFee] >= 0 AND [OwnerEarnings] >= 0");
                     t.HasCheckConstraint("CHK_Bookings_FeeMath", "[TotalPrice] = [PlatformFee] + [OwnerEarnings]");
                 });
@@ -730,8 +730,8 @@ namespace PlayCourt.Infrastructure.Data
 
                 entity.ToTable(t =>
                 {
-                    t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4)");
-                    t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4)");
+                    t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4,5)");
+                    t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4,5)");
                 });
             });
         }

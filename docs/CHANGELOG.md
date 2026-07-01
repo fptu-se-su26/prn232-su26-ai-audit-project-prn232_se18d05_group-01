@@ -622,3 +622,52 @@ PlayCourt.Infrastructure/DependencyInjection.cs
 ```text
 Commit fe5da07 da ghi nhan feature notification. Docs cap nhat bo sung sau commit va khong sua docs/REFLECTION.md.
 ```
+
+---
+
+## Cap nhat ngay 01/07/2026 - DE180405 PayOS Pending Booking Expiration
+
+### Da hoan thanh
+
+- [x] Them `BookingStatus.Expired` de bieu dien booking qua han thanh toan.
+- [x] Them cau hinh `BookingExpiration` gom timeout Pending payment, scan interval va batch size.
+- [x] Them `IBookingExpirationService`, `BookingExpirationService` va `BookingExpirationWorker`.
+- [x] Worker tu dong tim Booking Pending qua timeout cau hinh, chuyen sang Expired va ghi `BookingStatusHistory`.
+- [x] Payment PayOS Pending gan voi booking bi expire duoc danh dau `Failed`.
+- [x] Dung conditional update de tranh expire nham booking vua duoc PayOS sync/webhook confirm.
+- [x] Them migration `AddExpiredBookingStatus` cap nhat check constraint cho BookingStatus va BookingStatusHistory.
+- [x] Them test cho expire booking, release court slot va PayOS terminal failure khong confirm booking.
+
+### File lien quan
+
+```text
+PlayCourt.Application/Settings/BookingExpirationSettings.cs
+PlayCourt.Application/Interfaces/IBookingExpirationService.cs
+PlayCourt.Infrastructure/Services/BookingExpirationService.cs
+PlayCourt.Infrastructure/Services/BookingExpirationWorker.cs
+PlayCourt.Domain/Enums/DomainEnums.cs
+PlayCourt.Domain/Entities/Booking.cs
+PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs
+PlayCourt.Infrastructure/Data/Migrations/20260701074643_AddExpiredBookingStatus.cs
+PlayCourt.Infrastructure/DependencyInjection.cs
+PlayCourt.API/appsettings.json
+PlayCourt.API/appsettings.Development.example.json
+PlayCourt.ApiTests/BookingExpirationServiceTests.cs
+PlayCourt.ApiTests/BookingServiceTests.cs
+PlayCourt.ApiTests/PaymentServiceTests.cs
+```
+
+### Kiem chung
+
+```text
+dotnet format PlayCourt.sln --verify-no-changes
+Ket qua: Passed.
+
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded, 0 warning, 0 error.
+
+dotnet test PlayCourt.sln
+Ket qua: Passed, 88/88 tests.
+
+Ghi chu: Khong sua docs/REFLECTION.md; khong commit plan trong docs/superpowers/plans.
+```

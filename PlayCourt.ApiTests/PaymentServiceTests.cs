@@ -123,6 +123,40 @@ public sealed class PaymentServiceTests
         Assert.Null(gateway.StatusOrderCode);
     }
 
+    [Theory]
+    [InlineData("EXPIRED")]
+    [InlineData("CANCELLED")]
+    [InlineData("FAILED")]
+    public async Task SyncPayOsPaymentAsync_WhenPayOsReportsTerminalFailure_MarksPaymentFailedAndLeavesBookingPending(
+        string payOsStatus)
+    {
+        await using var context = CreateContext();
+        var player = AddPlayer(context);
+        var booking = AddBooking(context, player, totalPrice: 120_000m);
+        var payment = AddPendingPayOsPayment(context, player.UserId, booking, orderCode: 987654321);
+        await context.SaveChangesAsync();
+        var gateway = new FakePayOsGateway
+        {
+            StatusResult = new PayOsPaymentLinkStatusResult(
+                987654321,
+                payOsStatus,
+                "TF230204212323",
+                "link_123",
+                120_000,
+                $$"""{"status":"{{payOsStatus}}"}""")
+        };
+        var service = CreateService(context, gateway);
+
+        var response = await service.SyncPayOsPaymentAsync(player.UserId, booking.Id);
+
+        Assert.True(response.Success);
+        Assert.Equal(PaymentStatus.Failed, payment.Status);
+        Assert.Equal(BookingStatus.Pending, booking.Status);
+        Assert.DoesNotContain(context.BookingStatusHistories, item =>
+            item.BookingId == booking.Id &&
+            item.NewStatus == BookingStatus.Confirmed);
+    }
+
     [Fact]
     public async Task GetBookingPaymentsAsync_WhenPlayerOwnsBooking_ReturnsPaymentHistory()
     {

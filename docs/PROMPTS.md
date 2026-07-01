@@ -1545,3 +1545,59 @@ Giu NotificationWriter chi add entity vao DbContext va de service goi SaveChange
 | File lien quan | `NotificationsController.cs`, `NotificationDtos.cs`, `INotificationService.cs`, `INotificationWriter.cs`, `NotificationService.cs`, `NotificationWriter.cs`, `BookingService.cs`, `PaymentService.cs`, `MatchService.cs`, `CourtOwnerService.cs` |
 | Ket qua chay/test | Build/test duoc kiem tra trong qua trinh merge feature; khong sua `docs/REFLECTION.md` |
 | Ghi chu khac | Notification chi doc/sua/xoa theo user dang dang nhap, khong tra notification cua user khac |
+
+---
+
+### Prompt so 21
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug PayOS Pending Booking khong tu het han |
+| Phan viec lien quan | Backend / Booking / Payment / BackgroundService / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+Bug: Booking thanh toan qua PayOS co the giu trang thai Pending vo thoi han neu nguoi dung khong hoan tat thanh toan. He thong chua co background worker hoac scheduled job de tu dong huy Booking qua han va giai phong Court slot.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tao nhanh bugfix/de180405-<Ten BUG>, dem cac thay doi hien tai sang nhanh do, len ke hoach fix bug, sau do trien khai theo plan, commit cac file can thiet voi message theo template, khong commit plan va file khong lien quan, cap nhat 3 file log ngoai tru reflection.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService tao Booking Pending, PaymentService tao PayOS payment link va confirm Booking khi payment Success. Availability dang coi Booking Pending/Confirmed la active booking nen Pending qua han se tiep tuc giu slot.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI doc BookingService, PaymentService, BookingStatus enum va DI, xac nhan bug hop le. Giai phap la them BookingStatus.Expired, BookingExpiration config, service expire booking pending theo timeout va BackgroundService chay dinh ky.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da them service expire Pending Booking qua han, worker chay dinh ky, config timeout/scan interval/batch size, migration cap nhat check constraint va unit tests cho expire booking, release court slot, payment terminal failure khong confirm booking.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Them conditional update trong expiration service de tranh race condition voi webhook/sync PayOS. Khong dua file plan va file runtime .codegraph vao commit. Khong sua docs/REFLECTION.md.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `BookingExpirationSettings.cs`, `IBookingExpirationService.cs`, `BookingExpirationService.cs`, `BookingExpirationWorker.cs`, `DomainEnums.cs`, `PlayCourtDbContext.cs`, `BookingExpirationServiceTests.cs`, `BookingServiceTests.cs`, `PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 88/88 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret van khong commit vao repository |

@@ -63,7 +63,8 @@ namespace PlayCourt.Domain.Enums
         Confirmed = 1,
         CancelledByUser = 2,
         CancelledByOwner = 3,
-        Completed = 4
+        Completed = 4,
+        Expired = 5
     }
 
     public enum PaymentType : short

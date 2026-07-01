@@ -1275,3 +1275,47 @@ Gioi han moi truy van theo userId lay tu JWT de tranh doc thong bao cua user kha
 | File lien quan | `PlayCourt.API/Controllers/NotificationsController.cs`, `PlayCourt.Application/DTOs/Notifications/NotificationDtos.cs`, `PlayCourt.Application/Interfaces/INotificationService.cs`, `PlayCourt.Application/Interfaces/INotificationWriter.cs`, `PlayCourt.Infrastructure/Services/NotificationService.cs`, `PlayCourt.Infrastructure/Services/NotificationWriter.cs`, `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.Infrastructure/Services/PaymentService.cs`, `PlayCourt.Infrastructure/Services/MatchService.cs`, `PlayCourt.Infrastructure/Services/CourtOwnerService.cs` |
 | Ket qua chay/test | Feature da build/test truoc khi commit notification; docs duoc cap nhat sau commit |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md` |
+
+---
+
+### Lan su dung AI so 22
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va sua bug PayOS Pending Booking khong tu het han cho DE180405 |
+| Phan viec lien quan | Backend / Booking / Payment / BackgroundService / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Kiem tra bug PayOS booking pending khong tu het han, tao branch bugfix/de180405-payos-pending-booking-expiration, lap ke hoach, trien khai fix theo plan, commit file can thiet va cap nhat 3 file log ngoai tru reflection.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI xac nhan bug do Booking Pending van giu slot trong BookingService, trong khi PayOS chi confirm booking khi payment Success va chua co co che scheduled job de expire booking qua han.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da them BookingStatus.Expired, cau hinh BookingExpiration, IBookingExpirationService, BookingExpirationService va BookingExpirationWorker. Worker chay dinh ky de tim booking Pending qua timeout cau hinh, chuyen sang Expired, ghi BookingStatusHistory va danh dau payment PayOS Pending thanh Failed.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Dung conditional update voi dieu kien booking van Pending va CreatedAt da qua cutoff de tranh expire nham booking vua duoc webhook/sync PayOS xac nhan thanh Confirmed. Them migration cap nhat check constraint cho BookingStatus va BookingStatusHistory.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `BookingExpirationSettings.cs`, `IBookingExpirationService.cs`, `BookingExpirationService.cs`, `BookingExpirationWorker.cs`, `DomainEnums.cs`, `Booking.cs`, `PlayCourtDbContext.cs`, migration `AddExpiredBookingStatus`, `BookingExpirationServiceTests.cs`, `BookingServiceTests.cs`, `PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 88/88 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit plan trong `docs/superpowers/plans` |

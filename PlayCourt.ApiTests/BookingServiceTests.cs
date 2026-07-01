@@ -66,6 +66,45 @@ public sealed class BookingServiceTests
         Assert.Equal(237_500m, response.Data.OwnerEarnings);
     }
 
+    [Fact]
+    public async Task CreateAsync_WhenExpiredBookingOverlaps_CreatesBooking()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var existingPlayer = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2026, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var endAt = startAt.AddHours(2);
+        AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(20, 0, 0), 100_000m);
+        context.Bookings.Add(new Booking
+        {
+            UserProfile = existingPlayer,
+            Court = court,
+            StartAt = startAt,
+            EndAt = endAt,
+            TotalPrice = 200_000m,
+            PlatformFee = 10_000m,
+            OwnerEarnings = 190_000m,
+            Status = BookingStatus.Expired,
+            CreatedAt = startAt.AddDays(-1)
+        });
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).CreateAsync(
+            player.UserId,
+            new CreateBookingRequestDto
+            {
+                CourtId = court.Id,
+                StartAt = startAt,
+                EndAt = endAt
+            });
+
+        Assert.True(response.Success);
+        Assert.Equal(2, context.Bookings.Count());
+        Assert.Equal(BookingStatus.Pending, context.Bookings.Single(item => item.UserProfileId == player.Id).Status);
+    }
+
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()
