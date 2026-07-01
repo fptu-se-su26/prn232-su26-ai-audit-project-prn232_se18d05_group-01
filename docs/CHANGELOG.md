@@ -716,3 +716,49 @@ Ket qua: Passed, 89/89 tests.
 
 Ghi chu: Khong sua docs/REFLECTION.md; khong commit file runtime .codegraph hoac appsettings local ngoai scope.
 ```
+
+---
+
+## Cap nhat ngay 01/07/2026 - DE180405 Booking Double Booking Race Bugfix
+
+### Da hoan thanh
+
+- [x] Xac nhan bug BookingService validate slot truoc transaction nen hai request dong thoi co the cung thay slot trong.
+- [x] Them transaction-scoped SQL Server `sp_getapplock` theo `CourtId` trong `BookingService.CreateAsync`.
+- [x] Chuyen authoritative `ValidateSlotAsync` vao trong transaction sau khi da lay lock.
+- [x] Giu lock helper no-op voi non-relational provider de cac test InMemory hien co tiep tuc chay.
+- [x] Cap nhat `BookingsController.Create` de tra HTTP 409 Conflict cho cac loi slot conflict.
+- [x] Them regression test cho active booking overlap de dam bao request thu hai bi tu choi khi slot da co booking active.
+
+### File lien quan
+
+```text
+PlayCourt.Infrastructure/Services/BookingService.cs
+PlayCourt.API/Controllers/BookingsController.cs
+PlayCourt.ApiTests/BookingServiceTests.cs
+docs/AI_AUDIT_LOG.md
+docs/PROMPTS.md
+docs/CHANGELOG.md
+```
+
+### Kiem chung
+
+```text
+Targeted test:
+dotnet test PlayCourt.ApiTests/PlayCourt.ApiTests.csproj --filter "FullyQualifiedName~BookingServiceTests.CreateAsync_WhenActiveBookingOverlaps_RejectsBooking"
+Ket qua: Passed 1/1.
+
+dotnet format PlayCourt.sln --verify-no-changes
+Ket qua: Passed.
+
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded, 0 warning, 0 error.
+
+dotnet test PlayCourt.sln
+Ket qua: Passed, 90/90 tests.
+
+Manual SQL Server concurrency verification:
+Gui hai POST /api/bookings dong thoi voi cung CourtId, StartAt va EndAt. Ky vong chi mot request tao Booking thanh cong, request con lai nhan 409 Conflict hoac business failure, va database chi co mot active booking overlap.
+
+Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpowers/plans hoac appsettings local ngoai scope.
+```

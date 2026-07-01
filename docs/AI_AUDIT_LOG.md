@@ -1363,3 +1363,47 @@ Giu fix nho gon trong BookingService, khong doi contract API/controller. Test bo
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs` |
 | Ket qua chay/test | RED: targeted BookingService test failed vi booking van tao thanh cong; GREEN: targeted test passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 89/89 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit file runtime `.codegraph` hoac appsettings local dang co thay doi ngoai scope |
+
+---
+
+### Lan su dung AI so 24
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich su dung | Phan tich va sua bug double booking khi hai request tao Booking dong thoi cho DE180405 |
+| Phan viec lien quan | Backend / Booking / Concurrency / SQL Server Locking / Testing / Documentation |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Hai request dat cung Court va cung khung gio co the cung thanh cong neu duoc gui gan nhu dong thoi. BookingService goi ValidateSlotAsync truoc khi mo transaction, kiem tra trung lich bang AnyAsync voi isolation mac dinh va khong co locking. Hay check issue, lap plan, tao nhanh bugfix/de180405-<ten bug> tu dev, dem thay doi hien tai sang nhanh moi, trien khai fix, cap nhat log ngoai tru reflection, commit file can thiet va tao PR vao dev.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI xac nhan bug hop le vi BookingService.CreateAsync kiem tra slot truoc transaction, transaction hien tai chi boc thao tac insert, va database chi co index thuong khong ngan duoc overlap time range khi co race condition.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Da chuyen authoritative slot validation vao trong transaction tao Booking va them SQL Server transaction-scoped sp_getapplock theo CourtId truoc khi validate va insert. Booking create controller tra HTTP 409 Conflict cho cac loi slot conflict.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Dung lock resource theo CourtId thay vi theo StartAt/EndAt de chan ca cac khung gio giao nhau nhung khong trung exact time. Giu no-op khi provider khong relational de cac unit test InMemory hien co tiep tuc chay. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | Targeted active booking overlap test passed 1/1; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 90/90 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; manual SQL Server concurrency verification can gui hai POST /api/bookings dong thoi cung CourtId/StartAt/EndAt va ky vong chi 1 active booking duoc tao |

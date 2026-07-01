@@ -107,6 +107,45 @@ public sealed class BookingServiceTests
         Assert.Equal(BookingStatus.Pending, context.Bookings.Single(item => item.UserProfileId == player.Id).Status);
     }
 
+    [Fact]
+    public async Task CreateAsync_WhenActiveBookingOverlaps_RejectsBooking()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var player = AddPlayer(context);
+        var existingPlayer = AddPlayer(context);
+        var court = AddAvailableCourt(context, sport);
+        var startAt = new DateTimeOffset(2030, 7, 1, 16, 0, 0, TimeSpan.Zero);
+        var endAt = startAt.AddHours(2);
+        AddPricingRule(context, court, startAt, new TimeSpan(14, 0, 0), new TimeSpan(20, 0, 0), 100_000m);
+        context.Bookings.Add(new Booking
+        {
+            UserProfile = existingPlayer,
+            Court = court,
+            StartAt = startAt.AddMinutes(30),
+            EndAt = endAt.AddMinutes(30),
+            TotalPrice = 200_000m,
+            PlatformFee = 10_000m,
+            OwnerEarnings = 190_000m,
+            Status = BookingStatus.Pending,
+            CreatedAt = startAt.AddDays(-1)
+        });
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).CreateAsync(
+            player.UserId,
+            new CreateBookingRequestDto
+            {
+                CourtId = court.Id,
+                StartAt = startAt,
+                EndAt = endAt
+            });
+
+        Assert.False(response.Success);
+        Assert.Equal("Court already has an active booking in this time range.", response.Message);
+        Assert.Single(context.Bookings.Where(item => item.CourtId == court.Id));
+    }
+
     private static PlayCourtDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<PlayCourtDbContext>()

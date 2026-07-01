@@ -34,7 +34,14 @@ namespace PlayCourt.API.Controllers
             }
 
             var response = await _bookingService.CreateAsync(userId, request);
-            return response.Success ? Ok(response) : BadRequest(response);
+            if (response.Success)
+            {
+                return Ok(response);
+            }
+
+            return IsBookingSlotConflict(response.Message)
+                ? Conflict(response)
+                : BadRequest(response);
         }
 
         [HttpGet("{id:int}")]
@@ -164,6 +171,18 @@ namespace PlayCourt.API.Controllers
         private IActionResult InvalidToken()
         {
             return Unauthorized(ApiResponse<object>.Fail("Invalid token."));
+        }
+
+        private static bool IsBookingSlotConflict(string? message)
+        {
+            return IsConflictMessage(message, "Court already has an active booking in this time range.") ||
+                IsConflictMessage(message, "Court already has an active match in this time range.") ||
+                IsConflictMessage(message, "Court is blocked by a schedule in this time range.");
+        }
+
+        private static bool IsConflictMessage(string? actual, string expected)
+        {
+            return string.Equals(actual, expected, StringComparison.Ordinal);
         }
 
         private IActionResult ValidationError<T>()
