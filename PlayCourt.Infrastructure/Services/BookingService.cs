@@ -150,7 +150,10 @@ namespace PlayCourt.Infrastructure.Services
         {
             var ownsVenue = await _dbContext.Venues
                 .AnyAsync(v => v.Id == venueId && v.CourtOwnerProfile.UserProfile.UserId == userId);
-            if (!ownsVenue)
+            var isStaff = await _dbContext.VenueStaffs
+                .AnyAsync(vs => vs.VenueId == venueId && vs.UserId == userId && vs.IsActive);
+
+            if (!ownsVenue && !isStaff)
             {
                 return PagedResponse<IReadOnlyCollection<BookingResponseDto>>.Fail("Venue not found or you are not authorized to view its bookings.");
             }
@@ -165,7 +168,10 @@ namespace PlayCourt.Infrastructure.Services
         {
             var ownsCourt = await _dbContext.Courts
                 .AnyAsync(c => c.Id == courtId && c.Venue.CourtOwnerProfile.UserProfile.UserId == userId);
-            if (!ownsCourt)
+            var isStaff = await _dbContext.VenueStaffs
+                .AnyAsync(vs => vs.UserId == userId && vs.IsActive && vs.Venue.Courts.Any(c => c.Id == courtId));
+
+            if (!ownsCourt && !isStaff)
             {
                 return PagedResponse<IReadOnlyCollection<BookingResponseDto>>.Fail("Court not found or you are not authorized to view its bookings.");
             }
@@ -286,7 +292,7 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<BookingResponseDto>.Fail("Booking not found.");
             }
 
-            if (!IsVenueOwner(userId, booking))
+            if (!await IsAuthorizedVenueManagerAsync(userId, booking))
             {
                 return ApiResponse<BookingResponseDto>.Fail("You are not authorized to confirm this booking.");
             }
@@ -321,7 +327,7 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<BookingResponseDto>.Fail("Booking not found.");
             }
 
-            if (!IsVenueOwner(userId, booking))
+            if (!await IsAuthorizedVenueManagerAsync(userId, booking))
             {
                 return ApiResponse<BookingResponseDto>.Fail("You are not authorized to reject this booking.");
             }
@@ -362,7 +368,7 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<BookingResponseDto>.Fail("Booking not found.");
             }
 
-            if (!IsVenueOwner(userId, booking))
+            if (!await IsAuthorizedVenueManagerAsync(userId, booking))
             {
                 return ApiResponse<BookingResponseDto>.Fail("You are not authorized to complete this booking.");
             }
@@ -456,7 +462,7 @@ namespace PlayCourt.Infrastructure.Services
 
         private async Task<bool> CanAccessBookingAsync(int userId, Booking booking)
         {
-            if (booking.UserProfile.UserId == userId || IsVenueOwner(userId, booking))
+            if (booking.UserProfile.UserId == userId || await IsAuthorizedVenueManagerAsync(userId, booking))
             {
                 return true;
             }
@@ -467,6 +473,23 @@ namespace PlayCourt.Infrastructure.Services
         private static bool IsVenueOwner(int userId, Booking booking)
         {
             return booking.Court?.Venue?.CourtOwnerProfile?.UserProfile?.UserId == userId;
+        }
+
+        private async Task<bool> IsAuthorizedVenueManagerAsync(int userId, Booking booking)
+        {
+            if (IsVenueOwner(userId, booking))
+            {
+                return true;
+            }
+
+            var venueId = booking.Court?.VenueId;
+            if (venueId is null)
+            {
+                return false;
+            }
+
+            return await _dbContext.VenueStaffs
+                .AnyAsync(vs => vs.VenueId == venueId.Value && vs.UserId == userId && vs.IsActive);
         }
 
         private async Task<(bool IsAvailable, string? Reason)> ValidateSlotAsync(

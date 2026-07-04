@@ -71,7 +71,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpGet("~/api/venues/{venueId:int}/bookings")]
-        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        [Authorize]
         public async Task<IActionResult> GetVenueBookings(int venueId, [FromQuery] BookingQueryDto query)
         {
             if (!TryGetCurrentUserId(out var userId))
@@ -84,7 +84,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpGet("~/api/courts/{courtId:int}/bookings")]
-        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        [Authorize]
         public async Task<IActionResult> GetCourtBookings(int courtId, [FromQuery] BookingQueryDto query)
         {
             if (!TryGetCurrentUserId(out var userId))
@@ -125,7 +125,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpPatch("{id:int}/confirm")]
-        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        [Authorize]
         public async Task<IActionResult> Confirm(int id, [FromBody] UpdateBookingStatusRequestDto request)
         {
             if (!TryGetCurrentUserId(out var userId))
@@ -138,7 +138,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpPatch("{id:int}/reject")]
-        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        [Authorize]
         public async Task<IActionResult> Reject(int id, [FromBody] UpdateBookingStatusRequestDto request)
         {
             if (!TryGetCurrentUserId(out var userId))
@@ -151,7 +151,7 @@ namespace PlayCourt.API.Controllers
         }
 
         [HttpPatch("{id:int}/complete")]
-        [Authorize(Policy = ApiPolicies.CourtOwner)]
+        [Authorize]
         public async Task<IActionResult> Complete(int id, [FromBody] UpdateBookingStatusRequestDto request)
         {
             if (!TryGetCurrentUserId(out var userId))
