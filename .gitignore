@@ -45,3 +45,6 @@ appsettings.Development.json
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# CodeGraph data files
+.cursor/

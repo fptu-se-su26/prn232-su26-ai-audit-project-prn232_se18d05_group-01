@@ -38,7 +38,7 @@ namespace PlayCourt.Domain.Entities
         [Column(TypeName = "decimal(12,2)")]
         public decimal OwnerEarnings { get; set; }
 
-        // Status: 0=Pending, 1=Confirmed, 2=CancelledByUser, 3=CancelledByOwner, 4=Completed.
+        // Status: 0=Pending, 1=Confirmed, 2=CancelledByUser, 3=CancelledByOwner, 4=Completed, 5=Expired.
         [Required]
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
 

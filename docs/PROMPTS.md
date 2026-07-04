@@ -13,7 +13,7 @@
 | Danh sách MSSV | DE180519, DE180405, DE180313, DE180310, DE190946 |
 | Giảng viên hướng dẫn | QuangLTN3 |
 | Ngày bắt đầu | 11/05/2026 |
-| Ngày cập nhật gần nhất | 21/05/2026 |
+| Ngày cập nhật gần nhất | 24/06/2026 |
 
 ---
 
@@ -57,13 +57,20 @@ Sinh viên/nhóm cần ghi lại:
 | 1 | 14/05/2026 | Codex | Cập nhật tài liệu ban đầu | Điền thông tin project, ngày bắt đầu/kết thúc và danh sách công cụ AI | README và tài liệu trong `docs/` được cập nhật thông tin nền ban đầu | Có | `README.md`, `docs/` |
 | 2 | 21/05/2026 | Codex | Hướng dẫn tạo model và DbContext | Tạo entity model, enum, DbContext, relationship, index, constraint và migration cho PlayCourt | Hoàn thiện model, DbContext và migration EF Core | Có | `PlayCourt.Domain/`, `PlayCourt.Infrastructure/Data/` |
 | 3 | 21/05/2026 | Codex | Setup application layer | Tách DI theo layer, thêm middleware exception, ApiResponse và service placeholder | Program.cs gọn hơn, các layer có extension registration riêng và có response/error shape dùng chung | Có | `PlayCourt.API/`, `PlayCourt.Application/`, `PlayCourt.Infrastructure/` |
-| 4 |  |  |  |  |  | Có / Không |  |
-| 5 |  |  |  |  |  | Có / Không |  |
-| 6 |  |  |  |  |  | Có / Không |  |
-| 7 |  |  |  |  |  | Có / Không |  |
-| 8 |  |  |  |  |  | Có / Không |  |
-| 9 |  |  |  |  |  | Có / Không |  |
-| 10 |  |  |  |  |  | Có / Không |  |
+| 4 | 03/06/2026 | Codex | Triển khai Register API | Tạo API đăng ký tài khoản theo Clean Architecture | Có endpoint register, service, DTO, validation và BCrypt | Có | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs` |
+| 5 | 03/06/2026 | Codex | Triển khai Login API | Tạo API đăng nhập bằng email/số điện thoại và trả JWT | Có endpoint login, JWT service, cấu hình bearer auth và test | Có | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/JwtTokenService.cs` |
+| 6 | 03/06/2026 | Codex | Triển khai Email OTP infrastructure | Tạo VerificationToken table, OTP service và dev email logger | Có entity, enum, migration, service OTP và email logging | Có | `VerificationToken.cs`, `VerificationTokenService.cs`, migration `AddVerificationTokenTable` |
+| 7 | 03/06/2026 | Codex | Triển khai Verify Email | Tạo verify/resend OTP endpoints và SMTP email service | Register gửi OTP, verify email, resend OTP, MailKit SMTP | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
+| 8 | 03/06/2026 | Codex | Triển khai Password Management | Tạo forgot/reset/change password endpoints | Dùng lại OTP PasswordReset, SMTP email và BCrypt | Có | `AuthController.cs`, `AuthService.cs`, `SmtpEmailService.cs` |
+| 9 | 03/06/2026 | Codex | Triển khai User Profile API | Tạo GET/PUT `/api/users/me` tách riêng AuthService | Có UsersController, UserService, DTO, validation và test | Có | `UsersController.cs`, `UserService.cs`, `UsersControllerTests.cs` |
+| 10 | 04/06/2026 | Codex | Triển khai Sport Management API | Tạo API quản lý môn thể thao, admin create/update/toggle active, validate code/name/player count và thêm test | Có SportsController, DTO, ISportService, SportService, controller test và service test | Có | `SportsController.cs`, `SportService.cs`, `SportServiceTests.cs` |
+| 11 | 06/06/2026 | Codex | Triển khai Venue Management API | Tạo API POST/GET/PUT Venue cho CourtOwner, giữ đúng scope không admin approve/upload/images/amenities | Có VenuesController, IVenueService, VenueService, DTOs/Venues và DI registration | Có | `556a7fc`, `VenuesController.cs`, `VenueService.cs`, `DTOs/Venues/` |
+| 12 | 07/06/2026 | Antigravity | Triển khai Court Management API và DTOs/PricingRules | Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules, ownership verify qua chain Venue → CourtOwnerProfile → UserProfile | Có CourtsController, CourtService, ICourtService, 3 DTOs Courts, 3 DTOs PricingRules, +1 dòng DI | Có | `8c80134`, `CourtsController.cs`, `CourtService.cs`, `DTOs/Courts/`, `DTOs/PricingRules/` |
+| 13 | 07/06/2026 | Antigravity | Triển khai Pricing Rule API | Tạo API CRUD cho bảng giá giờ, logic chống overlap giờ | Có PricingRulesController, IPricingRuleService, PricingRuleService, DI | Có | `3582d61`, `PricingRulesController.cs`, `PricingRuleService.cs` |
+| 14 | 07/06/2026 | Antigravity | Triển khai Court Schedule API | Tạo API CRUD cho lịch khóa sân, logic chống overlap giờ | Có CourtSchedulesController, ICourtScheduleService, CourtScheduleService, DI | Có | `3fe045c`, `CourtSchedulesController.cs`, `CourtScheduleService.cs` |
+| 15 | 24/06/2026 | Codex | Triển khai CRUD PlayerSport cho User Profile | Phân tích nghiệp vụ và tạo API thêm, xem, đổi trình độ, xóa môn thể thao của người dùng hiện tại | Có 4 endpoint `/api/users/me/sports`, DTO, mở rộng IUserService/UserService và test controller/service | Có | `UsersController.cs`, `UserService.cs`, `UserServicePlayerSportTests.cs` |
+| 16 | 24/06/2026 | Codex | Admin xác minh CourtOwner | List/detail/filter, approve/reject và chặn owner chưa Approved tạo Venue | Có controller/service/DTO riêng, migration và build pass | Có | `CourtOwnersController.cs`, `CourtOwnerService.cs`, migration |
+| 17 | 24/06/2026 | Antigravity | Hoàn thiện toàn bộ Venue Module | Bạn hãy code feature/de180310-complete-venue-module bổ sung Public Search, Admin Approve, Images, Amenities, Opening Hours | Có VenuesController, AdminVenuesController, AmenitiesController và các services, DTOs tương ứng | Có | Sẽ cập nhật sau khi commit |
 
 ---
 
@@ -293,6 +300,902 @@ Prompt này được ghi nhận vì ảnh hưởng trực tiếp đến cấu tr
 
 ---
 
+### Prompt số 4
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Register API |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Register API cho PlayCourt Backend. Frontend gửi fullName, email, phoneNumber, password, role và businessName. Dùng ApiResponse<T>, BCrypt, Clean Architecture, tạo User, UserProfile và CourtOwnerProfile nếu Owner.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project cần endpoint đăng ký tài khoản để Player và Owner có thể tạo tài khoản mới.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý tạo DTO, service interface, service implementation, controller, DI registration và kiểm tra build/test.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để triển khai endpoint POST /api/auth/register, validate input, hash password và lưu dữ liệu vào SQL Server qua EF Core.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chỉnh lại theo entity thật của project, không dùng SQLite test package và đảm bảo controller không chứa business logic.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [ ] Prompt còn thiếu thông tin
+- [x] Prompt tạo ra kết quả tốt
+- [ ] Prompt tạo ra kết quả chưa phù hợp
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Application/DTOs/Auth/`, `PlayCourt.Infrastructure/Services/AuthService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Register API dùng SQL Server và BCrypt |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này giúp nhóm hoàn thành một chức năng backend quan trọng của hệ thống.
+```
+
+---
+
+### Prompt số 5
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Login API với JWT |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Login API with JWT cho PlayCourt backend. Login bằng email hoặc số điện thoại, verify password bằng BCrypt, chỉ cho user Active đăng nhập, trả JWT access token, không thêm LastLoginAt, không thêm migration.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Sau khi có Register API, project cần chức năng đăng nhập để frontend nhận token và gọi các API cần phân quyền.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý tạo LoginRequestDto, LoginResponseDto, IJwtTokenService, JwtTokenService, cập nhật AuthService, AuthController, cấu hình JWT và thêm test.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm endpoint POST /api/auth/login, sinh JWT token, kiểm tra role claim và cấu hình middleware authentication.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra lại package JWT, middleware order, role claim và đảm bảo không thay đổi database/migration.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra và chỉnh sửa
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Application/DTOs/Auth/LoginRequestDto.cs`, `PlayCourt.Application/DTOs/Auth/LoginResponseDto.cs`, `PlayCourt.Infrastructure/Services/JwtTokenService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`, `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không thêm migration và không thêm LastLoginAt |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Login API là chức năng chính của phần authentication.
+```
+
+---
+
+### Prompt số 6
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Email OTP infrastructure |
+| Phần việc liên quan | Backend / Database / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Email/OTP infrastructure cho PlayCourt Backend bằng EF Core Code First. Thêm VerificationTokenPurpose enum, VerificationToken entity, relationship với User, DbContext config, migration, OTP service và development email service log bằng ILogger.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project cần hạ tầng OTP để dùng lại cho verify email và forgot/reset password ở các task sau.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý tạo bảng VerificationTokens, thêm enum purpose, thêm interface/service tạo OTP, verify OTP và development email service không gửi email thật.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm entity, DbSet, Fluent API config, migration AddVerificationTokenTable, OTP hash bằng BCrypt và DI registration.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra không đổi database provider, không thêm SMTP package, không thêm endpoint ngoài scope và chạy database update.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng migration/build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.Domain/Entities/VerificationToken.cs`, `PlayCourt.Domain/Enums/DomainEnums.cs`, `PlayCourt.Infrastructure/Data/PlayCourtDbContext.cs`, `PlayCourt.Infrastructure/Services/VerificationTokenService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet ef migrations add AddVerificationTokenTable`; `dotnet ef database update`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Chỉ làm infrastructure, chưa làm Verify Email/Forgot Password endpoint |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì OTP infrastructure là nền tảng cho các chức năng xác thực email và reset password.
+```
+
+---
+
+### Prompt số 7
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Verify Email bằng OTP và SMTP |
+| Phần việc liên quan | Backend / Auth / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Verify Email feature. Register tạo OTP và gửi email, thêm endpoint /api/auth/verify-email và /api/auth/resend-verify-email, dùng ApiResponse<T>, MailKit SMTP, Gmail app password trong appsettings.Development.json local.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có Register/Login và OTP infrastructure, cần hoàn thiện flow verify email để frontend có thể xác thực tài khoản người dùng.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý thêm VerifyEmailRequestDto, ResendVerifyEmailRequestDto, EmailSettings, SmtpEmailService, cập nhật AuthService/RegisterAsync, thêm VerifyEmailAsync, ResendVerifyEmailAsync và controller tests.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để register gửi OTP qua SMTP, verify OTP set IsEmailVerified, resend OTP có cooldown 60 giây và cấu hình EmailSettings.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ credential SMTP trong appsettings.Development.json local, shared appsettings chỉ dùng placeholder và kiểm tra không đưa password thật vào file tracked.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc bảo mật
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/SmtpEmailService.cs`, `PlayCourt.Application/Settings/EmailSettings.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không ghi SMTP password thật trong docs |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Verify Email là chức năng auth chính, dùng lại OTP infrastructure đã có.
+```
+
+---
+
+### Prompt số 8
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Forgot/Reset/Change Password |
+| Phần việc liên quan | Backend / Auth / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Forgot Password, Reset Password và Change Password cho PlayCourt. Dùng lại VerificationTokenPurpose.PasswordReset, VerificationTokenService, SMTP email service, BCrypt, endpoint change-password có Authorize và không thêm migration.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có Register/Login, JWT, Email OTP infrastructure và Verify Email nên cần hoàn thiện flow quản lý mật khẩu.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI gợi ý thêm DTO request, mở rộng IAuthService/AuthService, thêm reset password email template, thêm 3 endpoint trong AuthController và controller tests.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm `/api/auth/forgot-password`, `/api/auth/reset-password` và `/api/auth/change-password`, dùng OTP PasswordReset và hash password mới bằng BCrypt.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ SQL Server, không thêm migration, trả message forgot password dạng chung và kiểm tra bằng build/test.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc không thêm migration
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/AuthController.cs`, `PlayCourt.Application/DTOs/Auth/`, `PlayCourt.Infrastructure/Services/AuthService.cs`, `PlayCourt.Infrastructure/Services/SmtpEmailService.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` passed 19/19 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không ghi SMTP password thật trong docs |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Password Management là chức năng auth chính và dùng lại hạ tầng OTP đã có.
+```
+
+---
+
+### Prompt số 9
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 03/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai User Profile API |
+| Phần việc liên quan | Coding / Testing / Documentation |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi test case / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement User Profile APIs for PlayCourt API: GET /api/users/me and PUT /api/users/me. Allow authenticated users to get and update safe personal profile fields, keep logic separate from AuthService, use ApiResponse<T>, do not expose PasswordHash, do not update account/court-owner business fields, do not add migration, add controller tests and update docs.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có User, UserProfile, CourtOwnerProfile, JWT authentication, ClaimTypes.NameIdentifier, ApiResponse<T>, manual DTO mapping và test controller bằng stub service.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất tạo DTOs trong PlayCourt.Application/DTOs/Users, IUserService, UserService dùng EF Core, UsersController có Authorize và tests cho success/fail/unauthorized.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm endpoint GET /api/users/me và PUT /api/users/me, trả profile hiện tại, cập nhật safe fields, đăng ký DI và thêm UsersControllerTests.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chỉnh theo entity thật của project, giữ AuthService không đổi, không tạo migration, chỉ validate FullName/Gender trong service và kiểm chứng bằng build/test.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [ ] Prompt còn thiếu thông tin
+- [x] Prompt tạo ra kết quả tốt
+- [ ] Prompt tạo ra kết quả chưa phù hợp
+- [ ] Cần hỏi lại AI nhiều lần
+- [x] Cần tự kiểm tra và chỉnh sửa nhiều
+- [ ] Kết quả AI có lỗi hoặc chưa chính xác
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.ApiTests/UsersControllerTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` |
+| Link tài liệu/báo cáo | `docs/CHANGELOG.md`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md` |
+| Ghi chú khác | Không thêm migration và không expose PasswordHash |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì User Profile API là chức năng người dùng đăng nhập quan trọng và có yêu cầu bảo mật field rõ ràng.
+```
+
+---
+
+### Prompt số 10
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 04/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Sport Management API |
+| Phần việc liên quan | Coding / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi test case / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Sport Management cho PlayCourt Backend. Tạo API quản lý môn thể thao, dùng ApiResponse<T>, tách logic vào SportService, admin mới được create/update/toggle active, có validate code/name/player count và thêm test.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có entity Sport, DbContext, ApiResponse<T>, JWT authorization policy và pattern controller/service/test cho các feature trước.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất thêm SportsController, DTOs trong PlayCourt.Application/DTOs/Sports, ISportService, SportService dùng EF Core và test cho controller/service.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm API GET danh sách sport, GET sport theo id, POST tạo sport, PUT cập nhật sport và PATCH toggle active.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm kiểm tra lại phân quyền admin cho API thay đổi dữ liệu, validate duplicate code/name, chuẩn hóa sport code và chạy test toàn solution.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ phân quyền
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/SportsController.cs`, `PlayCourt.Application/DTOs/Sports/`, `PlayCourt.Application/Interfaces/ISportService.cs`, `PlayCourt.Infrastructure/Services/SportService.cs`, `PlayCourt.ApiTests/SportsControllerTests.cs`, `PlayCourt.ApiTests/SportServiceTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-build` passed 39/39 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không thêm migration vì bảng Sport đã có |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Sport Management là chức năng backend dùng để quản lý danh mục môn thể thao trong hệ thống.
+```
+
+---
+
+### Prompt số 11
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 06/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai Venue Management API cho CourtOwner |
+| Phần việc liên quan | Coding / Testing / Documentation |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Branch chính: feature/de180310-venue-management. Scope API: POST /api/venues, GET /api/venues/my, GET /api/venues/{id}, PUT /api/venues/{id}. Chỉ CourtOwner được tạo/sửa Venue của mình. Venue mới tạo có Status = Pending. Không làm Admin approve trong feature này. Không làm upload file thật; không làm Venue Images/Amenities trong branch này.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có Venue entity, CourtOwnerProfile, JWT authentication, ApiPolicies.CourtOwner, ApiResponse<T>, DbContext và pattern controller/service/DTO từ các feature trước. Branch cần tránh conflict với Sports, Courts và PricingRules.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất tạo VenuesController, CreateVenueRequestDto, UpdateVenueRequestDto, VenueResponseDto, IVenueService, VenueService và đăng ký DI cho IVenueService. Service dùng EF Core để tìm owner profile theo userId và kiểm tra Venue thuộc owner hiện tại.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Nhóm áp dụng để thêm POST /api/venues, GET /api/venues/my, GET /api/venues/{id}, PUT /api/venues/{id}; Venue mới tạo có Status Pending và Venue sau khi update được đưa về Pending.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm giữ AuthService không đổi, không thêm migration, không tạo upload/images/amenities/admin approve, chỉ thêm dòng DI cho VenueService và kiểm tra bằng build/test.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ phân quyền và scope không làm
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra bằng build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `556a7fc` |
+| File liên quan | `PlayCourt.API/Controllers/VenuesController.cs`, `PlayCourt.Application/DTOs/Venues/`, `PlayCourt.Application/Interfaces/IVenueService.cs`, `PlayCourt.Infrastructure/Services/VenueService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln --no-build` passed 39/39 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không cập nhật `docs/REFLECTION.md`; không thêm migration |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Venue Management là chức năng backend chính của CourtOwner và có ràng buộc phân quyền, ownership, scope branch rõ ràng.
+```
+
+---
+
+### Prompt số 12
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Court Management API và DTOs/PricingRules |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Hỏi review / Hỏi revert scope thừa |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Implement Court Management API cho PlayCourt Backend. Tạo CourtsController, ICourtService, CourtService, DTOs/Courts và DTOs/PricingRules. Chỉ CourtOwner sở hữu Venue mới được thêm/sửa Court. Court cần SportId. Không sửa AuthService, không format toàn bộ solution, DependencyInjection.cs chỉ thêm đúng dòng service của mình.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Project đã có entity Court, Venue, CourtOwnerProfile, UserProfile và chain quan hệ FK đầy đủ. Cần triển khai API quản lý sân con cho CourtOwner theo đúng domain của DE180313 để tránh conflict với thành viên khác.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI tạo CourtDto, CreateCourtRequestDto, UpdateCourtRequestDto; PricingRuleDto, CreatePricingRuleRequestDto, UpdatePricingRuleRequestDto; ICourtService với 4 method; CourtService verify ownership qua Venue → CourtOwnerProfile → UserProfile.UserId; CourtsController với explicit route /api/venues/{venueId}/courts và /api/courts/{id}. AI ban đầu tạo thêm IPricingRuleService, PricingRuleService, PricingRulesController ngoài scope.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng phần trong scope: CourtsController, ICourtService, CourtService, DTOs/Courts, DTOs/PricingRules và +1 dòng DI. Yêu cầu AI xóa phần ngoài scope (IPricingRuleService, PricingRuleService, PricingRulesController).
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Kiểm tra lại scope sau mỗi bước, yêu cầu AI revert phần thừa, xác nhận DI chỉ có đúng 1 dòng mới, chạy dotnet build toàn solution để xác nhận 0 Warning 0 Error.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt nêu rõ ràng buộc không sửa file người khác
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần hỏi lại AI để revert scope thừa
+- [x] Cần tự kiểm tra build
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `8c80134` |
+| File liên quan | `PlayCourt.API/Controllers/CourtsController.cs`, `PlayCourt.Application/Interfaces/ICourtService.cs`, `PlayCourt.Infrastructure/Services/CourtService.cs`, `PlayCourt.Application/DTOs/Courts/`, `PlayCourt.Application/DTOs/PricingRules/`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed — 0 Warning(s), 0 Error(s) |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không sửa AuthService, không sửa DbContext, không format toàn solution |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này được ghi nhận vì Court Management là domain chính của DE180313 trong sprint này.
+```
+
+---
+
+### Prompt số 13
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Pricing Rule API |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Branch tiếp theo: feature/de180313-pricing-rules. Scope: POST /api/courts/{courtId}/pricing-rules, GET /api/courts/{courtId}/pricing-rules, PUT /api/pricing-rules/{id}, DELETE /api/pricing-rules/{id}. DTOs đã có từ branch trước. Thêm logic validate để kiểm tra không cho phép tạo PricingRule bị overlap giờ (StartAt và EndAt) trong cùng 1 Court. Owner chỉ được thao tác với PricingRule của Court do Venue của mình quản lý.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Court và DTOs cho PricingRule đã được tạo trước đó. Cần tạo Service và Controller để CourtOwner quản lý bảng giá giờ cho sân của họ.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất tạo PricingRulesController với 4 endpoints, IPricingRuleService và PricingRuleService. Service kiểm tra quyền sở hữu và check logic chống overlap (StartAt < request.EndAt && EndAt > request.StartAt). Đăng ký IPricingRuleService vào DI.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng toàn bộ Service, Controller và DI. Chống overlap giờ hoạt động hiệu quả.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Tiến hành chạy build và unit test tự động để đảm bảo logic không có lỗi compile và không làm hỏng test cũ.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ cụ thể (chống overlap)
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `3582d61` |
+| File liên quan | `PlayCourt.API/Controllers/PricingRulesController.cs`, `PlayCourt.Application/Interfaces/IPricingRuleService.cs`, `PlayCourt.Infrastructure/Services/PricingRuleService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Logic check overlap được xử lý ở Service layer |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt này hướng AI xử lý bài toán domain logic (trùng lặp khung giờ).
+```
+
+---
+
+
+### Prompt số 14
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 07/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Court Schedule API |
+| Phần việc liên quan | Backend / Testing |
+| Mức độ sử dụng | Hỏi sinh code mẫu |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+feature/de180313-court-schedule
+POST   /api/courts/{courtId}/schedules
+GET    /api/courts/{courtId}/schedules
+DELETE /api/court-schedules/{id} tiếp theo
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Sau khi hoàn thiện PricingRule, cần tiếp tục làm API CourtSchedule để quản lý các lịch khóa sân (ví dụ sân bận, sân sửa chữa). Lịch cũng cần chống overlap.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất tạo CourtSchedulesController, ICourtScheduleService, CourtScheduleService và DTOs. Service tái sử dụng logic check quyền sở hữu và thêm cơ chế validate chống trùng lặp giờ giống như phần Pricing Rule.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng toàn bộ Service, Controller và DI. Logic validate chống trùng lặp giờ khóa sân chạy tốt.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Build và test 39/39 passing để xác nhận không lỗi.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | `3fe045c` |
+| File liên quan | `PlayCourt.API/Controllers/CourtSchedulesController.cs`, `PlayCourt.Application/Interfaces/ICourtScheduleService.cs`, `PlayCourt.Infrastructure/Services/CourtScheduleService.cs`, `PlayCourt.Application/DTOs/CourtSchedules/` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet build PlayCourt.sln` passed, `dotnet test PlayCourt.sln` passed 39/39 |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Hoàn thành toàn bộ API cho chức năng quản lý sân con. |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt ngắn gọn nhưng AI đã hiểu được context từ các prompt trước đó.
+```
+
+---
+
+### Prompt số 15
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Triển khai CRUD PlayerSport trong User Profile |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỏi phân tích nghiệp vụ / Hỏi sinh code mẫu / Hỏi hướng dẫn test |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Tôi cần làm chức năng thêm sport cho user tức PlayerSport. Hãy phân tích nghiệp vụ và nên làm vào đâu. Tôi muốn thêm vào IUserService vì bản chất vẫn là một phần của profile user. Hãy làm CRUD đầy đủ: thêm, xem, đổi trình độ, xóa.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Entity PlayerSport và cấu hình EF Core đã tồn tại, nhưng hệ thống chưa có API để người dùng đăng nhập tự quản lý danh sách môn thể thao và trình độ trong hồ sơ của mình.
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất đặt nghiệp vụ trong IUserService/UserService, sử dụng userId từ JWT thay vì nhận UserProfileId từ client, tạo các endpoint GET/POST/PUT/DELETE dưới `/api/users/me/sports`, DTO riêng và validation cho Sport, SkillLevel, trạng thái active và dữ liệu trùng.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Đã triển khai đầy đủ API xem danh sách, thêm sport, cập nhật SkillLevel và xóa PlayerSport. Response trả thông tin SportCode, SportName và tên SkillLevel; không trả trực tiếp entity.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm chốt PlayerSport là một phần của User Profile nên giữ trong IUserService thay vì tạo service riêng. Quyền sở hữu được giới hạn theo JWT, dùng sportId trên route và giữ unique constraint `(UserProfileId, SportId)` làm lớp bảo vệ cuối cùng. Nhóm chạy test và build toàn solution trước khi hoàn tất.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `PlayCourt.API/Controllers/UsersController.cs`, `PlayCourt.Application/Interfaces/IUserService.cs`, `PlayCourt.Application/DTOs/Users/`, `PlayCourt.Infrastructure/Services/UserService.cs`, `PlayCourt.ApiTests/UsersControllerTests.cs`, `PlayCourt.ApiTests/UserServicePlayerSportTests.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln --no-restore` passed 66/66; `dotnet build PlayCourt.sln --no-restore` passed với 0 warning, 0 error |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Không cần migration vì entity, quan hệ và unique constraint PlayerSport đã tồn tại. |
+
+#### 5.8. Ghi chú thêm
+
+```text
+AI cũng hướng dẫn kiểm thử thủ công bằng Swagger/Postman: đăng nhập lấy JWT, lấy sportId từ `/api/sports`, sau đó gọi các endpoint `/api/users/me/sports`.
+```
+
+---
+
+### Prompt số 16
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 24/06/2026 |
+| Công cụ AI | Codex |
+| Mục đích | Admin approve/reject CourtOwner và chặn tạo Venue khi chưa Approved |
+
+```text
+Phạm vi branch: Admin lấy danh sách/chi tiết CourtOwner, approve/reject có thể đổi ngược trạng thái và CourtOwner chưa Approved không được tạo Venue. Giữ cấu trúc API/Application/Infrastructure/Domain hiện có.
+```
+
+**Kết quả:** thêm `CourtOwnersController`, `ICourtOwnerService`/`CourtOwnerService`, DTO riêng, migration `AddCourtOwnerRejectionReason` và kiểm tra trạng thái Approved trong `VenueService`. Build solution pass 0 warning, 0 error.
+
+---
+
+### Prompt số 17
+ 
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 28/06/2026 |
+| Công cụ AI | Antigravity |
+| Mục đích | Triển khai Review & VenueStaff Module |
+| Phần việc liên quan | Backend / Testing / Documentation |
+| Mức độ sử dụng | Hỏi sinh code mẫu / Phân tích nghiệp vụ |
+
+#### 5.1. Prompt nguyên văn
+
+```text
+Phạm vi branch: feature/de180310-review-venue-staff. Scope: Review Module (12 APIs) và VenueStaff Module (3 APIs). Giữ cấu trúc API/Application/Infrastructure/Domain hiện có. Không được thêm thư mục mới, chỉ tạo file cho feature.
+```
+
+#### 5.2. Bối cảnh khi viết prompt
+
+```text
+Cần triển khai 15 endpoints cho Module 3 bao gồm Review và VenueStaff, đảm bảo bảo vệ logic nghiệp vụ (rating increments, moderate edit locks, self-report prevention, unique booking review soft-delete release và reactivation logic cho VenueStaff).
+```
+
+#### 5.3. Kết quả AI trả về
+
+```text
+AI đề xuất kế hoạch triển khai chi tiết cấu trúc DTOs, Service Interfaces, Services, Mappers và Controllers. Triển khai hoàn thiện toàn bộ mã nguồn đáp ứng đầy đủ yêu cầu nghiệp vụ.
+```
+
+#### 5.4. Kết quả đã áp dụng vào bài
+
+```text
+Áp dụng toàn bộ mã nguồn tạo mới DTOs, Services, Mappers và Controllers. Cấu hình định tuyến Swagger live kiểm thử thành công.
+```
+
+#### 5.5. Phần sinh viên/nhóm đã chỉnh sửa hoặc cải tiến
+
+```text
+Nhóm yêu cầu AI tự động chạy build và test nhanh qua API HTTP Get (Invoke-RestMethod) để xác nhận code sinh ra không phá hỏng luồng chạy chung của toàn solution.
+```
+
+#### 5.6. Đánh giá chất lượng prompt
+
+- [x] Prompt rõ ràng
+- [x] Prompt có đủ bối cảnh
+- [x] Prompt định hướng logic nghiệp vụ
+- [x] Prompt tạo ra kết quả tốt
+- [x] Cần tự kiểm tra build/test
+
+#### 5.7. Minh chứng liên quan
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Sẽ cập nhật sau khi commit |
+| File liên quan | `ReviewsController.cs`, `VenueStaffsController.cs`, `ReviewService.cs`, `VenueStaffService.cs`, `ReviewDtos.cs`, `VenueStaffDtos.cs` |
+| Screenshot |  |
+| Kết quả chạy/test | `dotnet test PlayCourt.sln` passed 66/66; live Swagger endpoints 200 OK |
+| Link tài liệu/báo cáo | `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ghi chú khác | Tất cả các tính năng đã hoạt động ổn định. |
+
+#### 5.8. Ghi chú thêm
+
+```text
+Prompt đã hướng dẫn AI giải quyết hoàn chỉnh bài toán nghiệp vụ phức tạp của module Review.
+```
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -336,13 +1239,13 @@ Ghi lại ít nhất một prompt chưa tạo ra kết quả tốt hoặc chưa 
 ### 7.1. Prompt chưa hiệu quả
 
 ```text
-Dán prompt chưa hiệu quả tại đây.
+Viết test bằng SQLite cho Register API.
 ```
 
 ### 7.2. Vì sao prompt này chưa hiệu quả?
 
 ```text
-Viết tại đây...
+Prompt này chưa hiệu quả vì project đang dùng SQL Server, thêm SQLite làm test provider có thể gây lệch công nghệ và thêm package không cần thiết.
 ```
 
 Gợi ý nguyên nhân:
@@ -359,19 +1262,19 @@ Gợi ý nguyên nhân:
 ### 7.3. Cách cải thiện prompt
 
 ```text
-Viết tại đây...
+Nêu rõ project chỉ dùng SQL Server và nếu viết test thì không thêm database provider khác.
 ```
 
 ### 7.4. Prompt sau khi cải tiến
 
 ```text
-Dán prompt đã được cải tiến tại đây.
+Hãy viết test đơn giản cho AuthController bằng fake IAuthService, không thêm SQLite hoặc database provider mới.
 ```
 
 ### 7.5. Kết quả sau khi cải tiến prompt
 
 ```text
-Viết tại đây...
+Kết quả phù hợp hơn vì test chỉ kiểm tra HTTP response của controller, không thay đổi công nghệ database của project.
 ```
 
 ---
@@ -381,7 +1284,7 @@ Viết tại đây...
 ### 8.1. Khi viết prompt, em/nhóm cần cung cấp thông tin gì để AI trả lời tốt hơn?
 
 ```text
-Viết tại đây...
+Cần cung cấp mục tiêu, bối cảnh project, công nghệ đang dùng, input/output mong muốn, ràng buộc kiến trúc và cách kiểm chứng.
 ```
 
 Gợi ý:
@@ -398,13 +1301,13 @@ Gợi ý:
 ### 8.2. Em/nhóm đã học được gì về cách đặt câu hỏi cho AI?
 
 ```text
-Viết tại đây...
+Prompt càng rõ thì AI càng trả lời sát hơn. Nếu thiếu bối cảnh, AI dễ đề xuất giải pháp không phù hợp với project.
 ```
 
 ### 8.3. Lần sau em/nhóm sẽ cải thiện prompt như thế nào?
 
 ```text
-Viết tại đây...
+Nhóm sẽ ghi rõ project dùng .NET 8, EF Core, SQL Server, Clean Architecture và yêu cầu không thêm package ngoài scope.
 ```
 
 ---
@@ -415,18 +1318,18 @@ Viết tại đây...
 
 | Loại prompt | Số lượng | Ví dụ prompt tiêu biểu |
 |---|---:|---|
-| Prompt phân tích yêu cầu |  |  |
-| Prompt giải thích kiến thức |  |  |
-| Prompt thiết kế giải pháp |  |  |
-| Prompt thiết kế database |  |  |
-| Prompt sinh code mẫu |  |  |
-| Prompt debug lỗi |  |  |
-| Prompt viết test case |  |  |
-| Prompt review code |  |  |
-| Prompt tối ưu code |  |  |
-| Prompt viết báo cáo |  |  |
-| Prompt chuẩn bị thuyết trình |  |  |
-| Prompt khác |  |  |
+| Prompt phân tích yêu cầu | 1 | Tóm tắt yêu cầu Register/Login API |
+| Prompt giải thích kiến thức | 1 | Giải thích Clean Architecture và EF Core |
+| Prompt thiết kế giải pháp | 2 | Thiết kế layer và Register flow |
+| Prompt thiết kế database | 2 | Tạo entity model, DbContext và VerificationToken table |
+| Prompt sinh code mẫu | 14 | Các API backend, gồm CourtOwner Approval và PlayerSport CRUD |
+| Prompt debug lỗi | 4 | Kiểm tra package/test chưa phù hợp, build bị khóa process API, null principal và DLL lock khi test profile |
+| Prompt viết test case | 7 | Test AuthController, JwtTokenService, verify/resend endpoints, password management endpoints, user profile endpoints, sport management và PlayerSport CRUD |
+| Prompt review code | 1 | Review DI, response và build |
+| Prompt tối ưu code | 1 | Rút gọn Program.cs và docs |
+| Prompt viết báo cáo | 0 | Chưa ghi nhận riêng |
+| Prompt chuẩn bị thuyết trình | 0 | Chưa thực hiện |
+| Prompt khác | 0 |  |
 
 ---
 
@@ -436,16 +1339,16 @@ Sinh viên/nhóm tự kiểm tra chất lượng prompt đã dùng.
 
 | Tiêu chí | Đã đạt? | Ghi chú |
 |---|:---:|---|
-| Prompt có mục tiêu rõ ràng |  |  |
-| Prompt có đủ bối cảnh |  |  |
-| Prompt có nêu công nghệ/ngôn ngữ sử dụng |  |  |
-| Prompt có nêu yêu cầu đầu ra |  |  |
-| Prompt không yêu cầu AI làm toàn bộ bài một cách máy móc |  |  |
-| Prompt có yêu cầu AI giải thích hoặc phân tích |  |  |
-| Kết quả AI được kiểm tra lại |  |  |
-| Kết quả AI được chỉnh sửa trước khi sử dụng |  |  |
-| Prompt quan trọng được ghi lại đầy đủ |  |  |
-| Prompt sai/chưa hiệu quả được rút kinh nghiệm |  |  |
+| Prompt có mục tiêu rõ ràng | Đạt | Nêu rõ chức năng cần làm |
+| Prompt có đủ bối cảnh | Đạt | Có mô tả project và công nghệ |
+| Prompt có nêu công nghệ/ngôn ngữ sử dụng | Đạt | ASP.NET Core, EF Core, SQL Server |
+| Prompt có nêu yêu cầu đầu ra | Đạt | Có file, endpoint, response mẫu |
+| Prompt không yêu cầu AI làm toàn bộ bài một cách máy móc | Đạt | Nhóm vẫn review và chỉnh sửa |
+| Prompt có yêu cầu AI giải thích hoặc phân tích | Đạt | Có yêu cầu theo Clean Architecture |
+| Kết quả AI được kiểm tra lại | Đạt | Chạy build/test và review package |
+| Kết quả AI được chỉnh sửa trước khi sử dụng | Đạt | Chỉnh theo entity và DbContext thật |
+| Prompt quan trọng được ghi lại đầy đủ | Đạt | Có prompt model, layer, register |
+| Prompt sai/chưa hiệu quả được rút kinh nghiệm | Đạt | Ghi nhận lỗi SQLite test package |
 
 ---
 
@@ -461,4 +1364,464 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| Nguyen Phan Huy | Sẽ xác nhận khi hoàn thành project |
+| Nguyen Phan Huy | 03/06/2026 |
+
+---
+
+## Prompt record - Player Matching (DE190946, 28/06/2026)
+
+### Original request
+
+```text
+Read the README for setup guidance, create branch
+feature/DE190946-player-matching, then implement player matching.
+```
+
+### Context and constraints applied
+
+- ASP.NET Core Web API on .NET 8, EF Core, SQL Server, and the existing layered architecture.
+- Reused `Match`, `MatchParticipant`, `MatchJoinRequest`, `MatchInvitation`, and `PlayerSport`.
+- Used the authenticated user claim instead of accepting host identity from the request.
+- Required build and full regression-test verification.
+
+### Result review
+
+The generated implementation was reviewed against EF Core indexes and corrected so a rejected
+join request is reset to pending rather than inserted as a duplicate `(MatchId, PlayerId)` row.
+
+---
+
+### Prompt so 18
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 28/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Booking Management API |
+| Phan viec lien quan | Backend / Booking / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi khong can test, nhanh hien tai chi lam Booking hay len plan roi lam cho toi, as pass 123456789 neu can thiet. nho sua cac file trong docs ngoai tru file reflection. lam xong goi y message commit
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Branch `feature/de180405-booking-management` can tap trung vao Booking Management, khong lam Payment/MatchInvitation trong dot nay. Project da co san entity Booking, BookingStatusHistory, Court, CourtSchedule va PricingRule.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI tao DTO, service interface, service implementation va controller cho Booking. Cac API gom tao booking, xem chi tiet, danh sach booking cua player, danh sach booking theo venue/court cho owner, check availability va cap nhat trang thai booking.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Ap dung code vao cac layer hien co cua PlayCourt API. BookingService dung EF Core de kiem tra player profile, ownership cua court owner, overlap voi booking/court schedule/match, tinh gia theo PricingRule va ghi BookingStatusHistory.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu scope chi Booking, khong dung password database vi appsettings dang dung Trusted_Connection. Khong tao test moi theo yeu cau, nhung co chay build toan solution de xac nhan compile.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.Application/DTOs/Bookings/BookingDtos.cs`, `PlayCourt.Application/Interfaces/IBookingService.cs`, `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.Infrastructure/DependencyInjection.cs` |
+| Ket qua chay/test | `dotnet build PlayCourt.sln --no-restore` passed, 0 warning, 0 error |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md` |
+
+---
+
+### Prompt so 19
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Payment API dung PayOS |
+| Phan viec lien quan | Backend / Payment / PayOS / Testing / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi debug / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi can lam chuc nang payment dung payos, doc du an truoc roi len plan cho toi xem, uu tien lam theo flow da lam voi cac chuc nang truoc
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Hien tai web dang chay local, PayOS khong the goi webhook duoc. Giai thich cach returnUrl + sync-payos va trien khai cho toi, khong commit.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Du an PlayCourt dang dung ASP.NET Core Web API, EF Core, SQL Server va chia layer API/Application/Domain/Infrastructure. Module Booking da co san va entity Payment da co trong Domain/DbContext nhung chua co Payment service/controller.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI phan tich BookingService hien co, entity Payment va cau hinh DI. Giai phap duoc chon la tao payment link PayOS sau khi booking Pending, dung returnUrl ve localhost de frontend goi sync-payos, va giu webhook de dung khi deploy production.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Ap dung code vao cac layer hien co: PaymentsController o API, Payment DTOs va interfaces o Application, PaymentService/PayOsGateway o Infrastructure, PayOsSettings trong Application Settings, dang ky DI va them package payOS. Them PaymentServiceTests cho cac flow quan trong.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu schema hien co cua bang Payments, khong them migration Payment moi. Khi debug manual booking bi loi 500, xac dinh root cause la DB local chua apply migration AddCourtOwnerRejectionReason va apply migration cho database local truoc khi test tiep.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/PaymentsController.cs`, `PlayCourt.Application/DTOs/Payments/PaymentDtos.cs`, `PlayCourt.Application/Interfaces/IPaymentService.cs`, `PlayCourt.Application/Interfaces/IPayOsGateway.cs`, `PlayCourt.Infrastructure/Services/PaymentService.cs`, `PlayCourt.Infrastructure/Services/PayOsGateway.cs`, `PlayCourt.ApiTests/PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret chi nen dien vao `appsettings.Development.json` local, khong commit secret that |
+
+---
+
+### Prompt so 20
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 30/06/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Trien khai Notification API va tich hop thong bao vao cac nghiep vu chinh |
+| Phan viec lien quan | Backend / Notification / Documentation |
+| Muc do su dung | Hoi phan tich nghiep vu / Hoi sinh code mau / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+toi can lam chuc nang notification cho project PlayCourt. Hay doc flow hien co roi lam ngan gon theo kien truc cu, co API xem thong bao, unread count, mark read, mark all read, delete. Tich hop tao notification vao booking, payment, match va court owner approval neu hop ly. Khong sua file reflection.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co entity Notification va cac module Booking, Payment, Match, CourtOwner. Can bo sung API cho user tu quan ly thong bao va writer noi bo de cac service tao notification trong cung transaction.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat tao NotificationsController, Notification DTOs, INotificationService, INotificationWriter, NotificationService va NotificationWriter. Flow tao thong bao duoc chen vao cac service nghiep vu thay vi expose endpoint tao notification cong khai.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da them API GET /api/notifications, GET /api/notifications/unread-count, PATCH /api/notifications/{id}/read, PATCH /api/notifications/read-all va DELETE /api/notifications/{id}. Booking, Payment, Match va CourtOwner approval tao notification cho user lien quan.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu NotificationWriter chi add entity vao DbContext va de service goi SaveChangesAsync, dam bao notification nam trong cung unit of work voi thay doi nghiep vu. Payment success co kiem tra idempotent de tranh tao trung thong bao khi sync/webhook lap lai.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| Link commit | `fe5da07` |
+| File lien quan | `NotificationsController.cs`, `NotificationDtos.cs`, `INotificationService.cs`, `INotificationWriter.cs`, `NotificationService.cs`, `NotificationWriter.cs`, `BookingService.cs`, `PaymentService.cs`, `MatchService.cs`, `CourtOwnerService.cs` |
+| Ket qua chay/test | Build/test duoc kiem tra trong qua trinh merge feature; khong sua `docs/REFLECTION.md` |
+| Ghi chu khac | Notification chi doc/sua/xoa theo user dang dang nhap, khong tra notification cua user khac |
+
+---
+
+### Prompt so 21
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug PayOS Pending Booking khong tu het han |
+| Phan viec lien quan | Backend / Booking / Payment / BackgroundService / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+Bug: Booking thanh toan qua PayOS co the giu trang thai Pending vo thoi han neu nguoi dung khong hoan tat thanh toan. He thong chua co background worker hoac scheduled job de tu dong huy Booking qua han va giai phong Court slot.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tao nhanh bugfix/de180405-<Ten BUG>, dem cac thay doi hien tai sang nhanh do, len ke hoach fix bug, sau do trien khai theo plan, commit cac file can thiet voi message theo template, khong commit plan va file khong lien quan, cap nhat 3 file log ngoai tru reflection.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService tao Booking Pending, PaymentService tao PayOS payment link va confirm Booking khi payment Success. Availability dang coi Booking Pending/Confirmed la active booking nen Pending qua han se tiep tuc giu slot.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI doc BookingService, PaymentService, BookingStatus enum va DI, xac nhan bug hop le. Giai phap la them BookingStatus.Expired, BookingExpiration config, service expire booking pending theo timeout va BackgroundService chay dinh ky.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da them service expire Pending Booking qua han, worker chay dinh ky, config timeout/scan interval/batch size, migration cap nhat check constraint va unit tests cho expire booking, release court slot, payment terminal failure khong confirm booking.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Them conditional update trong expiration service de tranh race condition voi webhook/sync PayOS. Khong dua file plan va file runtime .codegraph vao commit. Khong sua docs/REFLECTION.md.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `BookingExpirationSettings.cs`, `IBookingExpirationService.cs`, `BookingExpirationService.cs`, `BookingExpirationWorker.cs`, `DomainEnums.cs`, `PlayCourtDbContext.cs`, `BookingExpirationServiceTests.cs`, `BookingServiceTests.cs`, `PaymentServiceTests.cs` |
+| Ket qua chay/test | `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 88/88 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; PayOS secret van khong commit vao repository |
+
+---
+
+### Prompt so 22
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug Booking trung lich voi Match dang hoat dong |
+| Phan viec lien quan | Backend / Booking / Match / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs |
+
+#### Prompt nguyen van
+
+```text
+Nguoi dung co the tao Booking truc tiep tren mot Court va khung gio dang duoc mot Match su dung. BookingService chi kiem tra Booking overlap nhung khong kiem tra bang Matches, dan den hai nghiep vu cung chiem mot Court trong cung thoi gian.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Len plan fix bug nay cho toi, sau do trien khai, xong thi sua cac file log ngoai tru reflection theo template cua cac commit truoc, roi chi commit cac file can thiet voi message theo template.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService.ValidateSlotAsync de kiem tra Court, Venue, Booking overlap va CourtSchedule overlap. MatchService khi tao/sua Match da chan overlap voi Booking, CourtSchedule va Match Open/Full, nhung chieu tao Booking chua co check voi Matches.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression test truoc, xac nhan RED khi Booking van tao thanh cong tren slot co Match Open/Full, sau do them query Matches vao ValidateSlotAsync voi cung logic overlap dang dung o MatchService.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService de reject slot co Match Open hoac Full trung CourtId va giao thoi gian. Da cap nhat BookingServiceTests de bao ve case Match Open/Full overlap va giu cac moc booking test o nam 2030.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Khong doi controller response mapping de tranh anh huong cac flow Booking khac. Khong sua docs/REFLECTION.md. Chi stage cac file source, test va 3 file log lien quan.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | Targeted test failed truoc fix va passed sau fix; `dotnet format PlayCourt.sln --verify-no-changes`; `dotnet build PlayCourt.sln`; `dotnet test PlayCourt.sln` passed 89/89 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file `.codegraph` vao commit |
+
+---
+
+### Prompt so 23
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug double booking khi tao Booking dong thoi |
+| Phan viec lien quan | Backend / Booking / Concurrency / SQL Server Locking / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+Hai request dat cung Court va cung khung gio co the cung thanh cong neu duoc gui gan nhu dong thoi. BookingService goi ValidateSlotAsync truoc khi mo transaction. Viec kiem tra trung lich bang AnyAsync su dung isolation mac dinh va khong co locking, khien ca hai request deu co the thay slot dang trong truoc khi du lieu duoc insert.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Len plan fix loi nay cho toi. Sau do tao nhanh moi bugfix/de180405-<ten bug> tu dev va dem thay doi hien tai sang nhanh moi, trien khai luon, update cac file log ngoai tru reflection theo template cua cac commit truoc, chi commit file can thiet va tao PR vao dev voi description day du.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co BookingService.ValidateSlotAsync kiem tra Court, Venue, Booking overlap, Match overlap va CourtSchedule overlap. Tuy nhien CreateAsync goi ValidateSlotAsync truoc BeginTransactionAsync, nen check-and-insert khong nam trong cung critical section.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat dung SQL Server sp_getapplock voi LockOwner Transaction theo CourtId, sau do rerun ValidateSlotAsync trong transaction truoc khi insert Booking. Ly do la unique index theo StartAt/EndAt khong ngan duoc cac khoang thoi gian giao nhau khac exact value.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService.CreateAsync de mo transaction, lay application lock theo CourtId, validate slot lai trong transaction roi moi insert Booking va BookingStatusHistory. BookingsController.Create tra 409 Conflict cho cac loi slot conflict.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu lock helper no-op khi DbContext khong dung relational provider de tranh pha vo unit test InMemory. Them regression test active booking overlap va ghi chu manual verification cho SQL Server concurrency. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.API/Controllers/BookingsController.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | Targeted active booking overlap test passed 1/1; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 90/90 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |
+
+---
+
+### Prompt so 24
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug Booking ngoai gio hoat dong Venue |
+| Phan viec lien quan | Backend / Booking / VenueOpeningHours / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+He thong cho phep nguoi dung dat san ngoai gio hoat dong cua Venue hoac vao ngay Venue duoc cau hinh dong cua. BookingService.ValidateSlotAsync hien chua truy van VenueOpeningHours de xac thuc thoi gian bat dau va ket thuc cua Booking.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tiep tuc tao nhanh, len plan roi trien khai nhu o da lam: tao branch bugfix moi tu dev, cap nhat log ngoai tru reflection, chi commit file can thiet va tao PR vao dev.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project da co entity VenueOpeningHour, DbSet VenueOpeningHours, unique index theo VenueId/DayOfWeek va API cap nhat opening hours trong VenueService. Tuy nhien BookingService.ValidateSlotAsync chua dung du lieu nay khi tao Booking hoac check availability.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression tests truoc cho Venue IsClosed va booking ngoai OpenTime-CloseTime, sau do them helper ValidateVenueOpeningHoursAsync trong BookingService de query VenueOpeningHours theo VenueId va DayOfWeek.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingService.ValidateSlotAsync de tu choi Booking khi Venue dong cua trong ngay dat, khi cau hinh opening hour cua ngay do khong day du, hoac khi thoi gian dat nam ngoai khoang OpenTime-CloseTime. CheckAvailabilityAsync cung huong loi tu fix nay vi dung chung ValidateSlotAsync.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Giu missing VenueOpeningHours row la khong restrict de tranh pha vo du lieu cu va unit tests hien co. Them RED/GREEN tests cho hai case chinh. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 92/92 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |
+
+---
+
+### Prompt so 25
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 01/07/2026 |
+| Cong cu AI | Codex |
+| Muc dich | Sua bug lich su Booking khi Court hoac Venue bi soft delete |
+| Phan viec lien quan | Backend / Booking / Soft Delete / EF Core Query Filters / Testing / Documentation |
+| Muc do su dung | Hoi phan tich bug / Hoi lap ke hoach / Hoi sinh code mau / Hoi viet test / Hoi cap nhat docs / Hoi tao PR |
+
+#### Prompt nguyen van
+
+```text
+API xem lich su dat san bi loi HTTP 500 khi Booking tham chieu den Court hoac Venue da bi soft delete. Trong BookingService.MapToDto, he thong truy cap truc tiep booking.Court.Name va booking.Court.Venue.Name. Tuy nhien, Global Query Filter cua EF Core se khong load cac Court hoac Venue co IsDeleted = true, khien navigation property co the bang null va gay NullReferenceException.
+```
+
+#### Prompt bo sung trong qua trinh lam
+
+```text
+Tiep tuc len plan va lam nhu cu: tao branch bugfix moi tu dev, viet test truoc, trien khai fix, cap nhat log ngoai tru reflection, chi commit file can thiet va tao PR vao dev.
+```
+
+#### Boi canh khi viet prompt
+
+```text
+Project co global query filter cho Court va Venue theo IsDeleted. BookingService.BookingQuery include Court/Venue theo filter mac dinh, con MapToDto truy cap truc tiep booking.Court.Name va booking.Court.Venue.Name.
+```
+
+#### Ket qua AI tra ve
+
+```text
+AI de xuat them regression tests cho GetMyBookingsAsync khi Court hoac Venue bi soft delete, sau do dung IgnoreQueryFilters trong BookingQuery de load historical Court/Venue, re-apply filter cho Booking/User, va map fallback name.
+```
+
+#### Ket qua da ap dung vao bai
+
+```text
+Da cap nhat BookingQuery de doc duoc Booking lich su co Court/Venue da soft delete ma van loai Booking/User da bi delete. Da them fallback `Court has been deleted` va `Venue has been deleted` trong MapToDto.
+```
+
+#### Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Khong doi BookingResponseDto de tranh anh huong frontend contract. Bo sung null-safe owner check trong BookingService. Khong sua docs/REFLECTION.md va khong commit appsettings local ngoai scope.
+```
+
+#### Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
+| Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 94/94 tests |
+| Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |

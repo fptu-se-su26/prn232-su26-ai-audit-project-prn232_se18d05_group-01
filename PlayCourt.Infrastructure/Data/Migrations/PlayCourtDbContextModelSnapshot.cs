@@ -17,7 +17,7 @@ namespace PlayCourt.Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.27")
+                .HasAnnotation("ProductVersion", "8.0.28")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -123,7 +123,7 @@ namespace PlayCourt.Infrastructure.Data.Migrations
 
                             t.HasCheckConstraint("CHK_Bookings_FeeMath", "[TotalPrice] = [PlatformFee] + [OwnerEarnings]");
 
-                            t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4)");
+                            t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4,5)");
 
                             t.HasCheckConstraint("CHK_Bookings_Time", "[StartAt] < [EndAt]");
                         });
@@ -166,9 +166,9 @@ namespace PlayCourt.Infrastructure.Data.Migrations
 
                     b.ToTable("BookingStatusHistories", "dbo", t =>
                         {
-                            t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4)");
+                            t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4,5)");
 
-                            t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4)");
+                            t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4,5)");
                         });
                 });
 
@@ -259,6 +259,10 @@ namespace PlayCourt.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("TaxCode")
                         .HasMaxLength(50)
@@ -766,6 +770,60 @@ namespace PlayCourt.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PlayCourt.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("ReplacedByTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("UX_RefreshTokens_TokenHash");
+
+                    b.HasIndex("UserId", "ExpiresAt")
+                        .HasDatabaseName("IX_RefreshTokens_User_ExpiresAt");
+
+                    b.ToTable("RefreshTokens", "dbo", t =>
+                        {
+                            t.HasCheckConstraint("CHK_RefreshTokens_ExpiresAt", "[ExpiresAt] > [CreatedAt]");
+                        });
+                });
+
             modelBuilder.Entity("PlayCourt.Domain.Entities.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -1255,6 +1313,65 @@ namespace PlayCourt.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PlayCourt.Domain.Entities.VerificationToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("FailedAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<short>("Purpose")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_VerificationTokens_UserId");
+
+                    b.HasIndex("UserId", "Purpose", "ExpiresAt")
+                        .HasDatabaseName("IX_VerificationTokens_User_Purpose_ExpiresAt");
+
+                    b.ToTable("VerificationTokens", "dbo", t =>
+                        {
+                            t.HasCheckConstraint("CHK_VerificationTokens_FailedAttempts", "[FailedAttempts] >= 0");
+
+                            t.HasCheckConstraint("CHK_VerificationTokens_Purpose", "[Purpose] IN (0,1)");
+                        });
+                });
+
             modelBuilder.Entity("PlayCourt.Domain.Entities.Booking", b =>
                 {
                     b.HasOne("PlayCourt.Domain.Entities.Court", "Court")
@@ -1483,6 +1600,17 @@ namespace PlayCourt.Infrastructure.Data.Migrations
                     b.Navigation("Court");
                 });
 
+            modelBuilder.Entity("PlayCourt.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("PlayCourt.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PlayCourt.Domain.Entities.Review", b =>
                 {
                     b.HasOne("PlayCourt.Domain.Entities.UserProfile", "Player")
@@ -1616,6 +1744,17 @@ namespace PlayCourt.Infrastructure.Data.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("PlayCourt.Domain.Entities.VerificationToken", b =>
+                {
+                    b.HasOne("PlayCourt.Domain.Entities.User", "User")
+                        .WithMany("VerificationTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PlayCourt.Domain.Entities.Amenity", b =>
                 {
                     b.Navigation("VenueAmenities");
@@ -1677,9 +1816,13 @@ namespace PlayCourt.Infrastructure.Data.Migrations
 
                     b.Navigation("Payments");
 
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("UserProfile");
 
                     b.Navigation("VenueStaffs");
+
+                    b.Navigation("VerificationTokens");
                 });
 
             modelBuilder.Entity("PlayCourt.Domain.Entities.UserProfile", b =>

@@ -25,6 +25,8 @@ namespace PlayCourt.Infrastructure.Data
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<CourtOwnerProfile> CourtOwnerProfiles => Set<CourtOwnerProfile>();
         public DbSet<UserFavoriteVenue> UserFavoriteVenues => Set<UserFavoriteVenue>();
+        public DbSet<VerificationToken> VerificationTokens => Set<VerificationToken>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         // Sports
         public DbSet<Sport> Sports => Set<Sport>();
@@ -66,6 +68,8 @@ namespace PlayCourt.Infrastructure.Data
             ConfigureUsers(modelBuilder);
             ConfigureUserProfiles(modelBuilder);
             ConfigureCourtOwnerProfiles(modelBuilder);
+            ConfigureVerificationTokens(modelBuilder);
+            ConfigureRefreshTokens(modelBuilder);
             ConfigureSports(modelBuilder);
             ConfigurePlayerSports(modelBuilder);
             ConfigureVenues(modelBuilder);
@@ -166,6 +170,7 @@ namespace PlayCourt.Infrastructure.Data
                 entity.Property(e => e.BusinessLicenseNo).HasMaxLength(100);
                 entity.Property(e => e.TaxCode).HasMaxLength(50);
                 entity.Property(e => e.VerificationStatus).HasDefaultValue(CourtOwnerVerificationStatus.Pending).IsRequired();
+                entity.Property(e => e.RejectionReason).HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
 
                 entity.HasQueryFilter(e => !e.UserProfile.User.IsDeleted);
@@ -182,6 +187,73 @@ namespace PlayCourt.Infrastructure.Data
                 entity.ToTable(t =>
                 {
                     t.HasCheckConstraint("CHK_CourtOwnerProfiles_VerificationStatus", "[VerificationStatus] IN (0,1,2)");
+                });
+            });
+        }
+
+        private static void ConfigureVerificationTokens(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<VerificationToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Purpose).IsRequired();
+                entity.Property(e => e.TokenHash).HasMaxLength(255).IsRequired();
+                entity.Property(e => e.ExpiresAt).IsRequired();
+                entity.Property(e => e.FailedAttempts).HasDefaultValue(0).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false).IsRequired();
+
+                entity.HasQueryFilter(e => !e.IsDeleted);
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_VerificationTokens_UserId");
+
+                entity.HasIndex(e => new { e.UserId, e.Purpose, e.ExpiresAt })
+                    .HasDatabaseName("IX_VerificationTokens_User_Purpose_ExpiresAt");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.VerificationTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CHK_VerificationTokens_Purpose", "[Purpose] IN (0,1)");
+                    t.HasCheckConstraint("CHK_VerificationTokens_FailedAttempts", "[FailedAttempts] >= 0");
+                });
+            });
+        }
+
+        private static void ConfigureRefreshTokens(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.TokenHash).HasMaxLength(64).IsRequired();
+                entity.Property(e => e.ReplacedByTokenHash).HasMaxLength(64);
+                entity.Property(e => e.ExpiresAt).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false).IsRequired();
+
+                entity.HasQueryFilter(e => !e.IsDeleted && !e.User.IsDeleted);
+
+                entity.HasIndex(e => e.TokenHash)
+                    .IsUnique()
+                    .HasDatabaseName("UX_RefreshTokens_TokenHash");
+
+                entity.HasIndex(e => new { e.UserId, e.ExpiresAt })
+                    .HasDatabaseName("IX_RefreshTokens_User_ExpiresAt");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.RefreshTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CHK_RefreshTokens_ExpiresAt", "[ExpiresAt] > [CreatedAt]");
                 });
             });
         }
@@ -580,7 +652,7 @@ namespace PlayCourt.Infrastructure.Data
                 entity.ToTable(t =>
                 {
                     t.HasCheckConstraint("CHK_Bookings_Time", "[StartAt] < [EndAt]");
-                    t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4)");
+                    t.HasCheckConstraint("CHK_Bookings_Status", "[Status] IN (0,1,2,3,4,5)");
                     t.HasCheckConstraint("CHK_Bookings_Amounts", "[TotalPrice] >= 0 AND [PlatformFee] >= 0 AND [OwnerEarnings] >= 0");
                     t.HasCheckConstraint("CHK_Bookings_FeeMath", "[TotalPrice] = [PlatformFee] + [OwnerEarnings]");
                 });
@@ -658,8 +730,8 @@ namespace PlayCourt.Infrastructure.Data
 
                 entity.ToTable(t =>
                 {
-                    t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4)");
-                    t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4)");
+                    t.HasCheckConstraint("CHK_BookingStatusHistories_OldStatus", "[OldStatus] IS NULL OR [OldStatus] IN (0,1,2,3,4,5)");
+                    t.HasCheckConstraint("CHK_BookingStatusHistories_NewStatus", "[NewStatus] IN (0,1,2,3,4,5)");
                 });
             });
         }
