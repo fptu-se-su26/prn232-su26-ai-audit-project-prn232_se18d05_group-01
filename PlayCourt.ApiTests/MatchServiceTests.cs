@@ -455,6 +455,37 @@ public sealed class MatchServiceTests
     }
 
     [Fact]
+    public async Task CancelAsync_WhenMatchHasParticipant_NotifiesParticipantOnce()
+    {
+        await using var context = CreateContext();
+        var sport = AddSport(context);
+        var host = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var player = AddPlayer(context, sport, SkillLevel.Intermediate, "Da Nang");
+        var match = AddMatch(context, host, sport, "Da Nang");
+        match.Participants.Add(new MatchParticipant
+        {
+            Player = player,
+            JoinedAt = DateTimeOffset.UtcNow
+        });
+        await context.SaveChangesAsync();
+
+        var response = await CreateService(context).CancelAsync(host.UserId, match.Id);
+
+        Assert.True(response.Success);
+        var notification = Assert.Single(context.Notifications);
+        Assert.Equal(player.UserId, notification.UserId);
+        Assert.Equal(NotificationType.Match, notification.Type);
+        Assert.Equal(NotificationReferenceType.Match, notification.ReferenceType);
+        Assert.Equal(match.Id, notification.ReferenceId);
+        Assert.DoesNotContain(context.Notifications, item => item.UserId == host.UserId);
+
+        var retryResponse = await CreateService(context).CancelAsync(host.UserId, match.Id);
+
+        Assert.False(retryResponse.Success);
+        Assert.Single(context.Notifications);
+    }
+
+    [Fact]
     public async Task CancelAsync_AfterMatchStarted_ReturnsFailure()
     {
         await using var context = CreateContext();
