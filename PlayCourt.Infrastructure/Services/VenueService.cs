@@ -195,6 +195,20 @@ namespace PlayCourt.Infrastructure.Services
             if (venue is null)
                 return ApiResponse<object>.Fail("Venue not found.");
 
+            // Chặn xóa nếu còn Booking tương lai Pending/Confirmed ở bất kỳ Court nào của Venue.
+            var now = DateTimeOffset.Now;
+            var hasFutureBookings = await _dbContext.Bookings
+                .AnyAsync(b =>
+                    b.Court.VenueId == venueId &&
+                    !b.IsDeleted &&
+                    b.StartAt > now &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed));
+
+            if (hasFutureBookings)
+            {
+                return ApiResponse<object>.Fail("Cannot delete venue because it still has pending or confirmed future bookings.");
+            }
+
             venue.IsDeleted = true;
             venue.UpdatedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();

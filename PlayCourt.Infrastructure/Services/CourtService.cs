@@ -226,6 +226,20 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<bool>.Fail("Bạn không có quyền xóa sân này.");
             }
 
+            // Chặn xóa nếu còn Booking tương lai Pending/Confirmed.
+            var now = DateTimeOffset.Now;
+            var hasFutureBookings = await _dbContext.Bookings
+                .AnyAsync(b =>
+                    b.CourtId == id &&
+                    !b.IsDeleted &&
+                    b.StartAt > now &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed));
+
+            if (hasFutureBookings)
+            {
+                return ApiResponse<bool>.Fail("Cannot delete court because it still has pending or confirmed future bookings.");
+            }
+
             // Thực hiện xóa mềm.
             court.IsDeleted = true;
             court.UpdatedAt = DateTimeOffset.Now;
