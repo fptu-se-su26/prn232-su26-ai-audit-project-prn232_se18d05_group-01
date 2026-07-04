@@ -2,27 +2,31 @@
 
 ## 1. Project Information
 
-| Item | Description |
-|---|---|
-| Course | PRN232 |
-| Class | SE18D05 |
-| Semester | SU26 |
-| Group | Group 01 |
-| Topic | PlayCourt API - Sport Court Booking System |
-| Repository | https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01 |
-| Frontend | https://wykowjbu.github.io/play-count-fe/ |
+
+| Item       | Description                                                                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Course     | PRN232                                                                                                                                                                       |
+| Class      | SE18D05                                                                                                                                                                      |
+| Semester   | SU26                                                                                                                                                                         |
+| Group      | Group 01                                                                                                                                                                     |
+| Topic      | PlayCourt API - Sport Court Booking System                                                                                                                                   |
+| Repository | [https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01](https://github.com/fptu-se-su26/prn232-su26-ai-audit-project-prn232_se18d05_group-01) |
+| Frontend   | [https://wykowjbu.github.io/play-count-fe/](https://wykowjbu.github.io/play-count-fe/)                                                                                       |
+
 
 ---
 
 ## 2. Team Members
 
-| No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
-|---:|---|---|---|---|---|
-| 1 | DE180519 | Nguyen Phan Huy | Wykowjbu | Leader | Backend project setup, architecture, API coordination |
-| 2 | DE180405 | Phan Thanh Vuong | ptvuong2505 | Member | Backend feature development |
-| 3 | DE180313 | Nguyen Van Hai | vohai04 | Member | Backend feature development |
-| 4 | DE180310 | Phan Quoc Khanh | PQKhanh294 | Member | Testing and documentation |
-| 5 | DE190946 | Trinh Viet Hoang | HoangTrinhyeuoi | Member | Testing and documentation |
+
+| No  | Student ID | Full Name        | GitHub Username | Role   | Main Responsibility                                   |
+| ---: | ---------- | ---------------- | --------------- | ------ | ----------------------------------------------------- |
+| 1   | DE180519   | Nguyen Phan Huy  | Wykowjbu        | Leader | Backend project setup, architecture, API coordination |
+| 2   | DE180405   | Phan Thanh Vuong | ptvuong2505     | Member | Backend feature development                           |
+| 3   | DE180313   | Nguyen Van Hai   | vohai04         | Member | Backend feature development                           |
+| 4   | DE180310   | Phan Quoc Khanh  | PQKhanh294      | Member | Testing and documentation                             |
+| 5   | DE190946   | Trinh Viet Hoang | HoangTrinhyeuoi | Member | Testing and documentation                             |
+
 
 ---
 
@@ -121,12 +125,14 @@ chore    - Update config, packages, tools, or build files
 
 Đảm bảo máy bạn đã cài đặt:
 
-| Tool | Version | Download |
-|---|---|---|
-| .NET SDK | 8.0 trở lên | [Download](https://dotnet.microsoft.com/download/dotnet/8.0) |
-| Visual Studio 2022 / VS Code / Rider | Latest | [VS 2022](https://visualstudio.microsoft.com/) |
-| SQL Server | LocalDB / Express / Developer | (xem bên dưới) |
-| EF Core Tools | 8.x | `dotnet tool install --global dotnet-ef` |
+
+| Tool                                 | Version                       | Download                                                     |
+| ------------------------------------ | ----------------------------- | ------------------------------------------------------------ |
+| .NET SDK                             | 8.0 trở lên                   | [Download](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| Visual Studio 2022 / VS Code / Rider | Latest                        | [VS 2022](https://visualstudio.microsoft.com/)               |
+| SQL Server                           | LocalDB / Express / Developer | (xem bên dưới)                                               |
+| EF Core Tools                        | 8.x                           | `dotnet tool install --global dotnet-ef`                     |
+
 
 #### Chọn SQL Server phù hợp
 
@@ -164,21 +170,48 @@ copy PlayCourt.API\appsettings.Development.example.json PlayCourt.API\appsetting
     "DefaultConnection": "Server=YOUR_SERVER;Database=PlayCourtDb;User Id=YOUR_USERNAME;Password=YOUR_PASSWORD;Encrypt=True;TrustServerCertificate=True"
   },
   "Jwt": {
-    "Key": "YOUR_DEVELOPMENT_SECRET_KEY_AT_LEAST_32_CHARACTERS",
+    "Key": "playcourt-development-secret-key-change-later-123456",
     "Issuer": "PlayCourt",
     "Audience": "PlayCourtClient",
-    "ExpiresInMinutes": 60
+    "ExpiresInMinutes": 60,
+    "RefreshTokenExpiresInDays": 30
+  },
+  "Otp": {
+    "HashKey": "your-otp-hash-key-at-least-32-characters"
+  },
+  "EmailSettings": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "UserName": "your-email@gmail.com",
+    "Password": "your-gmail-app-password",
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "PlayCourt",
+    "EnableSsl": true
+  },
+  "PayOs": {
+    "ClientId": "your-payos-client-id",
+    "ApiKey": "your-payos-api-key",
+    "ChecksumKey": "your-payos-checksum-key",
+    "ReturnUrl": "http://localhost:5173/payment/result",
+    "CancelUrl": "http://localhost:5173/payment/cancel"
+  },
+  "BookingExpiration": {
+    "PendingPaymentTimeoutMinutes": 15,
+    "ScanIntervalSeconds": 60,
+    "BatchSize": 100
   }
 }
 ```
 
 Thay các giá trị sau:
 
-| Placeholder | Điền gì |
-|---|---|
-| `YOUR_SERVER` | Tên SQL Server của máy bạn, ví dụ `localhost`, `.\SQLEXPRESS`, `PHANHUY`, hoặc `localhost,1433` |
-| `YOUR_USERNAME` | Username SQL Server, ví dụ `sa` |
-| `YOUR_PASSWORD` | Password SQL Server của máy bạn |
+
+| Placeholder     | Điền gì                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| `YOUR_SERVER`   | Tên SQL Server của máy bạn, ví dụ `localhost`, `.\SQLEXPRESS`, `PHANHUY`, hoặc `localhost,1433` |
+| `YOUR_USERNAME` | Username SQL Server, ví dụ `sa`                                                                 |
+| `YOUR_PASSWORD` | Password SQL Server của máy bạn                                                                 |
+
 
 > **Nếu dùng LocalDB**, có thể dùng connection string không cần username/password:
 >
@@ -186,14 +219,18 @@ Thay các giá trị sau:
 > Server=(localdb)\mssqllocaldb;Database=PlayCourtDb;Trusted_Connection=True;TrustServerCertificate=True
 > ```
 
-#### Cấu hình JWT
+#### Cấu hình JWT, OTP, Email và PayOS
 
-| Placeholder | Điền gì |
-|---|---|
-| `YOUR_DEVELOPMENT_SECRET_KEY_AT_LEAST_32_CHARACTERS` | Khóa bí mật dùng để ký JWT trong môi trường development, tối thiểu 32 ký tự |
-| `Issuer` | Tên hệ thống phát hành token, mặc định `PlayCourt` |
-| `Audience` | Client/API audience, mặc định `PlayCourtClient` |
-| `ExpiresInMinutes` | Thời gian hết hạn token, mặc định `60` phút |
+
+| Key / Placeholder                         | Điền gì                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| `Jwt:Key`                                 | Khóa bí mật dùng để ký JWT trong development, tối thiểu 32 ký tự        |
+| `Jwt:RefreshTokenExpiresInDays`           | Thời gian hết hạn refresh token, mặc định `30` ngày                     |
+| `Otp:HashKey`                             | Khóa bí mật dùng để hash OTP, tối thiểu 32 ký tự                        |
+| `EmailSettings:UserName` / `FromEmail`    | Email SMTP dùng để gửi OTP                                              |
+| `EmailSettings:Password`                  | Gmail app password hoặc mật khẩu SMTP local                             |
+| `PayOs:ClientId` / `ApiKey` / `ChecksumKey` | Thông tin PayOS dùng cho payment link và webhook verification           |
+
 
 > Không commit secret thật hoặc production secret. Chỉ dùng placeholder/dev key trong file mẫu.
 
@@ -218,6 +255,7 @@ dotnet ef database update --project PlayCourt.Infrastructure --startup-project P
 ```
 
 Lệnh trên sẽ tự động:
+
 - Tạo database `PlayCourtDb` nếu chưa tồn tại
 - Chạy migration `InitialCreate` để tạo tất cả 25 bảng
 
@@ -232,10 +270,12 @@ dotnet run --project PlayCourt.API/PlayCourt.API.csproj --launch-profile http
 
 Mở trình duyệt và truy cập:
 
-| Service | URL |
-|---|---|
-| Swagger UI | [http://localhost:5187/swagger](http://localhost:5187/swagger) |
+
+| Service       | URL                                                              |
+| ------------- | ---------------------------------------------------------------- |
+| Swagger UI    | [http://localhost:5187/swagger](http://localhost:5187/swagger)   |
 | HTTPS Swagger | [https://localhost:7174/swagger](https://localhost:7174/swagger) |
+
 
 #### Verify Login API with JWT
 
@@ -293,14 +333,16 @@ dotnet run --project PlayCourt.API/PlayCourt.API.csproj --launch-profile http
 
 ### Troubleshooting
 
-| Lỗi | Nguyên nhân | Cách sửa |
-|---|---|---|
-| `Cannot open database` | Database chưa được tạo | Chạy lại `dotnet ef database update ...` |
-| `Login failed for user` | Connection string sai | Kiểm tra lại username/password trong `appsettings.Development.json` |
-| `dotnet ef not found` | Chưa cài EF Core Tools | Chạy `dotnet tool install --global dotnet-ef` |
-| `LocalDB not installed` | Chưa cài SQL Server LocalDB | Cài Visual Studio 2022 (chọn workload ASP.NET) hoặc [cài riêng LocalDB](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb) |
-| `Build failed` | Thiếu .NET SDK 8.0 | [Download .NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) |
-| `Jwt:Key is missing or invalid` | Chưa cấu hình `Jwt:Key` hoặc key quá ngắn | Kiểm tra `Jwt` config trong `appsettings.Development.json`, key nên tối thiểu 32 ký tự |
+
+| Lỗi                             | Nguyên nhân                               | Cách sửa                                                                                                                                                                    |
+| ------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot open database`          | Database chưa được tạo                    | Chạy lại `dotnet ef database update ...`                                                                                                                                    |
+| `Login failed for user`         | Connection string sai                     | Kiểm tra lại username/password trong `appsettings.Development.json`                                                                                                         |
+| `dotnet ef not found`           | Chưa cài EF Core Tools                    | Chạy `dotnet tool install --global dotnet-ef`                                                                                                                               |
+| `LocalDB not installed`         | Chưa cài SQL Server LocalDB               | Cài Visual Studio 2022 (chọn workload ASP.NET) hoặc [cài riêng LocalDB](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb) |
+| `Build failed`                  | Thiếu .NET SDK 8.0                        | [Download .NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)                                                                                                   |
+| `Jwt:Key is missing or invalid` | Chưa cấu hình `Jwt:Key` hoặc key quá ngắn | Kiểm tra `Jwt` config trong `appsettings.Development.json`, key nên tối thiểu 32 ký tự                                                                                      |
+
 
 ---
 
