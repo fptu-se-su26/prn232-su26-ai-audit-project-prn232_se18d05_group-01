@@ -1212,7 +1212,7 @@ namespace PlayCourt.Infrastructure.Services
                 SportName = match.Sport.Name,
                 CourtId = match.CourtId,
                 CourtName = match.Court?.Name,
-                VenueName = match.Court?.Venue.Name,
+                VenueName = match.Court?.Venue?.Name,
                 LocationDescription = match.LocationDescription,
                 StartAt = match.StartAt,
                 EndAt = match.EndAt,
