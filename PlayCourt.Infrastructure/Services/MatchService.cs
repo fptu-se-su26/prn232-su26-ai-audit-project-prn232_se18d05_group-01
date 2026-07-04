@@ -325,7 +325,11 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<MatchResponseDto>.Fail("Player profile not found.");
             }
 
-            var match = await _context.Matches.FirstOrDefaultAsync(item => item.Id == matchId);
+            var match = await _context.Matches
+                .Include(item => item.Participants)
+                    .ThenInclude(item => item.Player)
+                        .ThenInclude(item => item.User)
+                .FirstOrDefaultAsync(item => item.Id == matchId);
             if (match is null)
             {
                 return ApiResponse<MatchResponseDto>.Fail("Match not found.");
@@ -349,6 +353,22 @@ namespace PlayCourt.Infrastructure.Services
 
             match.Status = MatchStatus.Cancelled;
             match.UpdatedAt = DateTimeOffset.UtcNow;
+            foreach (var participant in match.Participants.Where(item =>
+                         !item.IsHost &&
+                         item.Player.User.Status == UserStatus.Active &&
+                         item.Player.UserId != userId))
+            {
+                _notificationWriter.Add(new CreateNotificationRequest
+                {
+                    UserId = participant.Player.UserId,
+                    Title = "Trận đấu đã bị hủy",
+                    Content = "Trận đấu bạn tham gia đã bị chủ trận hủy.",
+                    Type = NotificationType.Match,
+                    ReferenceType = NotificationReferenceType.Match,
+                    ReferenceId = match.Id
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             var cancelled = await MatchQuery()
