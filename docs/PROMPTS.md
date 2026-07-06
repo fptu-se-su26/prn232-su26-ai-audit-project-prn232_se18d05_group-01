@@ -1825,3 +1825,60 @@ Khong doi BookingResponseDto de tranh anh huong frontend contract. Bo sung null-
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | RED targeted tests failed 2/2; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 94/94 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong dua file plan hoac appsettings local vao commit |
+
+---
+
+### Prompt so 27
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 06/07/2026 |
+| Cong cu AI | Antigravity |
+| Muc dich | Fix REST Semantics cho Match Cancel API |
+| Phan viec lien quan | Backend / Debug |
+| Muc do su dung | Hoi plan va fix bug |
+
+#### 5.1. Prompt nguyen van
+
+```text
+Endpoint hủy trận đấu trong MatchesController sử dụng HTTP DELETE (DELETE /api/matches/{id}) nhưng thực chất chỉ cập nhật trạng thái Status = MatchStatus.Cancelled (soft update), không xóa tài nguyên khỏi hệ thống... Toàn bộ các feature khác trong dự án đều dùng PATCH cho việc đổi trạng thái. Hiện tại đây là bug, lên plan cho tôi để fix.
+```
+
+#### 5.2. Boi canh khi viet prompt
+
+```text
+Phat hien Endpoint Cancel cua MatchesController dung sai HTTP Method (DELETE thay vi PATCH) gay bat nhat voi toan bo du an.
+```
+
+#### 5.3. Ket qua AI tra ve
+
+```text
+AI tim ra file MatchesController.cs, len plan doi `[HttpDelete]` thanh `[HttpPatch]`.
+```
+
+#### 5.4. Ket qua da ap dung vao bai
+
+```text
+Thay the Attributes thanh cong, API nhat quan hon.
+```
+
+#### 5.5. Phan sinh vien/nhom da chinh sua hoac cai tien
+
+```text
+Chay build kiem tra.
+```
+
+#### 5.6. Danh gia chat luong prompt
+
+- [x] Prompt ro rang
+- [x] Prompt co du boi canh
+- [x] Prompt tao ra ket qua tot
+- [ ] Can tu kiem tra va chinh sua nhieu
+
+#### 5.7. Minh chung lien quan
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/MatchesController.cs` |
+| Ket qua chay/test | `dotnet build PlayCourt.sln` passed |
+| Ghi chu khac | Fixes #72 |
