@@ -1495,3 +1495,47 @@ Giu fix trong BookingService, khong doi DTO contract. Them null-safe IsVenueOwne
 | File lien quan | `PlayCourt.Infrastructure/Services/BookingService.cs`, `PlayCourt.ApiTests/BookingServiceTests.cs`, `docs/AI_AUDIT_LOG.md`, `docs/PROMPTS.md`, `docs/CHANGELOG.md` |
 | Ket qua chay/test | RED targeted tests failed 2/2 vi Booking bi loc khoi lich su; GREEN targeted tests passed 2/2; `dotnet format PlayCourt.sln --verify-no-changes` passed; `dotnet build PlayCourt.sln` passed, 0 warning, 0 error; `dotnet test PlayCourt.sln` passed, 94/94 tests |
 | Ghi chu khac | Khong sua `docs/REFLECTION.md`; khong commit `PlayCourt.API/appsettings.json` local ngoai scope |
+
+---
+
+### Lan su dung AI so 27
+
+| Noi dung | Thong tin |
+|---|---|
+| Ngay su dung | 06/07/2026 |
+| Cong cu AI | Antigravity |
+| Muc dich su dung | Fix RESTful Semantics cho MatchesController |
+| Phan viec lien quan | Backend / REST API |
+| Muc do su dung | Ho tro nhieu |
+
+#### Prompt da su dung
+
+```text
+Endpoint hủy trận đấu trong MatchesController sử dụng HTTP DELETE (DELETE /api/matches/{id}) nhưng thực chất chỉ cập nhật trạng thái Status = MatchStatus.Cancelled (soft update), không xóa tài nguyên khỏi hệ thống... Toàn bộ các feature khác trong dự án đều dùng PATCH cho việc đổi trạng thái. Hiện tại đây là bug, lên plan cho tôi để fix.
+```
+
+#### Ket qua AI goi y
+
+```text
+AI nhan dien vi pham REST semantics, dinh vi file `MatchesController.cs` va de xuat thay doi `[HttpDelete("{id:int}")]` thanh `[HttpPatch("{id:int}/cancel")]`.
+```
+
+#### Phan da ap dung vao bai
+
+```text
+Doi phuong thuc DELETE thanh PATCH de nhat quan voi toan bo he thong.
+```
+
+#### Phan tu chinh sua hoac cai tien
+
+```text
+Kiem tra build thanh cong, luu y cho Frontend cap nhat lai method goi API.
+```
+
+#### Minh chung
+
+| Loai minh chung | Noi dung |
+|---|---|
+| File lien quan | `PlayCourt.API/Controllers/MatchesController.cs` |
+| Ket qua chay/test | `dotnet build PlayCourt.sln` passed, 0 warning, 0 error |
+| Ghi chu khac | Fixes #72 |
