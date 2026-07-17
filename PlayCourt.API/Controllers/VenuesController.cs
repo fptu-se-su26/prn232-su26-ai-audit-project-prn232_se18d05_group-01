@@ -37,6 +37,17 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id:int}/availability")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailability(int id, [FromQuery] DateOnly date)
+        {
+            if (date == default)
+                return BadRequest(ApiResponse<VenueAvailabilityResponseDto>.Fail("Date must use YYYY-MM-DD format."));
+
+            var response = await _venueService.GetAvailabilityAsync(id, date);
+            return response.Success ? Ok(response) : NotFound(response);
+        }
+
         [HttpGet("admin")]
         [Authorize(Policy = ApiPolicies.Admin)]
         public async Task<IActionResult> GetAllForAdmin([FromQuery] VenueStatus? status = null)
@@ -268,5 +279,6 @@ namespace PlayCourt.API.Controllers
 
             return BadRequest(response);
         }
+
     }
 }

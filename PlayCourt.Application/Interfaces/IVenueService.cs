@@ -28,6 +28,8 @@ public interface IVenueService
 
     Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId);
 
+    Task<ApiResponse<VenueAvailabilityResponseDto>> GetAvailabilityAsync(int venueId, DateOnly date);
+
     // Admin
     Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
         VenueStatus? status = null);

@@ -173,7 +173,6 @@ namespace PlayCourt.Infrastructure.Services
             venue.Phone = NormalizeOptional(request.Phone);
             venue.OpenTime = request.OpenTime;
             venue.CloseTime = request.CloseTime;
-            venue.Status = VenueStatus.Pending;
             venue.UpdatedAt = DateTimeOffset.Now;
 
             await _dbContext.SaveChangesAsync();
@@ -287,6 +286,69 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
 
             return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueAvailabilityResponseDto>> GetAvailabilityAsync(int venueId, DateOnly date)
+        {
+            var venue = await _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == VenueStatus.Approved && !v.IsDeleted);
+            if (venue is null)
+                return ApiResponse<VenueAvailabilityResponseDto>.Fail("Venue not found or not approved.");
+
+            var dayOfWeek = date.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)date.DayOfWeek;
+            var openingHour = venue.OpeningHours.SingleOrDefault(h => h.DayOfWeek == dayOfWeek);
+            var dayStart = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero);
+            var dayEnd = dayStart.AddDays(1);
+            var courts = await _dbContext.Courts
+                .AsNoTracking()
+                .Include(c => c.Sport)
+                .Where(c => c.VenueId == venueId && !c.IsDeleted)
+                .OrderBy(c => c.Name)
+                .ThenBy(c => c.Id)
+                .ToListAsync();
+            var courtIds = courts.Select(c => c.Id).ToList();
+            var bookings = await _dbContext.Bookings
+                .AsNoTracking()
+                .Where(b => courtIds.Contains(b.CourtId) &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
+                    b.StartAt < dayEnd && b.EndAt > dayStart)
+                .ToListAsync();
+            var matches = await _dbContext.Matches
+                .AsNoTracking()
+                .Where(m => courtIds.Contains(m.CourtId!.Value) &&
+                    (m.Status == MatchStatus.Open || m.Status == MatchStatus.Full) &&
+                    m.StartAt < dayEnd && m.EndAt > dayStart)
+                .ToListAsync();
+            var schedules = await _dbContext.CourtSchedules
+                .AsNoTracking()
+                .Where(s => courtIds.Contains(s.CourtId) && s.StartAt < dayEnd && s.EndAt > dayStart)
+                .ToListAsync();
+            var pricingRules = await _dbContext.PricingRules
+                .AsNoTracking()
+                .Where(r => courtIds.Contains(r.CourtId) && r.DayOfWeek == dayOfWeek &&
+                    r.EffectiveFrom <= date.ToDateTime(TimeOnly.MinValue) &&
+                    (r.EffectiveTo == null || r.EffectiveTo >= date.ToDateTime(TimeOnly.MinValue)))
+                .ToListAsync();
+
+            var result = new VenueAvailabilityResponseDto
+            {
+                Date = date,
+                Venue = new VenueAvailabilityVenueDto
+                {
+                    Id = venue.Id,
+                    Name = venue.Name,
+                    Address = venue.Address,
+                    OpenTime = openingHour?.OpenTime,
+                    CloseTime = openingHour?.CloseTime,
+                    IsClosed = openingHour?.IsClosed ?? false
+                },
+                Courts = courts.Select(court => BuildAvailabilityCourt(
+                    court, dayStart, openingHour, bookings, matches, schedules, pricingRules)).ToList()
+            };
+
+            return ApiResponse<VenueAvailabilityResponseDto>.Ok(result, "Venue availability retrieved successfully.");
         }
 
         public async Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
@@ -724,6 +786,103 @@ namespace PlayCourt.Infrastructure.Services
                 .FirstOrDefaultAsync(profile =>
                     profile.UserProfile.UserId == userId &&
                     profile.UserProfile.User.Role == UserRole.CourtOwner);
+        }
+
+        private static VenueAvailabilityCourtDto BuildAvailabilityCourt(
+            Court court,
+            DateTimeOffset dayStart,
+            VenueOpeningHour? openingHour,
+            IReadOnlyCollection<Booking> bookings,
+            IReadOnlyCollection<Match> matches,
+            IReadOnlyCollection<CourtSchedule> schedules,
+            IReadOnlyCollection<PricingRule> pricingRules)
+        {
+            var slots = Enumerable.Range(0, 48).Select(index =>
+            {
+                var startAt = dayStart.AddMinutes(index * 30);
+                var endAt = startAt.AddMinutes(30);
+                return new VenueAvailabilitySlotDto
+                {
+                    StartAt = startAt,
+                    EndAt = endAt,
+                    Status = GetSlotStatus(court, startAt, endAt, openingHour, bookings, matches, schedules),
+                    EstimatedPrice = GetSlotPrice(court.Id, startAt, endAt, pricingRules)
+                };
+            }).ToList();
+
+            for (var index = 0; index < slots.Count - 1; index++)
+            {
+                slots[index].CanStartBooking =
+                    slots[index].Status == "Available" &&
+                    slots[index].EstimatedPrice.HasValue &&
+                    slots[index + 1].Status == "Available" &&
+                    slots[index + 1].EstimatedPrice.HasValue;
+            }
+
+            return new VenueAvailabilityCourtDto
+            {
+                Id = court.Id,
+                Name = court.Name,
+                SportId = court.SportId,
+                SportName = court.Sport.Name,
+                Slots = slots
+            };
+        }
+
+        private static string GetSlotStatus(
+            Court court,
+            DateTimeOffset startAt,
+            DateTimeOffset endAt,
+            VenueOpeningHour? openingHour,
+            IReadOnlyCollection<Booking> bookings,
+            IReadOnlyCollection<Match> matches,
+            IReadOnlyCollection<CourtSchedule> schedules)
+        {
+            if (court.Status == CourtStatus.Inactive ||
+                openingHour?.IsClosed == true ||
+                (openingHour is not null && (!openingHour.OpenTime.HasValue || !openingHour.CloseTime.HasValue ||
+                    startAt.TimeOfDay < openingHour.OpenTime || endAt.TimeOfDay > openingHour.CloseTime)))
+                return "Closed";
+
+            if (court.Status == CourtStatus.Maintenance ||
+                schedules.Any(s => s.CourtId == court.Id && s.StartAt < endAt && s.EndAt > startAt))
+                return "Maintenance";
+
+            if (bookings.Any(b => b.CourtId == court.Id && b.Status == BookingStatus.Pending && b.StartAt < endAt && b.EndAt > startAt))
+                return "Held";
+
+            if (bookings.Any(b => b.CourtId == court.Id && b.Status == BookingStatus.Confirmed && b.StartAt < endAt && b.EndAt > startAt) ||
+                matches.Any(m => m.CourtId == court.Id && m.StartAt < endAt && m.EndAt > startAt))
+                return "Booked";
+
+            return "Available";
+        }
+
+        private static decimal? GetSlotPrice(int courtId, DateTimeOffset startAt, DateTimeOffset endAt, IReadOnlyCollection<PricingRule> pricingRules)
+        {
+            if (startAt.Date != endAt.Date)
+                return null;
+
+            var cursor = startAt.TimeOfDay;
+            var endTime = endAt.TimeOfDay;
+            var totalPrice = 0m;
+
+            while (cursor < endTime)
+            {
+                var rule = pricingRules
+                    .Where(r => r.CourtId == courtId && r.StartTime <= cursor && r.EndTime > cursor)
+                    .OrderByDescending(r => r.EffectiveFrom)
+                    .ThenByDescending(r => r.StartTime)
+                    .FirstOrDefault();
+                if (rule is null)
+                    return null;
+
+                var segmentEnd = rule.EndTime < endTime ? rule.EndTime : endTime;
+                totalPrice += (decimal)(segmentEnd - cursor).TotalHours * rule.PricePerHour;
+                cursor = segmentEnd;
+            }
+
+            return Math.Round(totalPrice, 2);
         }
 
         private static VenueResponseDto MapToResponse(Venue venue)
