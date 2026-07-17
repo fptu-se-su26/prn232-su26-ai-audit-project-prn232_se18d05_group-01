@@ -82,6 +82,76 @@ public sealed class VenueAvailabilityServiceTests
         Assert.Equal("Booked", SlotAt(result, 10, 30).Status);
     }
 
+    [Fact]
+    public async Task GetAvailabilityAsync_PricesSlotCoveredByAdjacentRules()
+    {
+        await using var context = CreateContext();
+        var date = new DateOnly(2030, 7, 1);
+        var venue = AddVenue(context);
+        var court = AddCourt(context, venue, "Court 1");
+        context.VenueOpeningHours.Add(new VenueOpeningHour
+        {
+            Venue = venue,
+            DayOfWeek = 1,
+            OpenTime = new TimeSpan(8, 0, 0),
+            CloseTime = new TimeSpan(9, 0, 0)
+        });
+        context.PricingRules.AddRange(
+            new PricingRule
+            {
+                Court = court,
+                DayOfWeek = 1,
+                StartTime = new TimeSpan(8, 0, 0),
+                EndTime = new TimeSpan(8, 15, 0),
+                PricePerHour = 100_000m,
+                EffectiveFrom = date.ToDateTime(TimeOnly.MinValue)
+            },
+            new PricingRule
+            {
+                Court = court,
+                DayOfWeek = 1,
+                StartTime = new TimeSpan(8, 15, 0),
+                EndTime = new TimeSpan(8, 30, 0),
+                PricePerHour = 200_000m,
+                EffectiveFrom = date.ToDateTime(TimeOnly.MinValue)
+            });
+        await context.SaveChangesAsync();
+
+        var response = await new VenueService(context).GetAvailabilityAsync(venue.Id, date);
+
+        Assert.Equal(75_000m, SlotAt(response.Data!, 8, 0).EstimatedPrice);
+    }
+
+    [Fact]
+    public async Task GetAvailabilityAsync_DoesNotAllowStartWhenNextSlotHasNoPrice()
+    {
+        await using var context = CreateContext();
+        var date = new DateOnly(2030, 7, 1);
+        var venue = AddVenue(context);
+        var court = AddCourt(context, venue, "Court 1");
+        context.VenueOpeningHours.Add(new VenueOpeningHour
+        {
+            Venue = venue,
+            DayOfWeek = 1,
+            OpenTime = new TimeSpan(8, 0, 0),
+            CloseTime = new TimeSpan(9, 0, 0)
+        });
+        context.PricingRules.Add(new PricingRule
+        {
+            Court = court,
+            DayOfWeek = 1,
+            StartTime = new TimeSpan(8, 0, 0),
+            EndTime = new TimeSpan(8, 30, 0),
+            PricePerHour = 100_000m,
+            EffectiveFrom = date.ToDateTime(TimeOnly.MinValue)
+        });
+        await context.SaveChangesAsync();
+
+        var response = await new VenueService(context).GetAvailabilityAsync(venue.Id, date);
+
+        Assert.False(SlotAt(response.Data!, 8, 0).CanStartBooking);
+    }
+
     private static VenueAvailabilitySlotDto SlotAt(VenueAvailabilityResponseDto result, int hour, int minute) =>
         result.Courts.Single().Slots.Single(slot => slot.StartAt == At(result.Date, hour, minute));
 
