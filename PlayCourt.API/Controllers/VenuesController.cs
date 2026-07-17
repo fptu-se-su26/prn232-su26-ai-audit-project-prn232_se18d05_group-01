@@ -66,27 +66,6 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("admin/change-requests")]
-        [Authorize(Policy = ApiPolicies.Admin)]
-        public async Task<IActionResult> GetChangeRequestsForAdmin([FromQuery] VenueChangeRequestStatus? status = null)
-        {
-            var response = await _venueService.GetVenueChangeRequestsForAdminAsync(status);
-            if (!response.Success) return BadRequest(response);
-            return Ok(response);
-        }
-
-        [HttpPatch("admin/change-requests/{changeRequestId:int}/status")]
-        [Authorize(Policy = ApiPolicies.Admin)]
-        public async Task<IActionResult> UpdateChangeRequestStatus(
-            int changeRequestId,
-            [FromBody] UpdateVenueChangeRequestStatusRequestDto request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ApiResponse<VenueChangeRequestResponseDto>.Fail("Validation failed", GetModelStateErrors()));
-            var response = await _venueService.UpdateVenueChangeRequestStatusAsync(changeRequestId, request);
-            if (!response.Success) return HandleVenueChangeRequestStatusError(response);
-            return Ok(response);
-        }
-
         [HttpPatch("{id:int}/status")]
         [Authorize(Policy = ApiPolicies.Admin)]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateVenueStatusRequestDto request)
@@ -301,15 +280,5 @@ namespace PlayCourt.API.Controllers
             return BadRequest(response);
         }
 
-        private IActionResult HandleVenueChangeRequestStatusError(ApiResponse<VenueChangeRequestResponseDto> response)
-        {
-            if (response.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                return NotFound(response);
-
-            if (response.Message.Contains("already been processed", StringComparison.OrdinalIgnoreCase))
-                return Conflict(response);
-
-            return BadRequest(response);
-        }
     }
 }

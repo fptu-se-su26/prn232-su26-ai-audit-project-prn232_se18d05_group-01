@@ -40,13 +40,6 @@ public interface IVenueService
         int venueId,
         UpdateVenueStatusRequestDto request);
 
-    Task<ApiResponse<IReadOnlyCollection<VenueChangeRequestResponseDto>>> GetVenueChangeRequestsForAdminAsync(
-        VenueChangeRequestStatus? status = null);
-
-    Task<ApiResponse<VenueChangeRequestResponseDto>> UpdateVenueChangeRequestStatusAsync(
-        int changeRequestId,
-        UpdateVenueChangeRequestStatusRequestDto request);
-
     // Images
     Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, AddVenueImageRequestDto request);
     Task<ApiResponse<object>> DeleteImageAsync(int userId, int venueId, int imageId);
