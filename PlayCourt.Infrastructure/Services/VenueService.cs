@@ -165,22 +165,61 @@ namespace PlayCourt.Infrastructure.Services
                 return ApiResponse<VenueResponseDto>.Fail("Venue not found.");
             }
 
-            venue.Name = request.Name!.Trim();
             venue.Description = NormalizeOptional(request.Description);
-            venue.Address = request.Address!.Trim();
-            venue.Latitude = request.Latitude;
-            venue.Longitude = request.Longitude;
             venue.Phone = NormalizeOptional(request.Phone);
             venue.OpenTime = request.OpenTime;
             venue.CloseTime = request.CloseTime;
-            venue.Status = VenueStatus.Pending;
             venue.UpdatedAt = DateTimeOffset.Now;
+
+            var name = request.Name!.Trim();
+            var address = request.Address!.Trim();
+            var requiresApproval = venue.Status == VenueStatus.Approved &&
+                (venue.Name != name || venue.Address != address ||
+                 venue.Latitude != request.Latitude || venue.Longitude != request.Longitude);
+
+            if (requiresApproval)
+            {
+                var changeRequest = await _dbContext.VenueChangeRequests
+                    .FirstOrDefaultAsync(item =>
+                        item.VenueId == venueId &&
+                        item.Status == VenueChangeRequestStatus.Pending);
+
+                if (changeRequest is null)
+                {
+                    _dbContext.VenueChangeRequests.Add(new VenueChangeRequest
+                    {
+                        VenueId = venueId,
+                        Name = name,
+                        Address = address,
+                        Latitude = request.Latitude,
+                        Longitude = request.Longitude,
+                        CreatedAt = DateTimeOffset.Now
+                    });
+                }
+                else
+                {
+                    changeRequest.Name = name;
+                    changeRequest.Address = address;
+                    changeRequest.Latitude = request.Latitude;
+                    changeRequest.Longitude = request.Longitude;
+                    changeRequest.UpdatedAt = DateTimeOffset.Now;
+                }
+            }
+            else
+            {
+                venue.Name = name;
+                venue.Address = address;
+                venue.Latitude = request.Latitude;
+                venue.Longitude = request.Longitude;
+            }
 
             await _dbContext.SaveChangesAsync();
 
             return ApiResponse<VenueResponseDto>.Ok(
                 MapToResponse(venue),
-                "Venue updated successfully.");
+                requiresApproval
+                    ? "Operational information updated. The name or address change is pending approval."
+                    : "Venue updated successfully.");
         }
 
         public async Task<ApiResponse<object>> DeleteVenueAsync(int userId, int venueId)
@@ -289,6 +328,69 @@ namespace PlayCourt.Infrastructure.Services
             return ApiResponse<VenueResponseDto>.Ok(MapToResponse(venue), "Venue retrieved successfully.");
         }
 
+        public async Task<ApiResponse<VenueAvailabilityResponseDto>> GetAvailabilityAsync(int venueId, DateOnly date)
+        {
+            var venue = await _dbContext.Venues
+                .AsNoTracking()
+                .Include(v => v.OpeningHours)
+                .FirstOrDefaultAsync(v => v.Id == venueId && v.Status == VenueStatus.Approved && !v.IsDeleted);
+            if (venue is null)
+                return ApiResponse<VenueAvailabilityResponseDto>.Fail("Venue not found or not approved.");
+
+            var dayOfWeek = date.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)date.DayOfWeek;
+            var openingHour = venue.OpeningHours.SingleOrDefault(h => h.DayOfWeek == dayOfWeek);
+            var dayStart = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero);
+            var dayEnd = dayStart.AddDays(1);
+            var courts = await _dbContext.Courts
+                .AsNoTracking()
+                .Include(c => c.Sport)
+                .Where(c => c.VenueId == venueId && !c.IsDeleted)
+                .OrderBy(c => c.Name)
+                .ThenBy(c => c.Id)
+                .ToListAsync();
+            var courtIds = courts.Select(c => c.Id).ToList();
+            var bookings = await _dbContext.Bookings
+                .AsNoTracking()
+                .Where(b => courtIds.Contains(b.CourtId) &&
+                    (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
+                    b.StartAt < dayEnd && b.EndAt > dayStart)
+                .ToListAsync();
+            var matches = await _dbContext.Matches
+                .AsNoTracking()
+                .Where(m => courtIds.Contains(m.CourtId!.Value) &&
+                    (m.Status == MatchStatus.Open || m.Status == MatchStatus.Full) &&
+                    m.StartAt < dayEnd && m.EndAt > dayStart)
+                .ToListAsync();
+            var schedules = await _dbContext.CourtSchedules
+                .AsNoTracking()
+                .Where(s => courtIds.Contains(s.CourtId) && s.StartAt < dayEnd && s.EndAt > dayStart)
+                .ToListAsync();
+            var pricingRules = await _dbContext.PricingRules
+                .AsNoTracking()
+                .Where(r => courtIds.Contains(r.CourtId) && r.DayOfWeek == dayOfWeek &&
+                    r.EffectiveFrom <= date.ToDateTime(TimeOnly.MinValue) &&
+                    (r.EffectiveTo == null || r.EffectiveTo >= date.ToDateTime(TimeOnly.MinValue)))
+                .ToListAsync();
+
+            var result = new VenueAvailabilityResponseDto
+            {
+                Date = date,
+                Venue = new VenueAvailabilityVenueDto
+                {
+                    Id = venue.Id,
+                    Name = venue.Name,
+                    Address = venue.Address,
+                    OpenTime = openingHour?.OpenTime,
+                    CloseTime = openingHour?.CloseTime,
+                    IsClosed = openingHour?.IsClosed ?? false
+                },
+                Courts = courts.Select(court => BuildAvailabilityCourt(
+                    court, dayStart, openingHour, bookings, matches, schedules, pricingRules)).ToList()
+            };
+
+            return ApiResponse<VenueAvailabilityResponseDto>.Ok(result, "Venue availability retrieved successfully.");
+        }
+
         public async Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
             VenueStatus? status = null)
         {
@@ -386,6 +488,67 @@ namespace PlayCourt.Infrastructure.Services
             return ApiResponse<VenueResponseDto>.Ok(
                 MapToResponse(venue),
                 $"Venue status changed to '{request.Status}' successfully.");
+        }
+
+        public async Task<ApiResponse<IReadOnlyCollection<VenueChangeRequestResponseDto>>> GetVenueChangeRequestsForAdminAsync(
+            VenueChangeRequestStatus? status = null)
+        {
+            if (status.HasValue && !Enum.IsDefined(status.Value))
+            {
+                return ApiResponse<IReadOnlyCollection<VenueChangeRequestResponseDto>>.Fail("Change request status is invalid.");
+            }
+
+            var query = _dbContext.VenueChangeRequests.AsNoTracking();
+            if (status.HasValue)
+                query = query.Where(item => item.Status == status.Value);
+
+            var requests = await query
+                .OrderByDescending(item => item.CreatedAt)
+                .ToListAsync();
+
+            return ApiResponse<IReadOnlyCollection<VenueChangeRequestResponseDto>>.Ok(
+                requests.Select(MapToChangeRequestResponse).ToList(),
+                "Venue change requests retrieved successfully.");
+        }
+
+        public async Task<ApiResponse<VenueChangeRequestResponseDto>> UpdateVenueChangeRequestStatusAsync(
+            int changeRequestId,
+            UpdateVenueChangeRequestStatusRequestDto request)
+        {
+            if (changeRequestId <= 0)
+                return ApiResponse<VenueChangeRequestResponseDto>.Fail("Venue change request not found.");
+
+            if (request.Status is not (VenueChangeRequestStatus.Approved or VenueChangeRequestStatus.Rejected))
+                return ApiResponse<VenueChangeRequestResponseDto>.Fail("Change request status must be Approved or Rejected.");
+
+            var changeRequest = await _dbContext.VenueChangeRequests
+                .Include(item => item.Venue)
+                .FirstOrDefaultAsync(item => item.Id == changeRequestId);
+
+            if (changeRequest is null)
+                return ApiResponse<VenueChangeRequestResponseDto>.Fail("Venue change request not found.");
+
+            if (changeRequest.Status != VenueChangeRequestStatus.Pending)
+                return ApiResponse<VenueChangeRequestResponseDto>.Fail("Venue change request has already been processed.");
+
+            if (request.Status == VenueChangeRequestStatus.Approved)
+            {
+                changeRequest.Venue.Name = changeRequest.Name;
+                changeRequest.Venue.Address = changeRequest.Address;
+                changeRequest.Venue.Latitude = changeRequest.Latitude;
+                changeRequest.Venue.Longitude = changeRequest.Longitude;
+                changeRequest.Venue.UpdatedAt = DateTimeOffset.Now;
+            }
+
+            changeRequest.Status = request.Status;
+            changeRequest.UpdatedAt = DateTimeOffset.Now;
+            await _dbContext.SaveChangesAsync();
+
+            return ApiResponse<VenueChangeRequestResponseDto>.Ok(
+                MapToChangeRequestResponse(changeRequest),
+                request.Status == VenueChangeRequestStatus.Approved
+                    ? "Venue change request approved successfully."
+                    : "Venue change request rejected successfully.");
         }
 
         public async Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, AddVenueImageRequestDto request)
@@ -726,6 +889,84 @@ namespace PlayCourt.Infrastructure.Services
                     profile.UserProfile.User.Role == UserRole.CourtOwner);
         }
 
+        private static VenueAvailabilityCourtDto BuildAvailabilityCourt(
+            Court court,
+            DateTimeOffset dayStart,
+            VenueOpeningHour? openingHour,
+            IReadOnlyCollection<Booking> bookings,
+            IReadOnlyCollection<Match> matches,
+            IReadOnlyCollection<CourtSchedule> schedules,
+            IReadOnlyCollection<PricingRule> pricingRules)
+        {
+            var slots = Enumerable.Range(0, 48).Select(index =>
+            {
+                var startAt = dayStart.AddMinutes(index * 30);
+                var endAt = startAt.AddMinutes(30);
+                return new VenueAvailabilitySlotDto
+                {
+                    StartAt = startAt,
+                    EndAt = endAt,
+                    Status = GetSlotStatus(court, startAt, endAt, openingHour, bookings, matches, schedules),
+                    EstimatedPrice = GetSlotPrice(court.Id, startAt, endAt, pricingRules)
+                };
+            }).ToList();
+
+            for (var index = 0; index < slots.Count - 1; index++)
+            {
+                slots[index].CanStartBooking =
+                    slots[index].Status == "Available" && slots[index + 1].Status == "Available";
+            }
+
+            return new VenueAvailabilityCourtDto
+            {
+                Id = court.Id,
+                Name = court.Name,
+                SportId = court.SportId,
+                SportName = court.Sport.Name,
+                Slots = slots
+            };
+        }
+
+        private static string GetSlotStatus(
+            Court court,
+            DateTimeOffset startAt,
+            DateTimeOffset endAt,
+            VenueOpeningHour? openingHour,
+            IReadOnlyCollection<Booking> bookings,
+            IReadOnlyCollection<Match> matches,
+            IReadOnlyCollection<CourtSchedule> schedules)
+        {
+            if (court.Status == CourtStatus.Inactive ||
+                openingHour?.IsClosed == true ||
+                (openingHour is not null && (!openingHour.OpenTime.HasValue || !openingHour.CloseTime.HasValue ||
+                    startAt.TimeOfDay < openingHour.OpenTime || endAt.TimeOfDay > openingHour.CloseTime)))
+                return "Closed";
+
+            if (court.Status == CourtStatus.Maintenance ||
+                schedules.Any(s => s.CourtId == court.Id && s.StartAt < endAt && s.EndAt > startAt))
+                return "Maintenance";
+
+            if (bookings.Any(b => b.CourtId == court.Id && b.Status == BookingStatus.Pending && b.StartAt < endAt && b.EndAt > startAt))
+                return "Held";
+
+            if (bookings.Any(b => b.CourtId == court.Id && b.Status == BookingStatus.Confirmed && b.StartAt < endAt && b.EndAt > startAt) ||
+                matches.Any(m => m.CourtId == court.Id && m.StartAt < endAt && m.EndAt > startAt))
+                return "Booked";
+
+            return "Available";
+        }
+
+        private static decimal? GetSlotPrice(int courtId, DateTimeOffset startAt, DateTimeOffset endAt, IReadOnlyCollection<PricingRule> pricingRules)
+        {
+            var rule = pricingRules
+                .Where(r => r.CourtId == courtId && r.StartTime <= startAt.TimeOfDay && r.EndTime >= endAt.TimeOfDay)
+                .OrderByDescending(r => r.EffectiveFrom)
+                .ThenByDescending(r => r.StartTime)
+                .FirstOrDefault();
+
+            return rule is null ? null : Math.Round(rule.PricePerHour / 2, 2);
+        }
+
         private static VenueResponseDto MapToResponse(Venue venue)
         {
             return new VenueResponseDto
@@ -765,6 +1006,22 @@ namespace PlayCourt.Infrastructure.Services
                     CloseTime = oh.CloseTime,
                     IsClosed = oh.IsClosed
                 }).ToList() ?? []
+            };
+        }
+
+        private static VenueChangeRequestResponseDto MapToChangeRequestResponse(VenueChangeRequest changeRequest)
+        {
+            return new VenueChangeRequestResponseDto
+            {
+                Id = changeRequest.Id,
+                VenueId = changeRequest.VenueId,
+                Name = changeRequest.Name,
+                Address = changeRequest.Address,
+                Latitude = changeRequest.Latitude,
+                Longitude = changeRequest.Longitude,
+                Status = changeRequest.Status.ToString(),
+                CreatedAt = changeRequest.CreatedAt,
+                UpdatedAt = changeRequest.UpdatedAt
             };
         }
 

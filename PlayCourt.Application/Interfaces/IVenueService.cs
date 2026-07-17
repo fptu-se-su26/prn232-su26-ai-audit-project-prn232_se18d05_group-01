@@ -28,6 +28,8 @@ public interface IVenueService
 
     Task<ApiResponse<VenueResponseDto>> GetPublicVenueByIdAsync(int venueId);
 
+    Task<ApiResponse<VenueAvailabilityResponseDto>> GetAvailabilityAsync(int venueId, DateOnly date);
+
     // Admin
     Task<ApiResponse<IReadOnlyCollection<VenueResponseDto>>> GetAllVenuesForAdminAsync(
         VenueStatus? status = null);
@@ -37,6 +39,13 @@ public interface IVenueService
     Task<ApiResponse<VenueResponseDto>> UpdateVenueStatusAsync(
         int venueId,
         UpdateVenueStatusRequestDto request);
+
+    Task<ApiResponse<IReadOnlyCollection<VenueChangeRequestResponseDto>>> GetVenueChangeRequestsForAdminAsync(
+        VenueChangeRequestStatus? status = null);
+
+    Task<ApiResponse<VenueChangeRequestResponseDto>> UpdateVenueChangeRequestStatusAsync(
+        int changeRequestId,
+        UpdateVenueChangeRequestStatusRequestDto request);
 
     // Images
     Task<ApiResponse<VenueImageDto>> AddImageAsync(int userId, int venueId, AddVenueImageRequestDto request);

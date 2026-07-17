@@ -37,6 +37,17 @@ namespace PlayCourt.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id:int}/availability")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailability(int id, [FromQuery] DateOnly date)
+        {
+            if (date == default)
+                return BadRequest(ApiResponse<VenueAvailabilityResponseDto>.Fail("Date must use YYYY-MM-DD format."));
+
+            var response = await _venueService.GetAvailabilityAsync(id, date);
+            return response.Success ? Ok(response) : NotFound(response);
+        }
+
         [HttpGet("admin")]
         [Authorize(Policy = ApiPolicies.Admin)]
         public async Task<IActionResult> GetAllForAdmin([FromQuery] VenueStatus? status = null)
@@ -52,6 +63,27 @@ namespace PlayCourt.API.Controllers
         {
             var response = await _venueService.GetVenueForAdminByIdAsync(id);
             if (!response.Success) return NotFound(response);
+            return Ok(response);
+        }
+
+        [HttpGet("admin/change-requests")]
+        [Authorize(Policy = ApiPolicies.Admin)]
+        public async Task<IActionResult> GetChangeRequestsForAdmin([FromQuery] VenueChangeRequestStatus? status = null)
+        {
+            var response = await _venueService.GetVenueChangeRequestsForAdminAsync(status);
+            if (!response.Success) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPatch("admin/change-requests/{changeRequestId:int}/status")]
+        [Authorize(Policy = ApiPolicies.Admin)]
+        public async Task<IActionResult> UpdateChangeRequestStatus(
+            int changeRequestId,
+            [FromBody] UpdateVenueChangeRequestStatusRequestDto request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<VenueChangeRequestResponseDto>.Fail("Validation failed", GetModelStateErrors()));
+            var response = await _venueService.UpdateVenueChangeRequestStatusAsync(changeRequestId, request);
+            if (!response.Success) return HandleVenueChangeRequestStatusError(response);
             return Ok(response);
         }
 
@@ -264,6 +296,17 @@ namespace PlayCourt.API.Controllers
                 return NotFound(response);
 
             if (response.Message.Contains("Cannot transition", StringComparison.OrdinalIgnoreCase))
+                return Conflict(response);
+
+            return BadRequest(response);
+        }
+
+        private IActionResult HandleVenueChangeRequestStatusError(ApiResponse<VenueChangeRequestResponseDto> response)
+        {
+            if (response.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(response);
+
+            if (response.Message.Contains("already been processed", StringComparison.OrdinalIgnoreCase))
                 return Conflict(response);
 
             return BadRequest(response);
