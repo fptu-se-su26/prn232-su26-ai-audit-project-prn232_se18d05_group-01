@@ -296,7 +296,10 @@ namespace PlayCourt.Infrastructure.Services
                         BusinessLicenseNo = profile.CourtOwnerProfile.BusinessLicenseNo,
                         TaxCode = profile.CourtOwnerProfile.TaxCode,
                         BusinessAddress = profile.CourtOwnerProfile.BusinessAddress,
-                        VerificationStatus = profile.CourtOwnerProfile.VerificationStatus.ToString()
+                        BusinessLicenseDocumentUrl = profile.CourtOwnerProfile.BusinessLicenseDocumentUrl,
+                        VerificationStatus = profile.CourtOwnerProfile.VerificationStatus.ToString(),
+                        RejectionReason = profile.CourtOwnerProfile.RejectionReason,
+                        SubmittedAt = profile.CourtOwnerProfile.SubmittedAt
                     }
             };
         }

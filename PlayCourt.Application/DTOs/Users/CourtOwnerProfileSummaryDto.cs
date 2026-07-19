@@ -7,5 +7,8 @@ public class CourtOwnerProfileSummaryDto
     public string? BusinessLicenseNo { get; set; }
     public string? TaxCode { get; set; }
     public string? BusinessAddress { get; set; }
+    public string? BusinessLicenseDocumentUrl { get; set; }
     public string VerificationStatus { get; set; } = string.Empty;
+    public string? RejectionReason { get; set; }
+    public DateTimeOffset? SubmittedAt { get; set; }
 }

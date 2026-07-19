@@ -25,7 +25,8 @@ namespace PlayCourt.Domain.Enums
     {
         Pending = 0,
         Approved = 1,
-        Rejected = 2
+        Rejected = 2,
+        Draft = 3
     }
 
     public enum SkillLevel : short

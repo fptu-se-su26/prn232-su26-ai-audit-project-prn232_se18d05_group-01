@@ -14,5 +14,10 @@ namespace PlayCourt.Application.Interfaces
         Task<ApiResponse<CourtOwnerDetailDto>> UpdateVerificationStatusAsync(
             int id,
             UpdateCourtOwnerVerificationStatusRequestDto request);
+
+        // Owner endpoints
+        Task<ApiResponse<CourtOwnerProfileResponseDto>> GetMyProfileAsync(int userId);
+        Task<ApiResponse<CourtOwnerProfileResponseDto>> UpdateMyProfileAsync(int userId, UpdateCourtOwnerProfileRequestDto request);
+        Task<ApiResponse<CourtOwnerProfileResponseDto>> SubmitMyProfileAsync(int userId);
     }
 }

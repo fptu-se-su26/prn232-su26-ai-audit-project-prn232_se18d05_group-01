@@ -111,7 +111,7 @@ namespace PlayCourt.Infrastructure.Services
                 {
                     UserProfileId = userProfile.Id,
                     BusinessName = businessName,
-                    VerificationStatus = CourtOwnerVerificationStatus.Pending,
+                    VerificationStatus = CourtOwnerVerificationStatus.Draft,
                     CreatedAt = now
                 });
 
