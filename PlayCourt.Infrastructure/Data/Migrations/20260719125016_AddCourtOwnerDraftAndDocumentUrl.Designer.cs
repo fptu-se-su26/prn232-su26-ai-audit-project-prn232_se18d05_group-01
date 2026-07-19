@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlayCourt.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using PlayCourt.Infrastructure.Data;
 namespace PlayCourt.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PlayCourtDbContext))]
-    partial class PlayCourtDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719125016_AddCourtOwnerDraftAndDocumentUrl")]
+    partial class AddCourtOwnerDraftAndDocumentUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
