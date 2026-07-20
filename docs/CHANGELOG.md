@@ -854,3 +854,29 @@ Ket qua: Passed, 92/92 tests.
 
 Ghi chu: Khong sua docs/REFLECTION.md; khong commit file plan trong docs/superpowers/plans hoac appsettings local ngoai scope.
 ```
+
+---
+
+## 06/07/2026 - DE180313 REST Semantics Fix
+
+### Da hoan thanh
+
+- [x] Sửa lỗi RESTful semantics cho endpoint hủy trận đấu của MatchesController.
+- [x] Thay đổi `Cancel` endpoint HTTP method từ `DELETE` sang `PATCH` để đồng bộ với phần còn lại của ứng dụng (Booking, Venue) và đúng chuẩn soft-update.
+
+### File lien quan
+
+```text
+PlayCourt.API/Controllers/MatchesController.cs
+docs/CHANGELOG.md
+docs/AI_AUDIT_LOG.md
+docs/PROMPTS.md
+```
+
+### Kiem chung
+
+```text
+dotnet build PlayCourt.sln
+Ket qua: Build succeeded.
+Ghi chu: Fixes Issue #72
+```

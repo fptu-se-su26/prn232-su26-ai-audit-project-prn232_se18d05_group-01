@@ -30,14 +30,22 @@ namespace PlayCourt.Domain.Entities
         public string? TaxCode { get; set; }
 
         // Địa chỉ kinh doanh.
+        [MaxLength(500)]
         public string? BusinessAddress { get; set; }
 
-        // VerificationStatus: 0=Pending, 1=Approved, 2=Rejected.
+        // URL giấy phép kinh doanh (FE upload lên R2 rồi gửi URL vào đây).
+        [MaxLength(1000)]
+        public string? BusinessLicenseDocumentUrl { get; set; }
+
+        // VerificationStatus: 0=Pending, 1=Approved, 2=Rejected, 3=Draft.
         [Required]
-        public CourtOwnerVerificationStatus VerificationStatus { get; set; } = CourtOwnerVerificationStatus.Pending;
+        public CourtOwnerVerificationStatus VerificationStatus { get; set; } = CourtOwnerVerificationStatus.Draft;
 
         [MaxLength(500)]
         public string? RejectionReason { get; set; }
+
+        // Thời điểm Owner submit hồ sơ lần gần nhất.
+        public DateTimeOffset? SubmittedAt { get; set; }
 
         [Required]
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;

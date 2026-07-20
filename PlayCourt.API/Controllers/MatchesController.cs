@@ -102,7 +102,7 @@ namespace PlayCourt.API.Controllers
             return response.Success ? Ok(response) : HandleFailure(response);
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpPatch("{id:int}/cancel")]
         public async Task<IActionResult> Cancel(int id)
         {
             if (!TryGetCurrentUserId(out var userId))

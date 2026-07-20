@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using PlayCourt.Application.DTOs.Notifications;
 using PlayCourt.Application.Interfaces;
 using PlayCourt.Application.Settings;
 using PlayCourt.Domain.Entities;
@@ -14,13 +15,16 @@ public sealed class BookingExpirationService : IBookingExpirationService
     private const string ExpirationReason = "Booking expired because PayOS payment was not completed before timeout.";
     private const string PaymentExpiredNote = "Payment failed because booking expired.";
     private readonly PlayCourtDbContext _dbContext;
+    private readonly INotificationWriter _notificationWriter;
     private readonly BookingExpirationSettings _settings;
 
     public BookingExpirationService(
         PlayCourtDbContext dbContext,
+        INotificationWriter notificationWriter,
         IOptions<BookingExpirationSettings> settings)
     {
         _dbContext = dbContext;
+        _notificationWriter = notificationWriter;
         _settings = settings.Value;
     }
 
@@ -95,6 +99,7 @@ public sealed class BookingExpirationService : IBookingExpirationService
                     cancellationToken);
 
             _dbContext.BookingStatusHistories.Add(CreateHistory(bookingId, now));
+            await AddExpirationNotificationAsync(bookingId, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return true;
@@ -140,8 +145,37 @@ public sealed class BookingExpirationService : IBookingExpirationService
         }
 
         _dbContext.BookingStatusHistories.Add(CreateHistory(booking.Id, now));
+        await AddExpirationNotificationAsync(booking.Id, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private async Task AddExpirationNotificationAsync(int bookingId, CancellationToken cancellationToken)
+    {
+        var info = await _dbContext.Bookings
+            .Where(booking => booking.Id == bookingId)
+            .Select(booking => new
+            {
+                booking.UserProfile.UserId,
+                VenueName = booking.Court.Venue.Name
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (info is null)
+        {
+            return;
+        }
+
+        var timeoutMinutes = (int)_settings.PendingPaymentTimeout.TotalMinutes;
+        _notificationWriter.Add(new CreateNotificationRequest
+        {
+            UserId = info.UserId,
+            Title = "Đơn đặt sân đã bị hủy",
+            Content = $"Đơn đặt sân của bạn tại {info.VenueName} đã bị hủy do quá thời gian thanh toán ({timeoutMinutes} phút).",
+            Type = NotificationType.Booking,
+            ReferenceType = NotificationReferenceType.Booking,
+            ReferenceId = bookingId
+        });
     }
 
     private static BookingStatusHistory CreateHistory(int bookingId, DateTimeOffset now)

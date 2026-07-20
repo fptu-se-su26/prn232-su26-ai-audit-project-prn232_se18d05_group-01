@@ -98,10 +98,33 @@ public sealed class BookingExpirationServiceTests
         Assert.Contains("expired", payment.Note, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task ExpirePendingBookingsAsync_WhenBookingExpires_AddsPlayerNotification()
+    {
+        await using var context = CreateContext();
+        var now = new DateTimeOffset(2026, 7, 1, 12, 0, 0, TimeSpan.Zero);
+        var player = AddPlayer(context);
+        var booking = AddBooking(context, player, now.AddMinutes(-20), BookingStatus.Pending);
+        await context.SaveChangesAsync();
+        var service = CreateService(context, timeoutMinutes: 15);
+
+        await service.ExpirePendingBookingsAsync(now);
+
+        var notification = Assert.Single(context.Notifications);
+        Assert.Equal(player.UserId, notification.UserId);
+        Assert.Equal("Đơn đặt sân đã bị hủy", notification.Title);
+        Assert.Contains("Test Venue", notification.Content);
+        Assert.Contains("15 phút", notification.Content);
+        Assert.Equal(NotificationType.Booking, notification.Type);
+        Assert.Equal(NotificationReferenceType.Booking, notification.ReferenceType);
+        Assert.Equal(booking.Id, notification.ReferenceId);
+    }
+
     private static BookingExpirationService CreateService(PlayCourtDbContext context, int timeoutMinutes)
     {
         return new BookingExpirationService(
             context,
+            new NotificationWriter(context),
             Options.Create(new BookingExpirationSettings
             {
                 PendingPaymentTimeoutMinutes = timeoutMinutes,

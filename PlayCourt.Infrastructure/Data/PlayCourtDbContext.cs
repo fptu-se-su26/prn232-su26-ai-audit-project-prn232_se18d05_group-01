@@ -169,7 +169,9 @@ namespace PlayCourt.Infrastructure.Data
                 entity.Property(e => e.BusinessName).HasMaxLength(255).IsRequired();
                 entity.Property(e => e.BusinessLicenseNo).HasMaxLength(100);
                 entity.Property(e => e.TaxCode).HasMaxLength(50);
-                entity.Property(e => e.VerificationStatus).HasDefaultValue(CourtOwnerVerificationStatus.Pending).IsRequired();
+                entity.Property(e => e.BusinessAddress).HasMaxLength(500);
+                entity.Property(e => e.BusinessLicenseDocumentUrl).HasMaxLength(1000);
+                entity.Property(e => e.VerificationStatus).HasDefaultValue(CourtOwnerVerificationStatus.Draft).IsRequired();
                 entity.Property(e => e.RejectionReason).HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()").IsRequired();
 
@@ -186,7 +188,7 @@ namespace PlayCourt.Infrastructure.Data
 
                 entity.ToTable(t =>
                 {
-                    t.HasCheckConstraint("CHK_CourtOwnerProfiles_VerificationStatus", "[VerificationStatus] IN (0,1,2)");
+                    t.HasCheckConstraint("CHK_CourtOwnerProfiles_VerificationStatus", "[VerificationStatus] IN (0,1,2,3)");
                 });
             });
         }
